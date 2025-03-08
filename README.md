@@ -8,7 +8,7 @@
 
 ## 🔧 部署说明
 
-### 安装[vnStat](https://github.com/hulxv/vnstat-client/blob/main/docs/vnstat-installation-guide.md)
+### 安装[vnStat](https://github.com/vergoh/vnstat)
 
 ### API配置要求
 
