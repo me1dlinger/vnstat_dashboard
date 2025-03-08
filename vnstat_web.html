@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>网络流量统计</title>
+    <link
+      href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD//////////////////////////3I2JLdyNyTnczYjUAAAAAD///////////////////////////////////////////////////////////////9yNiPJdTgl/3g6Jv9yNyTKbzcnIAAAAACcpgBQnKYAiZ2lAJmepQBm////////////////AAAAAAAAAAAAAAAAcjcjdHY5Jf9yNiT/ci4m/3I1JPAAAAAAnqUARAAAAAAAAAAAnqcArZmqAA///////////wAAAAAAAAAAAAAAAHI3Ikp2NyX/dDwj/56nAP93RiH2AAAAAAAAAAAAAAAAAAAAAJ2mAG2dpgBT//////////8AAAAAAAAAAIFAKkNyNiP/bykm/5iaCf98VR//cDIk/gAAAAAAAAAAAAAAAAAAAACcpgCGoKYAK6BSO7agVDrMnlI5eZ5SOFGmVz3/hzwx/4uCEP97UR//cDEl/3Y5Jf8AAAAAAAAAAAAAAAAAAAAAnaYAnv////+hUzvppVY9/6ZXPf+nVz3/olE8/6J3Lf+PdB7/bS0k/3I3JP9zNyT/cjck72YzGQoAAAAAAAAAAJ6mAKD/////n1Q7UqlYPv+hVDv/oVM7/6FYOf+ekhj/pE4//4dELv9vNSL/cjck/3Q4Jf9yNiT3AAAAAJ6nAJ2bogAh/////wAAAACgVDrMpVY8/6JOPf+fjxv/oVI7/6FUO/+kVj3/h0Qu/281Iv9yNyT/dDgl/3I4JOmktgCVAAAAAP//////////nlI0IqFSPPOhaDL4oX8o/6dUP/+iVTv/oVQ7/6RWPf+GRC7/bzUi/3I3JP91OCX/bislpP////////////////////8AAAAAnK0ArQAAAAAAAAAAoVM78aNVPP+hVDv/pFY9/4ZDLv9zNiT/dTgl/3Y5Jf//////////////////////AAAAAJ2mAK4AAAAAAAAAAJZLLRGhVDr4o1U8/6FUO/+oWj3/pM4AYmwqIoR4Oib/cTYkh////////////////56oAGmepwBxAAAAAAAAAAAAAAAAmUwzFKFRO+ylVT3/pVY9/6RPPoeHQy7Fczck/3E2I7v///////////////+cpQCQnKgAQwAAAAAAAAAAAAAAAAAAAACdrQCPn2oxzahWPv+qWD7/qVg+/4lFL/9vNSHU////////////////nKYAap2lAIAAAAAAAAAAAKGoACacpgC/nqgAZgAAAACUUjEfoVQ6laFUO8OhVDv/oVQ7//////////////////////+dpgCvnqYApZ2nAKSdpgCa////////////////////////////////////////////////AYAAAAByAAA8PQAAPD8AADg9AAAwPAAAABwAAIAKAACAAgAAQAAAACwAAAAuEAAAPwAAAB8AAAAu4AAAAAAAAA=="
+      rel="icon"
+      type="image/x-icon"
+    />
+    <link
+      rel="shortcut icon"
+      href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD//////////////////////////3I2JLdyNyTnczYjUAAAAAD///////////////////////////////////////////////////////////////9yNiPJdTgl/3g6Jv9yNyTKbzcnIAAAAACcpgBQnKYAiZ2lAJmepQBm////////////////AAAAAAAAAAAAAAAAcjcjdHY5Jf9yNiT/ci4m/3I1JPAAAAAAnqUARAAAAAAAAAAAnqcArZmqAA///////////wAAAAAAAAAAAAAAAHI3Ikp2NyX/dDwj/56nAP93RiH2AAAAAAAAAAAAAAAAAAAAAJ2mAG2dpgBT//////////8AAAAAAAAAAIFAKkNyNiP/bykm/5iaCf98VR//cDIk/gAAAAAAAAAAAAAAAAAAAACcpgCGoKYAK6BSO7agVDrMnlI5eZ5SOFGmVz3/hzwx/4uCEP97UR//cDEl/3Y5Jf8AAAAAAAAAAAAAAAAAAAAAnaYAnv////+hUzvppVY9/6ZXPf+nVz3/olE8/6J3Lf+PdB7/bS0k/3I3JP9zNyT/cjck72YzGQoAAAAAAAAAAJ6mAKD/////n1Q7UqlYPv+hVDv/oVM7/6FYOf+ekhj/pE4//4dELv9vNSL/cjck/3Q4Jf9yNiT3AAAAAJ6nAJ2bogAh/////wAAAACgVDrMpVY8/6JOPf+fjxv/oVI7/6FUO/+kVj3/h0Qu/281Iv9yNyT/dDgl/3I4JOmktgCVAAAAAP//////////nlI0IqFSPPOhaDL4oX8o/6dUP/+iVTv/oVQ7/6RWPf+GRC7/bzUi/3I3JP91OCX/bislpP////////////////////8AAAAAnK0ArQAAAAAAAAAAoVM78aNVPP+hVDv/pFY9/4ZDLv9zNiT/dTgl/3Y5Jf//////////////////////AAAAAJ2mAK4AAAAAAAAAAJZLLRGhVDr4o1U8/6FUO/+oWj3/pM4AYmwqIoR4Oib/cTYkh////////////////56oAGmepwBxAAAAAAAAAAAAAAAAmUwzFKFRO+ylVT3/pVY9/6RPPoeHQy7Fczck/3E2I7v///////////////+cpQCQnKgAQwAAAAAAAAAAAAAAAAAAAACdrQCPn2oxzahWPv+qWD7/qVg+/4lFL/9vNSHU////////////////nKYAap2lAIAAAAAAAAAAAKGoACacpgC/nqgAZgAAAACUUjEfoVQ6laFUO8OhVDv/oVQ7//////////////////////+dpgCvnqYApZ2nAKSdpgCa////////////////////////////////////////////////AYAAAAByAAA8PQAAPD8AADg9AAAwPAAAABwAAIAKAACAAgAAQAAAACwAAAAuEAAAPwAAAB8AAAAu4AAAAAAAAA=="
+      type="image/x-icon"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        padding: 20px;
+        color: black;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(250px, 1fr));
+        gap: var(--gap-size);
+        padding: 0 var(--gap-size);
+        width: calc(100% - 2 * var(--gap-size));
+        margin: 0 auto;
+      }
+
+      /* 添加容器样式 */
+      .stat-container {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 10%;
+        /* 两侧间距 */
+        margin: 20px 0;
+      }
+
+      .stat-card {
+        background: #000000;
+        border: 5px solid #cd6d27;
+        border-radius: 30px;
+        padding: 25px;
+        color: white;
+        position: relative;
+        min-height: 150px;
+        box-shadow: 0 4px 8px rgba(205, 109, 39, 0.2);
+        box-sizing: border-box;
+        width: 18%;
+        min-width: 220px;
+        margin: 0 1%;
+        flex-shrink: 0;
+      }
+
+      /* 响应式处理 */
+      @media (max-width: 1200px) {
+        .stat-container {
+          flex-wrap: wrap;
+          justify-content: flex-start;
+        }
+
+        .stat-card {
+          width: 48%;
+          margin: 1%;
+        }
+      }
+
+      .stat-label {
+        position: absolute;
+        bottom: -35px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #cd6d27;
+        color: white;
+        padding: 6px 25px;
+        border-radius: 0 0 4px 4px;
+        font-size: 0.9em;
+        text-align: center;
+        white-space: nowrap;
+        z-index: 1;
+      }
+
+      .stat-row {
+        display: flex;
+        align-items: center;
+        /* margin: 15px 0; */
+        padding: 8px;
+        border-bottom: 1px solid #333;
+      }
+
+      .stat-icon {
+        font-size: 1.4em;
+        margin-right: 15px;
+        width: 30px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 1.8em;
+        font-weight: 500;
+        position: relative;
+      }
+
+      .stat-unit {
+        font-size: 0.6em;
+        vertical-align: super;
+        margin-left: 3px;
+        color: #cd6d27;
+      }
+
+      .control-bar {
+        display: flex;
+        gap: 15px;
+        background: #000;
+        border-radius: 8px;
+        margin: 50px 0;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 30px;
+      }
+
+      .control-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 1;
+      }
+
+      .left {
+        justify-content: flex-start;
+      }
+
+      .center {
+        justify-content: center;
+      }
+
+      .right {
+        justify-content: flex-end;
+      }
+
+      .date-range {
+        margin: 0 20px;
+
+        color: white;
+      }
+
+      /* 响应式处理 */
+      @media (max-width: 768px) {
+        .control-bar {
+          flex-wrap: wrap;
+          gap: 15px;
+        }
+
+        .control-group {
+          flex: 0 0 100%;
+          justify-content: center !important;
+        }
+      }
+
+      select {
+        background: #cd6d27;
+        color: white;
+        border: 1px solid #cd6d27;
+        padding: 8px 15px;
+        border-radius: 4px;
+      }
+
+      button {
+        background: #000;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: opacity 0.3s;
+      }
+
+      .time-display {
+        font-size: 0.9em;
+        line-height: 1.4;
+      }
+
+      .time-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .time-label {
+        color: white;
+        white-space: nowrap;
+      }
+
+      .time-value {
+        color: white;
+        font-weight: 500;
+      }
+
+      .traffic-summary {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1rem 0;
+        font-size: 1.1rem;
+      }
+
+      .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+      }
+
+      .summary-item i {
+        font-size: 1.2rem;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      .view-switcher {
+        position: relative;
+        margin-bottom: 1rem;
+      }
+
+      .switch-container {
+        display: flex;
+        /* position: absolute; */
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        display: flex;
+        gap: 8px;
+      }
+
+      .switch-container button {
+        background: none;
+        border: 1px solid #e4e4e7;
+        border-radius: 6px;
+        padding: 8px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: all 0.2s;
+      }
+
+      .switch-container button.active {
+        opacity: 1;
+        border-color: #3b82f6;
+        color: #3b82f6;
+      }
+
+      /* 移除全局button样式，改为指定类名 */
+      .view-switch {
+        background: white !important;
+        /* 强制白色背景 */
+        color: #333 !important;
+        /* 深色文字 */
+        border: 1px solid #e4e4e7 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+      }
+
+      .view-switch.active {
+        border-color: #3b82f6 !important;
+        color: #3b82f6 !important;
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+      }
+
+      .data-table {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9em;
+      }
+
+      th {
+        background: #f8fafc;
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #e5e7eb;
+      }
+
+      td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      tr:nth-child(even) {
+        background: #f8fafc;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <!-- 统计卡片 -->
+      <div class="stat-container" v-if="currentInterface">
+        <!-- 总统计 -->
+        <div class="stat-card">
+          <div class="stat-row">
+            <i class="fas fa-tachometer-alt stat-icon"></i>
+            <div class="stat-value">
+              {{ formatSum(currentInterface.traffic.total).value }}
+              <span class="stat-unit"
+                >{{ formatSum(currentInterface.traffic.total).unit }}</span
+              >
+            </div>
+          </div>
+          <div class="stat-row">
+            <i class="fas fa-arrow-down stat-icon"></i>
+            <div class="stat-value">
+              {{ formatBytes(currentInterface.traffic.total.rx).value }}
+              <span class="stat-unit"
+                >{{ formatBytes(currentInterface.traffic.total.rx).unit }}</span
+              >
+            </div>
+          </div>
+          <div class="stat-row">
+            <i class="fas fa-arrow-up stat-icon"></i>
+            <div class="stat-value">
+              {{ formatBytes(currentInterface.traffic.total.tx).value }}
+              <span class="stat-unit"
+                >{{ formatBytes(currentInterface.traffic.total.tx).unit }}</span
+              >
+            </div>
+          </div>
+          <div class="stat-label">总计</div>
+        </div>
+
+        <!-- 本月统计 -->
+        <div
+          class="stat-card"
+          v-for="(data, title) in summaryData"
+          :key="title"
+        >
+          <div class="stat-row">
+            <i class="fas fa-chart-bar stat-icon"></i>
+            <div class="stat-value">
+              {{ formatSum(data).value }}
+              <span class="stat-unit">{{ formatSum(data).unit }}</span>
+            </div>
+          </div>
+          <div class="stat-row">
+            <i class="fas fa-arrow-down stat-icon"></i>
+            <div class="stat-value">
+              {{ formatBytes(data.rx).value }}
+              <span class="stat-unit">{{ formatBytes(data.rx).unit }}</span>
+            </div>
+          </div>
+          <div class="stat-row">
+            <i class="fas fa-arrow-up stat-icon"></i>
+            <div class="stat-value">
+              {{ formatBytes(data.tx).value }}
+              <span class="stat-unit">{{ formatBytes(data.tx).unit }}</span>
+            </div>
+          </div>
+          <div class="stat-label">{{ title.toUpperCase() }}</div>
+        </div>
+      </div>
+
+      <!-- 修改后的控制条结构 -->
+      <div class="control-bar">
+        <!-- 左侧控件 -->
+        <div class="control-group left">
+          <select v-model="timeRangeType">
+            <option value="day">按日</option>
+            <option value="month">按月</option>
+            <option value="year">按年</option>
+          </select>
+          <button
+            v-if='timeRangeType=="day"'
+            title="切换5分钟详细统计"
+            @click="handleShowFiveMinutesData()"
+          >
+            <i class="fas fa-wave-square"></i>
+          </button>
+        </div>
+        <div class="control-group center">
+          <button @click="adjustTime(-1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="date-range">{{ dateRange }}</span>
+          <button @click="adjustTime(1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- 右侧网卡选择 -->
+        <div class="control-group right">
+          <div class="time-display" v-if="selectedInterface">
+            <div class="time-row">
+              <span class="time-label">统计开始：</span>
+              <span class="time-value"
+                >{{ formatTime(selectedInterface.created) }}</span
+              >
+            </div>
+            <div class="time-row">
+              <span class="time-label">最后更新：</span>
+              <span class="time-value"
+                >{{ formatTime(selectedInterface.updated) }}</span
+              >
+            </div>
+          </div>
+          <select v-model="selectedInterface">
+            <option v-for="iface in interfaces" :value="iface">
+              {{ iface.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="traffic-summary">
+        <div class="summary-item" title="上行流量">
+          <i class="fas fa-upload text-blue-500"></i>
+          <span>{{ uploadGB }}</span>
+        </div>
+        <div class="summary-item" title="总流量">
+          <i class="fas fa-exchange-alt text-purple-500"></i>
+          <span>{{ totalGB }}</span>
+        </div>
+        <div class="summary-item" title="下行流量">
+          <i class="fas fa-download text-green-500"></i>
+          <span>{{ downloadGB }}</span>
+        </div>
+      </div>
+      <!-- 在图表容器上方添加 -->
+      <div class="view-switcher right">
+        <div class="switch-container">
+          <button
+            @click="currentView = 'chart'"
+            class="view-switch"
+            :class="{active: currentView === 'chart'} "
+            title="图表视图"
+          >
+            <i class="fas fa-chart-line"></i>
+          </button>
+          <button
+            @click="currentView = 'table'"
+            class="view-switch"
+            :class="{active: currentView === 'table'}"
+            title="表格视图"
+          >
+            <i class="fas fa-table"></i>
+          </button>
+        </div>
+      </div>
+      <!-- 图表容器 -->
+      <div class="chart-container">
+        <div v-show="currentView === 'chart'" id="trafficChart"></div>
+        <div v-show="currentView === 'table'" class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>日期/时间</th>
+                <th>上行</th>
+                <th>下行</th>
+                <th>总计</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in tableData" :key="item.timestamp">
+                <td>{{ getformatTableTime(item.timestamp) }}</td>
+                <td>
+                  {{ formatBytes(item.tx).value+formatBytes(item.tx).unit }}
+                </td>
+                <td>
+                  {{ formatBytes(item.rx).value +formatBytes(item.rx).unit}}
+                </td>
+                <td>
+                  {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx +
+                  item.rx).unit }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          rawData: {},
+          interfaces: [],
+          selectedInterface: null,
+          chart: null,
+          timeRangeType: "day",
+          currentRange: new Date(),
+          currentStats: {},
+          currentView: "chart",
+          filteredData: [],
+          fiveminuteMode: false,
+          tableData: [],
+          vnStatApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
+        },
+        computed: {
+          uploadGB() {
+            return (
+              this.formatBytes(this.currentStats.tx).value +
+              this.formatBytes(this.currentStats.tx).unit
+            );
+          },
+          downloadGB() {
+            return (
+              this.formatBytes(this.currentStats.rx).value +
+              this.formatBytes(this.currentStats.rx).unit
+            );
+          },
+          totalGB() {
+            return (
+              this.formatBytes(this.currentStats.total).value +
+              this.formatBytes(this.currentStats.total).unit
+            );
+          },
+          currentInterface() {
+            return this.selectedInterface || this.interfaces[0];
+          },
+          summaryData() {
+            return {
+              本月: this.getMonthData(),
+              今日: this.getDayData(),
+              昨日: this.getYesterdayData(),
+            };
+          },
+          dateRange() {
+            const d = new Date(this.currentRange);
+            const format = (date, withDay = true) => {
+              return `${date.getFullYear()}-${String(
+                date.getMonth() + 1
+              ).padStart(2, "0")}${
+                withDay ? `-${String(date.getDate()).padStart(2, "0")}` : ""
+              }`;
+            };
+            switch (this.timeRangeType) {
+              case "day":
+                // 显示日期
+                const day = new Date(d);
+                return `${format(day)}`;
+
+              case "month":
+                // 显示月份
+                const start = new Date(d.getFullYear(), d.getMonth(), 1);
+                const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+                return `${format(start)} - ${format(end)}`;
+
+              case "year":
+                // 显示年份
+                return `${d.getFullYear()}年`;
+            }
+          },
+        },
+        watch: {
+          timeRangeType() {
+            this.fiveminuteMode = false;
+            this.updateChart(0);
+          },
+          currentDate() {
+            this.updateChart(0);
+          },
+          selectedInterface() {
+            this.updateChart(0);
+          },
+        },
+        methods: {
+          formatBytes(bytes) {
+            const units = ["B", "KB", "MB", "GB", "TB"];
+            let i = 0;
+            bytes = Number(bytes);
+            while (bytes >= 1024 && i < units.length - 1) {
+              bytes /= 1024;
+              i++;
+            }
+            return {
+              value: bytes.toFixed(2),
+              unit: units[i],
+            };
+          },
+          formatSum(data) {
+            const total = data.rx + data.tx;
+            return this.formatBytes(total);
+          },
+          getMonthData() {
+            return this.currentInterface.traffic.month[0] || { rx: 0, tx: 0 };
+          },
+
+          getDayData() {
+            const today = new Date().getDate();
+            return (
+              this.currentInterface.traffic.day.find(
+                (d) =>
+                  new Date(this.getBeijingTime(d.timestamp)).getUTCDate() ===
+                  today
+              ) || { rx: 0, tx: 0 }
+            );
+          },
+          getYesterdayData() {
+            const yesterday = new Date().getDate() - 1;
+            return (
+              this.currentInterface.traffic.day.find(
+                (d) =>
+                  new Date(this.getBeijingTime(d.timestamp)).getUTCDate() ===
+                  yesterday
+              ) || { rx: 0, tx: 0 }
+            );
+          },
+          adjustTime(offset) {
+            const d = new Date(this.currentRange);
+            switch (this.timeRangeType) {
+              case "day":
+                d.setDate(d.getDate() + offset);
+                break;
+              case "month":
+                d.setMonth(d.getMonth() + offset);
+                break;
+              case "year":
+                d.setFullYear(d.getFullYear() + offset);
+                break;
+            }
+            this.currentRange = d;
+            if (this.fiveminuteMode) {
+              this.updateChart(1);
+            } else {
+              this.updateChart(0);
+            }
+          },
+          handleShowFiveMinutesData() {
+            if (this.fiveminuteMode) {
+              this.fiveminuteMode = false;
+              this.updateChart(0);
+            } else {
+              this.fiveminuteMode = true;
+              this.updateChart(1);
+            }
+          },
+          getMergedSeriesData(isFiveMinute = false) {
+            const dataType = isFiveMinute
+              ? { day: "hour", month: "day", year: "month" }[this.timeRangeType]
+              : { day: "hour", month: "day", year: "month" }[
+                  this.timeRangeType
+                ];
+            const dataPath = isFiveMinute ? "fiveminute" : dataType;
+
+            let totalRx = 0,
+              totalTx = 0;
+            const rawData = this.selectedInterface.traffic[dataPath];
+            this.filteredData = rawData.filter((item) => {
+              const itemDate = new Date(this.getBeijingTime(item.timestamp));
+              const currentDate = new Date(this.currentRange);
+              let match = false;
+              switch (this.timeRangeType) {
+                case "day":
+                  match =
+                    itemDate.getUTCFullYear() === currentDate.getFullYear() &&
+                    itemDate.getUTCMonth() === currentDate.getMonth() &&
+                    itemDate.getUTCDate() === currentDate.getDate();
+                  break;
+                case "month":
+                  match = itemDate.getUTCMonth() === currentDate.getMonth();
+                  break;
+                case "year":
+                  match =
+                    itemDate.getUTCFullYear() === currentDate.getFullYear();
+                  break;
+              }
+              if (match) {
+                totalRx += item.rx || 0;
+                totalTx += item.tx || 0;
+              }
+              return match;
+            });
+            this.currentStats = {
+              rx: totalRx,
+              tx: totalTx,
+              total: totalRx + totalTx,
+            };
+            this.tableData = this.filteredData;
+            const getXValue = (timestamp) =>
+              this.getXValue(timestamp, dataType, isFiveMinute);
+            return [
+              this.generateSeries("上行", "tx", "#E0C3A1", getXValue),
+              this.generateSeries("下行", "rx", "#E37563", getXValue),
+            ];
+          },
+          generateSeries(name, field, color, getX) {
+            return {
+              name,
+              data: this.filteredData.map((d) => ({
+                x: getX(d.timestamp),
+                y: d[field] / (1024 * 1024), // 统一单位转换
+              })),
+              color,
+            };
+          },
+          getXValue(timestamp, dataKey, isFiveMinute = false) {
+            const beijingDate = this.getBeijingTime(timestamp);
+            const month = (beijingDate.getUTCMonth() + 1)
+              .toString()
+              .padStart(2, "0");
+            const day = beijingDate.getUTCDate().toString().padStart(2, "0");
+            const hours = beijingDate.getUTCHours().toString().padStart(2, "0");
+            const minutes = beijingDate
+              .getUTCMinutes()
+              .toString()
+              .padStart(2, "0");
+            if (isFiveMinute) {
+              return `${beijingDate.getUTCFullYear()}-${month}-${day} ${hours}:${minutes}`;
+            } else {
+              switch (dataKey) {
+                case "hour":
+                  return `${month}-${day} ${hours}时`; // 格式：03-06 12时
+                case "day":
+                  return `${month}-${day}`; // 格式：03-06
+                case "month":
+                  return `${beijingDate.getUTCFullYear()}-${month}`; // 格式：2025-03
+                default:
+                  return beijingDate.toISOString();
+              }
+            }
+          },
+          updateChart(type) {
+            const options = {
+              chart: { type: "area", height: 400 },
+              series: this.getMergedSeriesData(type === 1),
+              fill: {
+                type: "solid",
+              },
+              dataLabels: {
+                enabled: false,
+              },
+              stroke: {
+                curve: "smooth",
+                width: 2,
+              },
+              markers: {
+                size: 3,
+                hover: { size: 5 },
+              },
+              xaxis: {
+                type: "category",
+                title: { text: this.getXAxisTitle() },
+              },
+              yaxis: {
+                title: { text: "流量 (MB)" },
+                labels: {
+                  formatter: function (value) {
+                    return value % 1 === 0
+                      ? value.toFixed(0) // 整数显示
+                      : value.toFixed(2); // 小数保留两位（可选）
+                  },
+                },
+              },
+              tooltip: {
+                y: {
+                  formatter: (value) => value.toFixed(2) + " MB",
+                },
+              },
+            };
+            if (this.chart) {
+              this.chart.updateOptions(options);
+            } else {
+              this.chart = new ApexCharts(
+                document.querySelector("#trafficChart"),
+                options
+              );
+              this.chart.render();
+            }
+          },
+          getformatTableTime(timestamp) {
+            const beijingDate = this.getBeijingTime(timestamp);
+            // 获取调整后的时间组件
+            const month = (beijingDate.getUTCMonth() + 1)
+              .toString()
+              .padStart(2, "0");
+            const day = beijingDate.getUTCDate().toString().padStart(2, "0");
+            const hours = beijingDate.getUTCHours().toString().padStart(2, "0");
+            if (this.fiveminuteMode) {
+              const minutes = beijingDate
+                .getUTCMinutes()
+                .toString()
+                .padStart(2, "0");
+              return `${beijingDate.getUTCFullYear()}-${month}-${day} ${hours}:${minutes}`;
+            } else {
+              switch (this.timeRangeType) {
+                case "day":
+                  return `${beijingDate.getUTCFullYear()}-${month}-${day} ${hours}:00`; // 格式：03-06 12时
+                case "month":
+                  return `${beijingDate.getUTCFullYear()}-${month}-${day}`; // 格式：03-06
+                case "year":
+                  return `${beijingDate.getUTCFullYear()}-${month}`; // 格式：2025-03
+                default:
+                  return beijingDate.toISOString();
+              }
+            }
+          },
+          getXAxisTitle() {
+            return {
+              day: "小时",
+              month: "日期",
+              year: "月份",
+            }[this.timeRangeType];
+          },
+          formatTime(timeObj) {
+            if (!timeObj?.timestamp) return "N/A";
+            const date = this.getBeijingTime(timeObj.timestamp);
+            return `${date.getUTCFullYear()}-${this.pad(
+              date.getUTCMonth() + 1
+            )}-${this.pad(date.getUTCDate())} 
+                ${this.pad(date.getUTCHours())}:${this.pad(
+              date.getUTCMinutes()
+            )}`;
+          },
+          // 补零函数
+          pad(num) {
+            return num.toString().padStart(2, "0");
+          },
+          getBeijingTime(timestamp) {
+            const date = new Date(timestamp * 1000);
+            date.setMinutes(date.getMinutes() + date.getTimezoneOffset() + 480); // UTC+8
+            return date;
+          },
+        },
+        async mounted() {
+          const response = await fetch(this.vnStatApi);
+          this.rawData = await response.json();
+          this.interfaces = this.rawData.interfaces;
+          this.selectedInterface = this.interfaces[0];
+          await this.$nextTick();
+        },
+      });
+    </script>
+  </body>
+</html>
