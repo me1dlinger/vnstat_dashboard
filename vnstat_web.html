@@ -511,6 +511,7 @@
           fiveminuteMode: false,
           tableData: [],
           vnStatApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
+          defaultInterface:''
         },
         computed: {
           uploadGB() {
@@ -842,7 +843,12 @@
           const response = await fetch(this.vnStatApi);
           this.rawData = await response.json();
           this.interfaces = this.rawData.interfaces;
-          this.selectedInterface = this.interfaces[0];
+          if(this.interfaces.length>0){
+              const defaultInterface = this.interfaces.find(
+              intf => intf.name === this.defaultInterface
+            );
+            this.selectedInterface = defaultInterface || this.interfaces[0];
+          }
           await this.$nextTick();
         },
       });
