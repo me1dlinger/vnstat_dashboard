@@ -122,12 +122,12 @@
         gap: 15px;
         background: #000;
         border-radius: 8px;
-        margin: 50px 0;
+        margin: 44px 0;
         align-items: center;
         flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
-        padding: 15px 30px;
+        padding: 13px 30px;
       }
 
       .control-group {
@@ -167,7 +167,6 @@
           justify-content: center !important;
         }
       }
-
       select {
         background: #cd6d27;
         color: white;
@@ -211,7 +210,7 @@
         display: flex;
         justify-content: center;
         gap: 2rem;
-        margin: 1rem 0;
+        margin: -1rem 0;
         font-size: 1.1rem;
       }
 
@@ -234,6 +233,7 @@
       .view-switcher {
         position: relative;
         margin-bottom: 1rem;
+        margin-top:-40px
       }
 
       .switch-container {
@@ -297,8 +297,18 @@
         text-align: left;
         font-weight: 600;
         border-bottom: 2px solid #e5e7eb;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
       }
-
+      th:hover {
+        background: #f1f5f9;
+      }
+      th i {
+        margin-left: 8px;
+        font-size: 0.8em;
+        color: #64748b;
+      }
       td {
         padding: 12px 16px;
         border-bottom: 1px solid #e5e7eb;
@@ -345,8 +355,6 @@
           </div>
           <div class="stat-label">总计</div>
         </div>
-
-        <!-- 本月统计 -->
         <div
           class="stat-card"
           v-for="(data, title) in summaryData"
@@ -380,7 +388,7 @@
       <!-- 修改后的控制条结构 -->
       <div class="control-bar">
         <!-- 左侧控件 -->
-        <div class="control-group left">
+        <div class="control-group left" v-show="!interfacesDataMode">
           <select v-model="timeRangeType">
             <option value="day">按日</option>
             <option value="month">按月</option>
@@ -394,7 +402,7 @@
             <i class="fas fa-wave-square"></i>
           </button>
         </div>
-        <div class="control-group center">
+        <div class="control-group center" v-show="!interfacesDataMode">
           <button @click="adjustTime(-1)">
             <i class="fas fa-chevron-left"></i>
           </button>
@@ -420,81 +428,136 @@
               >
             </div>
           </div>
-          <select v-model="selectedInterface">
+          <select v-model="selectedInterface" v-show="!interfacesDataMode">
             <option v-for="iface in interfaces" :value="iface">
               {{ iface.name }}
             </option>
           </select>
-        </div>
-      </div>
-      <div class="traffic-summary">
-        <div class="summary-item" title="上行流量">
-          <i class="fas fa-upload text-blue-500"></i>
-          <span>{{ uploadGB }}</span>
-        </div>
-        <div class="summary-item" title="总流量">
-          <i class="fas fa-exchange-alt text-purple-500"></i>
-          <span>{{ totalGB }}</span>
-        </div>
-        <div class="summary-item" title="下行流量">
-          <i class="fas fa-download text-green-500"></i>
-          <span>{{ downloadGB }}</span>
-        </div>
-      </div>
-      <!-- 在图表容器上方添加 -->
-      <div class="view-switcher right">
-        <div class="switch-container">
           <button
-            @click="currentView = 'chart'"
-            class="view-switch"
-            :class="{active: currentView === 'chart'} "
-            title="图表视图"
-          >
-            <i class="fas fa-chart-line"></i>
-          </button>
-          <button
-            @click="currentView = 'table'"
-            class="view-switch"
-            :class="{active: currentView === 'table'}"
-            title="表格视图"
-          >
-            <i class="fas fa-table"></i>
-          </button>
+          title="按网卡统计"
+          @click="handleShowInterfaceData()"
+        >
+          <i class="fas fa-network-wired"></i>
+        </button>
         </div>
       </div>
-      <!-- 图表容器 -->
-      <div class="chart-container">
-        <div v-show="currentView === 'chart'" id="trafficChart"></div>
-        <div v-show="currentView === 'table'" class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th>日期/时间</th>
-                <th>上行</th>
-                <th>下行</th>
-                <th>总计</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in tableData" :key="item.timestamp">
-                <td>{{ getformatTableTime(item.timestamp) }}</td>
-                <td>
-                  {{ formatBytes(item.tx).value+formatBytes(item.tx).unit }}
-                </td>
-                <td>
-                  {{ formatBytes(item.rx).value +formatBytes(item.rx).unit}}
-                </td>
-                <td>
-                  {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx +
-                  item.rx).unit }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <div v-show="!interfacesDataMode">
+        <div class="traffic-summary">
+          <div class="summary-item" title="上行流量">
+            <i class="fas fa-upload text-blue-500"></i>
+            <span>{{ uploadGB }}</span>
+          </div>
+          <div class="summary-item" title="总流量">
+            <i class="fas fa-exchange-alt text-purple-500"></i>
+            <span>{{ totalGB }}</span>
+          </div>
+          <div class="summary-item" title="下行流量">
+            <i class="fas fa-download text-green-500"></i>
+            <span>{{ downloadGB }}</span>
+          </div>
         </div>
+        <!-- 在图表容器上方添加 -->
+        <div class="view-switcher right">
+          <div class="switch-container">
+            <button
+              @click="currentView = 'chart'"
+              class="view-switch"
+              :class="{active: currentView === 'chart'} "
+              title="图表视图"
+            >
+              <i class="fas fa-chart-line"></i>
+            </button>
+            <button
+              @click="currentView = 'table'"
+              class="view-switch"
+              :class="{active: currentView === 'table'}"
+              title="表格视图"
+            >
+              <i class="fas fa-table"></i>
+            </button>
+          </div>
+        </div>
+        <!-- 图表容器 -->
+        <div class="chart-container">
+          <div v-show="currentView === 'chart'" id="trafficChart"></div>
+          <div v-show="currentView === 'table'" class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>日期/时间</th>
+                  <th>上行</th>
+                  <th>下行</th>
+                  <th>总计</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in tableData" :key="item.timestamp">
+                  <td>{{ getformatTableTime(item.timestamp) }}</td>
+                  <td>
+                    {{ formatBytes(item.tx).value+formatBytes(item.tx).unit }}
+                  </td>
+                  <td>
+                    {{ formatBytes(item.rx).value +formatBytes(item.rx).unit}}
+                  </td>
+                  <td>
+                    {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx +
+                    item.rx).unit }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  <!-- 在原有表格下方添加网卡统计表格 -->
+      <div v-show="interfacesDataMode" class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th @click="sortTable('name')">
+                网卡名称
+                <i class="fas" :class="sortIcon('name')"></i>
+              </th>
+              <th @click="sortTable('todayRx')">
+                今日下行
+                <i class="fas" :class="sortIcon('todayRx')"></i>
+              </th>
+              <th @click="sortTable('todayTx')">
+                今日上行
+                <i class="fas" :class="sortIcon('todayTx')"></i>
+              </th>
+              <th @click="sortTable('todayTotal')">
+                今日总计
+                <i class="fas" :class="sortIcon('todayTotal')"></i>
+              </th>
+              <th @click="sortTable('totalRx')">
+                全部下行
+                <i class="fas" :class="sortIcon('totalRx')"></i>
+              </th>
+              <th @click="sortTable('totalTx')">
+                全部上行
+                <i class="fas" :class="sortIcon('totalTx')"></i>
+              </th>
+              <th @click="sortTable('totalTotal')">
+                全部总计
+                <i class="fas" :class="sortIcon('totalTotal')"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in sortedInterfaces" :key="item.name">
+              <td>{{ item.name }}</td>
+              <td>{{ formatBytes(item.todayRx).value }}{{ formatBytes(item.todayRx).unit }}</td>
+              <td>{{ formatBytes(item.todayTx).value }}{{ formatBytes(item.todayTx).unit }}</td>
+              <td>{{ formatBytes(item.todayTotal).value }}{{ formatBytes(item.todayTotal).unit }}</td>
+              <td>{{ formatBytes(item.totalRx).value }}{{ formatBytes(item.totalRx).unit }}</td>
+              <td>{{ formatBytes(item.totalTx).value }}{{ formatBytes(item.totalTx).unit }}</td>
+              <td>{{ formatBytes(item.totalTotal).value }}{{ formatBytes(item.totalTotal).unit }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-
     <script>
       new Vue({
         el: "#app",
@@ -509,6 +572,10 @@
           currentView: "chart",
           filteredData: [],
           fiveminuteMode: false,
+          interfacesDataMode:false,
+          sortKey: 'name',
+          sortOrder: 'asc', // 'asc'或'desc'
+          interfacesTableData: [],
           tableData: [],
           vnStatApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
           defaultInterface:''
@@ -537,10 +604,19 @@
           },
           summaryData() {
             return {
-              本月: this.getMonthData(),
-              今日: this.getDayData(),
-              昨日: this.getYesterdayData(),
+              本月: this.getMonthData(this.selectedInterface || this.interfaces[0]),
+              今日: this.getDayData(this.selectedInterface || this.interfaces[0]),
+              昨日: this.getYesterdayData(this.selectedInterface || this.interfaces[0]),
             };
+          },
+          sortedInterfaces() {
+            return [...this.interfacesTableData].sort((a, b) => {
+              let modifier = 1
+              if (this.sortOrder === 'desc') modifier = -1
+              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier
+              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier
+              return 0
+            })
           },
           dateRange() {
             const d = new Date(this.currentRange);
@@ -556,7 +632,6 @@
                 // 显示日期
                 const day = new Date(d);
                 return `${format(day)}`;
-
               case "month":
                 // 显示月份
                 const start = new Date(d.getFullYear(), d.getMonth(), 1);
@@ -599,24 +674,24 @@
             const total = data.rx + data.tx;
             return this.formatBytes(total);
           },
-          getMonthData() {
-            return this.currentInterface.traffic.month[0] || { rx: 0, tx: 0 };
+          getMonthData(interface) {
+            return interface.traffic.month[0] || { rx: 0, tx: 0 };
           },
 
-          getDayData() {
+          getDayData(interface) {
             const today = new Date().getDate();
             return (
-              this.currentInterface.traffic.day.find(
+              interface.traffic.day.find(
                 (d) =>
                   new Date(this.getBeijingTime(d.timestamp)).getUTCDate() ===
                   today
               ) || { rx: 0, tx: 0 }
             );
           },
-          getYesterdayData() {
+          getYesterdayData(interface) {
             const yesterday = new Date().getDate() - 1;
             return (
-              this.currentInterface.traffic.day.find(
+              interface.traffic.day.find(
                 (d) =>
                   new Date(this.getBeijingTime(d.timestamp)).getUTCDate() ===
                   yesterday
@@ -651,6 +726,41 @@
               this.fiveminuteMode = true;
               this.updateChart(1);
             }
+          },
+          handleShowInterfaceData(){
+            if(this.interfacesDataMode){
+              this.interfacesDataMode = false;
+              this.updateChart(0);
+            }else{
+              this.interfacesDataMode = true
+              this.handleInterfacesData()
+            }
+          },
+          sortTable(key) {
+            if (this.sortKey === key) {
+              this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc'
+            } else {
+              this.sortKey = key
+              this.sortOrder = 'asc'
+            }
+          },
+          sortIcon(key) {
+            if (this.sortKey !== key) return 'fa-sort'
+            return this.sortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down'
+          },
+          handleInterfacesData(){
+            this.interfacesTableData = this.interfaces.map(item=>{
+              const todayData = this.getDayData(item)
+              return {
+                name: item.name,
+                todayRx: todayData.rx,
+                todayTx: todayData.tx,
+                todayTotal: todayData.rx + todayData.tx,
+                totalRx: item.traffic.total.rx,
+                totalTx: item.traffic.total.tx,
+                totalTotal: item.traffic.total.rx + item.traffic.total.tx
+              }
+            })
           },
           getMergedSeriesData(isFiveMinute = false) {
             const dataType = isFiveMinute
