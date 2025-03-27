@@ -881,7 +881,10 @@
               },
               tooltip: {
                 y: {
-                  formatter: (value) => value.toFixed(2) + " MB",
+                  formatter: (value) => {
+                    const formatResult = this.formatFromMB(value)
+                    return formatResult.value+formatResult.unit
+                  }
                 },
               },
             };
@@ -894,6 +897,19 @@
               );
               this.chart.render();
             }
+          },
+          formatFromMB(mb) {
+            const units = ['MB', 'GB', 'TB'];
+            let value = Number(mb);
+            let i = 0;
+            while (value >= 1024 && i < units.length - 1) {
+              value /= 1024;
+              i++;
+            }
+            return {
+              value: value.toFixed(2),
+              unit: units[i]
+            };
           },
           getformatTableTime(timestamp) {
             const beijingDate = this.getBeijingTime(timestamp);
