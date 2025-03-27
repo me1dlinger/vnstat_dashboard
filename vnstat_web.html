@@ -509,7 +509,7 @@
           </div>
         </div>
       </div>
-  <!-- 在原有表格下方添加网卡统计表格 -->
+      <!-- 网卡统计表格 -->
       <div v-show="interfacesDataMode" class="data-table">
         <table>
           <thead>
@@ -741,7 +741,7 @@
               this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc'
             } else {
               this.sortKey = key
-              this.sortOrder = 'asc'
+              this.sortOrder = 'desc'
             }
           },
           sortIcon(key) {
