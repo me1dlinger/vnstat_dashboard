@@ -574,7 +574,7 @@
           fiveminuteMode: false,
           interfacesDataMode:false,
           sortKey: 'name',
-          sortOrder: 'asc', // 'asc'或'desc'
+          sortOrder: 'desc', // 'asc'或'desc'
           interfacesTableData: [],
           tableData: [],
           vnStatApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
@@ -611,8 +611,8 @@
           },
           sortedInterfaces() {
             return [...this.interfacesTableData].sort((a, b) => {
-              let modifier = 1
-              if (this.sortOrder === 'desc') modifier = -1
+              let modifier = -1
+              if (this.sortOrder === 'asc') modifier = 1
               if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier
               if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier
               return 0
