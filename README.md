@@ -29,7 +29,8 @@ location /traffic/ {
 ### VNSTAT 历史数据备份
 
 由于vnstat的api能够返回的历史日期数据是有限的，所以写了个定时脚本用于定时请求vnstat api备份数据
-提供简易python服务能够请求指定天数的备份数据
+
+提供简易python服务能够请求指定日期的备份数据
 
 文件结构
 
