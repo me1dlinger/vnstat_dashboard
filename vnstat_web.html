@@ -122,12 +122,12 @@
         gap: 15px;
         background: #000;
         border-radius: 8px;
-        margin: 50px 0;
+        margin: 44px 0;
         align-items: center;
         flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
-        padding: 15px 30px;
+        padding: 13px 30px;
       }
 
       .control-group {
@@ -167,7 +167,6 @@
           justify-content: center !important;
         }
       }
-
       select {
         background: #cd6d27;
         color: white;
@@ -211,7 +210,7 @@
         display: flex;
         justify-content: center;
         gap: 2rem;
-        margin: 1rem 0;
+        margin: -1rem 0;
         font-size: 1.1rem;
       }
 
@@ -234,6 +233,7 @@
       .view-switcher {
         position: relative;
         margin-bottom: 1rem;
+        margin-top:-40px
       }
 
       .switch-container {
@@ -297,8 +297,18 @@
         text-align: left;
         font-weight: 600;
         border-bottom: 2px solid #e5e7eb;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
       }
-
+      th:hover {
+        background: #f1f5f9;
+      }
+      th i {
+        margin-left: 8px;
+        font-size: 0.8em;
+        color: #64748b;
+      }
       td {
         padding: 12px 16px;
         border-bottom: 1px solid #e5e7eb;
@@ -330,8 +340,7 @@
             <div class="stat-value">
               {{ formatBytes(currentInterface.traffic.total.rx).value }}
               <span class="stat-unit"
-                >{{ formatBytes(currentInterface.traffic.total.rx).unit }}</span
-              >
+                >{{ formatBytes(currentInterface.traffic.total.rx).unit }}</span>
             </div>
           </div>
           <div class="stat-row">
@@ -339,14 +348,11 @@
             <div class="stat-value">
               {{ formatBytes(currentInterface.traffic.total.tx).value }}
               <span class="stat-unit"
-                >{{ formatBytes(currentInterface.traffic.total.tx).unit }}</span
-              >
+                >{{ formatBytes(currentInterface.traffic.total.tx).unit }}</span>
             </div>
           </div>
           <div class="stat-label">总计</div>
         </div>
-
-        <!-- 本月统计 -->
         <div
           class="stat-card"
           v-for="(data, title) in summaryData"
@@ -380,26 +386,20 @@
       <!-- 修改后的控制条结构 -->
       <div class="control-bar">
         <!-- 左侧控件 -->
-        <div class="control-group left">
+        <div class="control-group left" v-show="!interfacesDataMode">
           <select v-model="timeRangeType">
+            <option value="hour">按时</option>
             <option value="day">按日</option>
             <option value="month">按月</option>
             <option value="year">按年</option>
           </select>
-          <button
-            v-if='timeRangeType=="day"'
-            title="切换5分钟详细统计"
-            @click="handleShowFiveMinutesData()"
-          >
-            <i class="fas fa-wave-square"></i>
-          </button>
         </div>
-        <div class="control-group center">
+        <div class="control-group center" v-show="!interfacesDataMode">
           <button @click="adjustTime(-1)">
             <i class="fas fa-chevron-left"></i>
           </button>
           <span class="date-range">{{ dateRange }}</span>
-          <button @click="adjustTime(1)">
+          <button :style="{ visibility: showNextButton ? 'visible' : 'hidden' }" @click="adjustTime(1)" >
             <i class="fas fa-chevron-right"></i>
           </button>
         </div>
@@ -420,81 +420,145 @@
               >
             </div>
           </div>
-          <select v-model="selectedInterface">
+          <select v-model="selectedInterface" v-show="!interfacesDataMode">
             <option v-for="iface in interfaces" :value="iface">
               {{ iface.name }}
             </option>
           </select>
-        </div>
-      </div>
-      <div class="traffic-summary">
-        <div class="summary-item" title="上行流量">
-          <i class="fas fa-upload text-blue-500"></i>
-          <span>{{ uploadGB }}</span>
-        </div>
-        <div class="summary-item" title="总流量">
-          <i class="fas fa-exchange-alt text-purple-500"></i>
-          <span>{{ totalGB }}</span>
-        </div>
-        <div class="summary-item" title="下行流量">
-          <i class="fas fa-download text-green-500"></i>
-          <span>{{ downloadGB }}</span>
-        </div>
-      </div>
-      <!-- 在图表容器上方添加 -->
-      <div class="view-switcher right">
-        <div class="switch-container">
           <button
-            @click="currentView = 'chart'"
-            class="view-switch"
-            :class="{active: currentView === 'chart'} "
-            title="图表视图"
-          >
-            <i class="fas fa-chart-line"></i>
-          </button>
-          <button
-            @click="currentView = 'table'"
-            class="view-switch"
-            :class="{active: currentView === 'table'}"
-            title="表格视图"
-          >
-            <i class="fas fa-table"></i>
-          </button>
+          title="按网卡统计"
+          @click="handleShowInterfaceData()"
+        >
+          <i class="fas fa-network-wired"></i>
+        </button>
         </div>
       </div>
-      <!-- 图表容器 -->
-      <div class="chart-container">
-        <div v-show="currentView === 'chart'" id="trafficChart"></div>
-        <div v-show="currentView === 'table'" class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th>日期/时间</th>
-                <th>上行</th>
-                <th>下行</th>
-                <th>总计</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in tableData" :key="item.timestamp">
-                <td>{{ getformatTableTime(item.timestamp) }}</td>
-                <td>
-                  {{ formatBytes(item.tx).value+formatBytes(item.tx).unit }}
-                </td>
-                <td>
-                  {{ formatBytes(item.rx).value +formatBytes(item.rx).unit}}
-                </td>
-                <td>
-                  {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx +
-                  item.rx).unit }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <div v-show="!interfacesDataMode">
+        <div class="traffic-summary">
+          <div class="summary-item" title="上行流量">
+            <i class="fas fa-upload text-blue-500"></i>
+            <span>{{ uploadGB }}</span>
+          </div>
+          <div class="summary-item" title="总流量">
+            <i class="fas fa-exchange-alt text-purple-500"></i>
+            <span>{{ totalGB }}</span>
+          </div>
+          <div class="summary-item" title="下行流量">
+            <i class="fas fa-download text-green-500"></i>
+            <span>{{ downloadGB }}</span>
+          </div>
         </div>
+        <!-- 在图表容器上方添加 -->
+        <div class="view-switcher right">
+          <div class="switch-container">
+            <button
+              @click="currentView = 'chart'"
+              class="view-switch"
+              :class="{active: currentView === 'chart'} "
+              title="图表视图"
+            >
+              <i class="fas fa-chart-line"></i>
+            </button>
+            <button
+              @click="currentView = 'table'"
+              class="view-switch"
+              :class="{active: currentView === 'table'}"
+              title="表格视图"
+            >
+              <i class="fas fa-table"></i>
+            </button>
+          </div>
+        </div>
+        <!-- 图表容器 -->
+        <div class="chart-container">
+          <div v-show="currentView === 'chart'" id="trafficChart"></div>
+          <div v-show="currentView === 'table'" class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th @click="sortTable('timestamp')">
+                    日期/时间
+                    <i class="fas" :class="sortIcon('timestamp')"></i>
+                  </th>
+                  <th @click="sortTable('tx')">
+                    上行
+                    <i class="fas" :class="sortIcon('tx')"></i>
+                  </th>
+                  <th @click="sortTable('rx')">
+                    下行
+                    <i class="fas" :class="sortIcon('rx')"></i>
+                  </th>
+                  <th>总计</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in sortedTableData" :key="item.timestamp">
+                  <td>{{ getformatTableTime(item.date,item.time) }}</td>
+                  <td>
+                    {{ formatBytes(item.tx).value+formatBytes(item.tx).unit }}
+                  </td>
+                  <td>
+                    {{ formatBytes(item.rx).value +formatBytes(item.rx).unit}}
+                  </td>
+                  <td>
+                    {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx +
+                    item.rx).unit }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+        <!-- 网卡统计表格 -->
+      <div v-show="interfacesDataMode" class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th @click="sortTable('name')">
+                网卡名称
+                <i class="fas" :class="sortIcon('name')"></i>
+              </th>
+              <th @click="sortTable('todayRx')">
+                今日下行
+                <i class="fas" :class="sortIcon('todayRx')"></i>
+              </th>
+              <th @click="sortTable('todayTx')">
+                今日上行
+                <i class="fas" :class="sortIcon('todayTx')"></i>
+              </th>
+              <th @click="sortTable('todayTotal')">
+                今日总计
+                <i class="fas" :class="sortIcon('todayTotal')"></i>
+              </th>
+              <th @click="sortTable('totalRx')">
+                全部下行
+                <i class="fas" :class="sortIcon('totalRx')"></i>
+              </th>
+              <th @click="sortTable('totalTx')">
+                全部上行
+                <i class="fas" :class="sortIcon('totalTx')"></i>
+              </th>
+              <th @click="sortTable('totalTotal')">
+                全部总计
+                <i class="fas" :class="sortIcon('totalTotal')"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in sortedInterfaces" :key="item.name">
+              <td>{{ item.name }}</td>
+              <td>{{ formatBytes(item.todayRx).value }}{{ formatBytes(item.todayRx).unit }}</td>
+              <td>{{ formatBytes(item.todayTx).value }}{{ formatBytes(item.todayTx).unit }}</td>
+              <td>{{ formatBytes(item.todayTotal).value }}{{ formatBytes(item.todayTotal).unit }}</td>
+              <td>{{ formatBytes(item.totalRx).value }}{{ formatBytes(item.totalRx).unit }}</td>
+              <td>{{ formatBytes(item.totalTx).value }}{{ formatBytes(item.totalTx).unit }}</td>
+              <td>{{ formatBytes(item.totalTotal).value }}{{ formatBytes(item.totalTotal).unit }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-
     <script>
       new Vue({
         el: "#app",
@@ -508,9 +572,14 @@
           currentStats: {},
           currentView: "chart",
           filteredData: [],
-          fiveminuteMode: false,
+          interfacesDataMode:false,
+          showNextButton:false,
+          sortKey: 'name',
+          sortOrder: 'asc', // 'asc'或'desc'
+          interfacesTableData: [],
           tableData: [],
           vnStatApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
+          defaultInterface:'enp3s0'
         },
         computed: {
           uploadGB() {
@@ -536,48 +605,72 @@
           },
           summaryData() {
             return {
-              本月: this.getMonthData(),
-              今日: this.getDayData(),
-              昨日: this.getYesterdayData(),
+              本月: this.getMonthData(this.selectedInterface || this.interfaces[0]),
+              今日: this.getDayData(this.selectedInterface || this.interfaces[0]),
+              昨日: this.getYesterdayData(this.selectedInterface || this.interfaces[0]),
             };
+          },
+          sortedInterfaces() {
+            return [...this.interfacesTableData].sort((a, b) => {
+              let modifier = -1
+              if (this.sortOrder === 'asc') modifier = 1
+              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier
+              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier
+              return 0
+            })
+          },
+          sortedTableData(){
+            return [...this.tableData].sort((a, b) => {
+              let modifier = -1
+              if (this.sortOrder === 'asc') modifier = 1
+              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier
+              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier
+              return 0
+            })
           },
           dateRange() {
             const d = new Date(this.currentRange);
-            const format = (date, withDay = true) => {
-              return `${date.getFullYear()}-${String(
+            const format = (date, withDay = true, withTime = false) => {
+              let result = `${date.getFullYear()}-${String(
                 date.getMonth() + 1
               ).padStart(2, "0")}${
                 withDay ? `-${String(date.getDate()).padStart(2, "0")}` : ""
               }`;
+              if (withTime) {
+                result += ` ${String(date.getHours()).padStart(2, "0")}:00`;
+              }
+              return result;
             };
             switch (this.timeRangeType) {
+              case "hour":
+                const hourStart = new Date(d);
+                hourStart.setMinutes(0, 0, 0);
+                const hourEnd = new Date(hourStart);
+                hourEnd.setHours(hourStart.getHours() + 1);
+                return `${format(hourStart, true, true)} - ${format(hourEnd, true, true)}`;
               case "day":
-                // 显示日期
                 const day = new Date(d);
                 return `${format(day)}`;
-
               case "month":
-                // 显示月份
                 const start = new Date(d.getFullYear(), d.getMonth(), 1);
                 const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
                 return `${format(start)} - ${format(end)}`;
-
               case "year":
-                // 显示年份
                 return `${d.getFullYear()}年`;
             }
           },
         },
         watch: {
           timeRangeType() {
-            this.fiveminuteMode = false;
-            this.updateChart(0);
+            this.showNextButton = false;
+            this.currentRange = new Date(),
+            this.updateChart();
           },
           currentDate() {
-            this.updateChart(0);
+            this.updateChart();
           },
           selectedInterface() {
-            this.updateChart(0);
+            this.updateChart();
           },
         },
         methods: {
@@ -598,87 +691,178 @@
             const total = data.rx + data.tx;
             return this.formatBytes(total);
           },
-          getMonthData() {
-            return this.currentInterface.traffic.month[0] || { rx: 0, tx: 0 };
-          },
-
-          getDayData() {
-            const today = new Date().getDate();
+          getMonthData(interface) {
+            const year = new Date().getFullYear()
+            const month = new Date().getMonth() + 1
             return (
-              this.currentInterface.traffic.day.find(
+              interface.traffic.month.find(
                 (d) =>
-                  new Date(this.getBeijingTime(d.timestamp)).getUTCDate() ===
-                  today
+                  d.date.year ===year&&d.date.month ===month
               ) || { rx: 0, tx: 0 }
             );
           },
-          getYesterdayData() {
-            const yesterday = new Date().getDate() - 1;
+          getDayData(interface) {
+            const year = new Date().getFullYear()
+            const month = new Date().getMonth() + 1
+            const day = new Date().getDate();
             return (
-              this.currentInterface.traffic.day.find(
+              interface.traffic.day.find(
                 (d) =>
-                  new Date(this.getBeijingTime(d.timestamp)).getUTCDate() ===
-                  yesterday
+                  d.date.year ===year&&d.date.month ===month&&d.date.day===day
               ) || { rx: 0, tx: 0 }
+            );
+          },
+          getYesterdayData(interface) {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const year = yesterday.getFullYear();
+            const month = yesterday.getMonth() + 1;
+            const day = yesterday.getDate();
+            return (
+                interface.traffic.day.find(
+                    d => d.date.year === year && d.date.month === month && d.date.day === day
+                ) || { rx: 0, tx: 0 }
             );
           },
           adjustTime(offset) {
             const d = new Date(this.currentRange);
+            const now = new Date();
+            let isLimitReached = false;
+            // 保存原始日期（用于闰年处理）
+            const originalDate = d.getDate();
+            const originalMonth = d.getMonth();
             switch (this.timeRangeType) {
+              case "hour":
+                // 自动处理跨日/月/年
+                d.setTime(d.getTime() + offset * 60 * 60 * 1000);
+                // 精确比较到小时级别
+                isLimitReached = d.getFullYear() === now.getFullYear() &&
+                                d.getMonth() === now.getMonth() &&
+                                d.getDate() === now.getDate() &&
+                                d.getHours() === now.getHours();
+                break;
               case "day":
                 d.setDate(d.getDate() + offset);
+                // 比较日期部分
+                isLimitReached = this.isSameDay(d, now);
                 break;
               case "month":
+                // 先设置为当月第一天，避免跨月时的日期溢出问题
+                d.setDate(1);
                 d.setMonth(d.getMonth() + offset);
+                // 处理跨月调整后的日期有效性（如1月31日→2月28/29日）
+                const maxDays = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+                d.setDate(Math.min(originalDate, maxDays));
+                isLimitReached = d.getFullYear() === now.getFullYear() && 
+                                d.getMonth() === now.getMonth();
                 break;
               case "year":
-                d.setFullYear(d.getFullYear() + offset);
+                const targetYear = d.getFullYear() + offset;
+                d.setFullYear(targetYear);
+                // 处理闰年2月29日的情况
+                if (originalMonth === 1 && originalDate === 29) {
+                    const isLeapYear = (year) => (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+                    if (!isLeapYear(targetYear)) {
+                        d.setMonth(1); // February
+                        d.setDate(28);
+                    }
+                }
+                isLimitReached = d.getFullYear() === now.getFullYear();
                 break;
             }
+            this.showNextButton = !isLimitReached;
             this.currentRange = d;
-            if (this.fiveminuteMode) {
-              this.updateChart(1);
-            } else {
-              this.updateChart(0);
+            this.updateChart();
+          },
+          //比较两个日期是否是同一天
+          isSameDay(date1, date2) {
+              return date1.getFullYear() === date2.getFullYear() &&
+                    date1.getMonth() === date2.getMonth() &&
+                    date1.getDate() === date2.getDate();
+          },
+          handleShowInterfaceData(){
+            if(this.interfacesDataMode){
+              this.interfacesDataMode = false;
+              this.updateChart();
+            }else{
+              this.interfacesDataMode = true
+              this.handleInterfacesData()
             }
           },
-          handleShowFiveMinutesData() {
-            if (this.fiveminuteMode) {
-              this.fiveminuteMode = false;
-              this.updateChart(0);
+          sortTable(key) {
+            if (this.sortKey === key) {
+              this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc'
             } else {
-              this.fiveminuteMode = true;
-              this.updateChart(1);
+              this.sortKey = key
+              this.sortOrder = 'desc'
             }
           },
-          getMergedSeriesData(isFiveMinute = false) {
-            const dataType = isFiveMinute
-              ? { day: "hour", month: "day", year: "month" }[this.timeRangeType]
-              : { day: "hour", month: "day", year: "month" }[
-                  this.timeRangeType
-                ];
-            const dataPath = isFiveMinute ? "fiveminute" : dataType;
-
+          sortIcon(key) {
+            if (this.sortKey !== key) return 'fa-sort'
+            return this.sortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down'
+          },
+          handleInterfacesData(){
+            this.interfacesTableData = this.interfaces.map(item=>{
+              const todayData = this.getDayData(item)
+              return {
+                name: item.name,
+                todayRx: todayData.rx,
+                todayTx: todayData.tx,
+                todayTotal: todayData.rx + todayData.tx,
+                totalRx: item.traffic.total.rx,
+                totalTx: item.traffic.total.tx,
+                totalTotal: item.traffic.total.rx + item.traffic.total.tx
+              }
+            })
+          },
+          getMergedSeriesData() {
+            const dataType = { 
+                                hour: "fiveminute",
+                                day: "hour", 
+                                month: "day",
+                                year: "month"
+                              }[this.timeRangeType]
             let totalRx = 0,
               totalTx = 0;
-            const rawData = this.selectedInterface.traffic[dataPath];
+            const rawData = this.selectedInterface.traffic[dataType];
+            const currentDate = new Date(this.currentRange);
+            const rangeYear = currentDate.getFullYear()
+            const rangeMonth = currentDate.getMonth()+1
+            const rangeDay = currentDate.getDate()
+            const rangeHour = currentDate.getHours();
             this.filteredData = rawData.filter((item) => {
-              const itemDate = new Date(this.getBeijingTime(item.timestamp));
-              const currentDate = new Date(this.currentRange);
               let match = false;
               switch (this.timeRangeType) {
+                case "hour":
+                  var itemYear = item.date.year;
+                  var itemMonth = item.date.month;
+                  var itemDay = item.date.day;
+                  var itemHour = item.time ? item.time.hour : 0;
+                  match = 
+                    itemYear === rangeYear &&
+                    itemMonth === rangeMonth &&
+                    itemDay === rangeDay &&
+                    itemHour === rangeHour;
+                  break;
                 case "day":
+                  var itemYear = item.date.year
+                  var itemMonth = item.date.month
+                  var itemDay = item.date.day
                   match =
-                    itemDate.getUTCFullYear() === currentDate.getFullYear() &&
-                    itemDate.getUTCMonth() === currentDate.getMonth() &&
-                    itemDate.getUTCDate() === currentDate.getDate();
+                    itemYear === rangeYear &&
+                    itemMonth === rangeMonth &&
+                    itemDay ===rangeDay;
                   break;
                 case "month":
-                  match = itemDate.getUTCMonth() === currentDate.getMonth();
+                  var itemYear = item.date.year
+                  var itemMonth = item.date.month
+                  var itemDay = item.date.day
+                  match = itemYear === rangeYear && itemMonth === rangeMonth;
                   break;
                 case "year":
-                  match =
-                    itemDate.getUTCFullYear() === currentDate.getFullYear();
+                  var itemYear = item.date.year
+                  match = itemYear === rangeYear
                   break;
               }
               if (match) {
@@ -693,8 +877,8 @@
               total: totalRx + totalTx,
             };
             this.tableData = this.filteredData;
-            const getXValue = (timestamp) =>
-              this.getXValue(timestamp, dataType, isFiveMinute);
+            const getXValue = (date,time) =>
+              this.getXValue(date, time, dataType);
             return [
               this.generateSeries("上行", "tx", "#E0C3A1", getXValue),
               this.generateSeries("下行", "rx", "#E37563", getXValue),
@@ -704,42 +888,37 @@
             return {
               name,
               data: this.filteredData.map((d) => ({
-                x: getX(d.timestamp),
+                x: getX(d.date,d.time),
                 y: d[field] / (1024 * 1024), // 统一单位转换
               })),
               color,
             };
           },
-          getXValue(timestamp, dataKey, isFiveMinute = false) {
-            const beijingDate = this.getBeijingTime(timestamp);
-            const month = (beijingDate.getUTCMonth() + 1)
-              .toString()
-              .padStart(2, "0");
-            const day = beijingDate.getUTCDate().toString().padStart(2, "0");
-            const hours = beijingDate.getUTCHours().toString().padStart(2, "0");
-            const minutes = beijingDate
-              .getUTCMinutes()
-              .toString()
-              .padStart(2, "0");
-            if (isFiveMinute) {
-              return `${beijingDate.getUTCFullYear()}-${month}-${day} ${hours}:${minutes}`;
-            } else {
-              switch (dataKey) {
-                case "hour":
-                  return `${month}-${day} ${hours}时`; // 格式：03-06 12时
-                case "day":
-                  return `${month}-${day}`; // 格式：03-06
-                case "month":
-                  return `${beijingDate.getUTCFullYear()}-${month}`; // 格式：2025-03
-                default:
-                  return beijingDate.toISOString();
-              }
+          getXValue(date, time, dataKey) {
+            const itemYear = date.year
+            const itemMonth = String(date.month).padStart(2, "0");
+            const itemDay = String(date.day).padStart(2, "0");
+            var itemHour = ''
+            var itemMinute = ''
+            if(time){
+              itemHour = String(time.hour).padStart(2, "0");
+              itemMinute = String(time.minute).padStart(2, "0");
+            }
+            switch (dataKey) {
+              case "fiveminute":
+                return `${itemYear}-${itemMonth}-${itemDay} ${itemHour}:${itemMinute}`;
+              case "hour":
+                return `${itemYear}-${itemMonth}-${itemDay} ${itemHour}时`;
+              case "day":
+                return `${itemYear}-${itemMonth}-${itemDay}`;
+              case "month":
+                return `${itemYear}-${itemMonth}`;
             }
           },
-          updateChart(type) {
+          updateChart() {
             const options = {
               chart: { type: "area", height: 400 },
-              series: this.getMergedSeriesData(type === 1),
+              series: this.getMergedSeriesData(),
               fill: {
                 type: "solid",
               },
@@ -764,13 +943,16 @@
                   formatter: function (value) {
                     return value % 1 === 0
                       ? value.toFixed(0) // 整数显示
-                      : value.toFixed(2); // 小数保留两位（可选）
+                      : value.toFixed(2); // 小数保留两位
                   },
                 },
               },
               tooltip: {
                 y: {
-                  formatter: (value) => value.toFixed(2) + " MB",
+                  formatter: (value) => {
+                    const formatResult = this.formatFromMB(value)
+                    return formatResult.value+formatResult.unit
+                  }
                 },
               },
             };
@@ -784,32 +966,22 @@
               this.chart.render();
             }
           },
-          getformatTableTime(timestamp) {
-            const beijingDate = this.getBeijingTime(timestamp);
-            // 获取调整后的时间组件
-            const month = (beijingDate.getUTCMonth() + 1)
-              .toString()
-              .padStart(2, "0");
-            const day = beijingDate.getUTCDate().toString().padStart(2, "0");
-            const hours = beijingDate.getUTCHours().toString().padStart(2, "0");
-            if (this.fiveminuteMode) {
-              const minutes = beijingDate
-                .getUTCMinutes()
-                .toString()
-                .padStart(2, "0");
-              return `${beijingDate.getUTCFullYear()}-${month}-${day} ${hours}:${minutes}`;
-            } else {
-              switch (this.timeRangeType) {
-                case "day":
-                  return `${beijingDate.getUTCFullYear()}-${month}-${day} ${hours}:00`; // 格式：03-06 12时
-                case "month":
-                  return `${beijingDate.getUTCFullYear()}-${month}-${day}`; // 格式：03-06
-                case "year":
-                  return `${beijingDate.getUTCFullYear()}-${month}`; // 格式：2025-03
-                default:
-                  return beijingDate.toISOString();
-              }
+          formatFromMB(mb) {
+            const units = ['MB', 'GB', 'TB'];
+            let value = Number(mb);
+            let i = 0;
+            while (value >= 1024 && i < units.length - 1) {
+              value /= 1024;
+              i++;
             }
+            return {
+              value: value.toFixed(2),
+              unit: units[i]
+            };
+          },
+          getformatTableTime(date,time) {
+            const dataType = { hour: "fiveminute",day: "hour", month: "day", year: "month" }[this.timeRangeType]
+            return this.getXValue(date,time,dataType)
           },
           getXAxisTitle() {
             return {
@@ -842,10 +1014,16 @@
           const response = await fetch(this.vnStatApi);
           this.rawData = await response.json();
           this.interfaces = this.rawData.interfaces;
-          this.selectedInterface = this.interfaces[0];
+          if(this.interfaces.length>0){
+              const defaultInterface = this.interfaces.find(
+              intf => intf.name === this.defaultInterface
+            );
+            this.selectedInterface = defaultInterface || this.interfaces[0];
+          }
           await this.$nextTick();
         },
       });
+          
     </script>
   </body>
 </html>

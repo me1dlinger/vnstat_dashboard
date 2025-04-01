@@ -1,6 +1,6 @@
 # vnstat_dashboard
 
-基于vnStat的实时流量监控面板，提供图表展示
+基于vnStat Api的实时流量监控面板，提供图表展示
 
 ## 🙏 致谢
 
