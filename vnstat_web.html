@@ -233,7 +233,7 @@
       .view-switcher {
         position: relative;
         margin-bottom: 1rem;
-        margin-top:-40px
+        margin-top: -40px;
       }
 
       .switch-container {
@@ -340,7 +340,8 @@
             <div class="stat-value">
               {{ formatBytes(currentInterface.traffic.total.rx).value }}
               <span class="stat-unit"
-                >{{ formatBytes(currentInterface.traffic.total.rx).unit }}</span>
+                >{{ formatBytes(currentInterface.traffic.total.rx).unit }}</span
+              >
             </div>
           </div>
           <div class="stat-row">
@@ -348,7 +349,8 @@
             <div class="stat-value">
               {{ formatBytes(currentInterface.traffic.total.tx).value }}
               <span class="stat-unit"
-                >{{ formatBytes(currentInterface.traffic.total.tx).unit }}</span>
+                >{{ formatBytes(currentInterface.traffic.total.tx).unit }}</span
+              >
             </div>
           </div>
           <div class="stat-label">总计</div>
@@ -399,7 +401,10 @@
             <i class="fas fa-chevron-left"></i>
           </button>
           <span class="date-range">{{ dateRange }}</span>
-          <button :style="{ visibility: showNextButton ? 'visible' : 'hidden' }" @click="adjustTime(1)" >
+          <button
+            :style="{ visibility: showNextButton ? 'visible' : 'hidden' }"
+            @click="adjustTime(1)"
+          >
             <i class="fas fa-chevron-right"></i>
           </button>
         </div>
@@ -425,12 +430,9 @@
               {{ iface.name }}
             </option>
           </select>
-          <button
-          title="按网卡统计"
-          @click="handleShowInterfaceData()"
-        >
-          <i class="fas fa-network-wired"></i>
-        </button>
+          <button title="按网卡统计" @click="handleShowInterfaceData()">
+            <i class="fas fa-network-wired"></i>
+          </button>
         </div>
       </div>
       <div v-show="!interfacesDataMode">
@@ -501,8 +503,8 @@
                     {{ formatBytes(item.rx).value +formatBytes(item.rx).unit}}
                   </td>
                   <td>
-                    {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx +
-                    item.rx).unit }}
+                    {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx
+                    + item.rx).unit }}
                   </td>
                 </tr>
               </tbody>
@@ -510,7 +512,7 @@
           </div>
         </div>
       </div>
-        <!-- 网卡统计表格 -->
+      <!-- 网卡统计表格 -->
       <div v-show="interfacesDataMode" class="data-table">
         <table>
           <thead>
@@ -548,12 +550,30 @@
           <tbody>
             <tr v-for="item in sortedInterfaces" :key="item.name">
               <td>{{ item.name }}</td>
-              <td>{{ formatBytes(item.todayRx).value }}{{ formatBytes(item.todayRx).unit }}</td>
-              <td>{{ formatBytes(item.todayTx).value }}{{ formatBytes(item.todayTx).unit }}</td>
-              <td>{{ formatBytes(item.todayTotal).value }}{{ formatBytes(item.todayTotal).unit }}</td>
-              <td>{{ formatBytes(item.totalRx).value }}{{ formatBytes(item.totalRx).unit }}</td>
-              <td>{{ formatBytes(item.totalTx).value }}{{ formatBytes(item.totalTx).unit }}</td>
-              <td>{{ formatBytes(item.totalTotal).value }}{{ formatBytes(item.totalTotal).unit }}</td>
+              <td>
+                {{ formatBytes(item.todayRx).value }}{{
+                formatBytes(item.todayRx).unit }}
+              </td>
+              <td>
+                {{ formatBytes(item.todayTx).value }}{{
+                formatBytes(item.todayTx).unit }}
+              </td>
+              <td>
+                {{ formatBytes(item.todayTotal).value }}{{
+                formatBytes(item.todayTotal).unit }}
+              </td>
+              <td>
+                {{ formatBytes(item.totalRx).value }}{{
+                formatBytes(item.totalRx).unit }}
+              </td>
+              <td>
+                {{ formatBytes(item.totalTx).value }}{{
+                formatBytes(item.totalTx).unit }}
+              </td>
+              <td>
+                {{ formatBytes(item.totalTotal).value }}{{
+                formatBytes(item.totalTotal).unit }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -572,14 +592,14 @@
           currentStats: {},
           currentView: "chart",
           filteredData: [],
-          interfacesDataMode:false,
-          showNextButton:false,
-          sortKey: 'name',
-          sortOrder: 'asc', // 'asc'或'desc'
+          interfacesDataMode: false,
+          showNextButton: false,
+          sortKey: "name",
+          sortOrder: "asc", // 'asc'或'desc'
           interfacesTableData: [],
           tableData: [],
           vnStatApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
-          defaultInterface:'enp3s0'
+          defaultInterface: "enp3s0",
         },
         computed: {
           uploadGB() {
@@ -605,28 +625,34 @@
           },
           summaryData() {
             return {
-              本月: this.getMonthData(this.selectedInterface || this.interfaces[0]),
-              今日: this.getDayData(this.selectedInterface || this.interfaces[0]),
-              昨日: this.getYesterdayData(this.selectedInterface || this.interfaces[0]),
+              本月: this.getMonthData(
+                this.selectedInterface || this.interfaces[0]
+              ),
+              今日: this.getDayData(
+                this.selectedInterface || this.interfaces[0]
+              ),
+              昨日: this.getYesterdayData(
+                this.selectedInterface || this.interfaces[0]
+              ),
             };
           },
           sortedInterfaces() {
             return [...this.interfacesTableData].sort((a, b) => {
-              let modifier = -1
-              if (this.sortOrder === 'asc') modifier = 1
-              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier
-              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier
-              return 0
-            })
+              let modifier = -1;
+              if (this.sortOrder === "asc") modifier = 1;
+              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+              return 0;
+            });
           },
-          sortedTableData(){
+          sortedTableData() {
             return [...this.tableData].sort((a, b) => {
-              let modifier = -1
-              if (this.sortOrder === 'asc') modifier = 1
-              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier
-              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier
-              return 0
-            })
+              let modifier = -1;
+              if (this.sortOrder === "asc") modifier = 1;
+              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+              return 0;
+            });
           },
           dateRange() {
             const d = new Date(this.currentRange);
@@ -647,7 +673,11 @@
                 hourStart.setMinutes(0, 0, 0);
                 const hourEnd = new Date(hourStart);
                 hourEnd.setHours(hourStart.getHours() + 1);
-                return `${format(hourStart, true, true)} - ${format(hourEnd, true, true)}`;
+                return `${format(hourStart, true, true)} - ${format(
+                  hourEnd,
+                  true,
+                  true
+                )}`;
               case "day":
                 const day = new Date(d);
                 return `${format(day)}`;
@@ -663,8 +693,7 @@
         watch: {
           timeRangeType() {
             this.showNextButton = false;
-            this.currentRange = new Date(),
-            this.updateChart();
+            (this.currentRange = new Date()), this.updateChart();
           },
           currentDate() {
             this.updateChart();
@@ -692,23 +721,24 @@
             return this.formatBytes(total);
           },
           getMonthData(interface) {
-            const year = new Date().getFullYear()
-            const month = new Date().getMonth() + 1
+            const year = new Date().getFullYear();
+            const month = new Date().getMonth() + 1;
             return (
               interface.traffic.month.find(
-                (d) =>
-                  d.date.year ===year&&d.date.month ===month
+                (d) => d.date.year === year && d.date.month === month
               ) || { rx: 0, tx: 0 }
             );
           },
           getDayData(interface) {
-            const year = new Date().getFullYear()
-            const month = new Date().getMonth() + 1
+            const year = new Date().getFullYear();
+            const month = new Date().getMonth() + 1;
             const day = new Date().getDate();
             return (
               interface.traffic.day.find(
                 (d) =>
-                  d.date.year ===year&&d.date.month ===month&&d.date.day===day
+                  d.date.year === year &&
+                  d.date.month === month &&
+                  d.date.day === day
               ) || { rx: 0, tx: 0 }
             );
           },
@@ -720,9 +750,12 @@
             const month = yesterday.getMonth() + 1;
             const day = yesterday.getDate();
             return (
-                interface.traffic.day.find(
-                    d => d.date.year === year && d.date.month === month && d.date.day === day
-                ) || { rx: 0, tx: 0 }
+              interface.traffic.day.find(
+                (d) =>
+                  d.date.year === year &&
+                  d.date.month === month &&
+                  d.date.day === day
+              ) || { rx: 0, tx: 0 }
             );
           },
           adjustTime(offset) {
@@ -737,10 +770,11 @@
                 // 自动处理跨日/月/年
                 d.setTime(d.getTime() + offset * 60 * 60 * 1000);
                 // 精确比较到小时级别
-                isLimitReached = d.getFullYear() === now.getFullYear() &&
-                                d.getMonth() === now.getMonth() &&
-                                d.getDate() === now.getDate() &&
-                                d.getHours() === now.getHours();
+                isLimitReached =
+                  d.getFullYear() === now.getFullYear() &&
+                  d.getMonth() === now.getMonth() &&
+                  d.getDate() === now.getDate() &&
+                  d.getHours() === now.getHours();
                 break;
               case "day":
                 d.setDate(d.getDate() + offset);
@@ -752,21 +786,27 @@
                 d.setDate(1);
                 d.setMonth(d.getMonth() + offset);
                 // 处理跨月调整后的日期有效性（如1月31日→2月28/29日）
-                const maxDays = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+                const maxDays = new Date(
+                  d.getFullYear(),
+                  d.getMonth() + 1,
+                  0
+                ).getDate();
                 d.setDate(Math.min(originalDate, maxDays));
-                isLimitReached = d.getFullYear() === now.getFullYear() && 
-                                d.getMonth() === now.getMonth();
+                isLimitReached =
+                  d.getFullYear() === now.getFullYear() &&
+                  d.getMonth() === now.getMonth();
                 break;
               case "year":
                 const targetYear = d.getFullYear() + offset;
                 d.setFullYear(targetYear);
                 // 处理闰年2月29日的情况
                 if (originalMonth === 1 && originalDate === 29) {
-                    const isLeapYear = (year) => (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-                    if (!isLeapYear(targetYear)) {
-                        d.setMonth(1); // February
-                        d.setDate(28);
-                    }
+                  const isLeapYear = (year) =>
+                    (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+                  if (!isLeapYear(targetYear)) {
+                    d.setMonth(1); // February
+                    d.setDate(28);
+                  }
                 }
                 isLimitReached = d.getFullYear() === now.getFullYear();
                 break;
@@ -777,34 +817,36 @@
           },
           //比较两个日期是否是同一天
           isSameDay(date1, date2) {
-              return date1.getFullYear() === date2.getFullYear() &&
-                    date1.getMonth() === date2.getMonth() &&
-                    date1.getDate() === date2.getDate();
+            return (
+              date1.getFullYear() === date2.getFullYear() &&
+              date1.getMonth() === date2.getMonth() &&
+              date1.getDate() === date2.getDate()
+            );
           },
-          handleShowInterfaceData(){
-            if(this.interfacesDataMode){
+          handleShowInterfaceData() {
+            if (this.interfacesDataMode) {
               this.interfacesDataMode = false;
               this.updateChart();
-            }else{
-              this.interfacesDataMode = true
-              this.handleInterfacesData()
+            } else {
+              this.interfacesDataMode = true;
+              this.handleInterfacesData();
             }
           },
           sortTable(key) {
             if (this.sortKey === key) {
-              this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc'
+              this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
             } else {
-              this.sortKey = key
-              this.sortOrder = 'desc'
+              this.sortKey = key;
+              this.sortOrder = "desc";
             }
           },
           sortIcon(key) {
-            if (this.sortKey !== key) return 'fa-sort'
-            return this.sortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down'
+            if (this.sortKey !== key) return "fa-sort";
+            return this.sortOrder === "asc" ? "fa-sort-up" : "fa-sort-down";
           },
-          handleInterfacesData(){
-            this.interfacesTableData = this.interfaces.map(item=>{
-              const todayData = this.getDayData(item)
+          handleInterfacesData() {
+            this.interfacesTableData = this.interfaces.map((item) => {
+              const todayData = this.getDayData(item);
               return {
                 name: item.name,
                 todayRx: todayData.rx,
@@ -812,24 +854,24 @@
                 todayTotal: todayData.rx + todayData.tx,
                 totalRx: item.traffic.total.rx,
                 totalTx: item.traffic.total.tx,
-                totalTotal: item.traffic.total.rx + item.traffic.total.tx
-              }
-            })
+                totalTotal: item.traffic.total.rx + item.traffic.total.tx,
+              };
+            });
           },
           getMergedSeriesData() {
-            const dataType = { 
-                                hour: "fiveminute",
-                                day: "hour", 
-                                month: "day",
-                                year: "month"
-                              }[this.timeRangeType]
+            const dataType = {
+              hour: "fiveminute",
+              day: "hour",
+              month: "day",
+              year: "month",
+            }[this.timeRangeType];
             let totalRx = 0,
               totalTx = 0;
             const rawData = this.selectedInterface.traffic[dataType];
             const currentDate = new Date(this.currentRange);
-            const rangeYear = currentDate.getFullYear()
-            const rangeMonth = currentDate.getMonth()+1
-            const rangeDay = currentDate.getDate()
+            const rangeYear = currentDate.getFullYear();
+            const rangeMonth = currentDate.getMonth() + 1;
+            const rangeDay = currentDate.getDate();
             const rangeHour = currentDate.getHours();
             this.filteredData = rawData.filter((item) => {
               let match = false;
@@ -839,30 +881,30 @@
                   var itemMonth = item.date.month;
                   var itemDay = item.date.day;
                   var itemHour = item.time ? item.time.hour : 0;
-                  match = 
+                  match =
                     itemYear === rangeYear &&
                     itemMonth === rangeMonth &&
                     itemDay === rangeDay &&
                     itemHour === rangeHour;
                   break;
                 case "day":
-                  var itemYear = item.date.year
-                  var itemMonth = item.date.month
-                  var itemDay = item.date.day
+                  var itemYear = item.date.year;
+                  var itemMonth = item.date.month;
+                  var itemDay = item.date.day;
                   match =
                     itemYear === rangeYear &&
                     itemMonth === rangeMonth &&
-                    itemDay ===rangeDay;
+                    itemDay === rangeDay;
                   break;
                 case "month":
-                  var itemYear = item.date.year
-                  var itemMonth = item.date.month
-                  var itemDay = item.date.day
+                  var itemYear = item.date.year;
+                  var itemMonth = item.date.month;
+                  var itemDay = item.date.day;
                   match = itemYear === rangeYear && itemMonth === rangeMonth;
                   break;
                 case "year":
-                  var itemYear = item.date.year
-                  match = itemYear === rangeYear
+                  var itemYear = item.date.year;
+                  match = itemYear === rangeYear;
                   break;
               }
               if (match) {
@@ -877,7 +919,7 @@
               total: totalRx + totalTx,
             };
             this.tableData = this.filteredData;
-            const getXValue = (date,time) =>
+            const getXValue = (date, time) =>
               this.getXValue(date, time, dataType);
             return [
               this.generateSeries("上行", "tx", "#E0C3A1", getXValue),
@@ -888,19 +930,19 @@
             return {
               name,
               data: this.filteredData.map((d) => ({
-                x: getX(d.date,d.time),
+                x: getX(d.date, d.time),
                 y: d[field] / (1024 * 1024), // 统一单位转换
               })),
               color,
             };
           },
           getXValue(date, time, dataKey) {
-            const itemYear = date.year
+            const itemYear = date.year;
             const itemMonth = String(date.month).padStart(2, "0");
             const itemDay = String(date.day).padStart(2, "0");
-            var itemHour = ''
-            var itemMinute = ''
-            if(time){
+            var itemHour = "";
+            var itemMinute = "";
+            if (time) {
               itemHour = String(time.hour).padStart(2, "0");
               itemMinute = String(time.minute).padStart(2, "0");
             }
@@ -950,9 +992,9 @@
               tooltip: {
                 y: {
                   formatter: (value) => {
-                    const formatResult = this.formatFromMB(value)
-                    return formatResult.value+formatResult.unit
-                  }
+                    const formatResult = this.formatFromMB(value);
+                    return formatResult.value + formatResult.unit;
+                  },
                 },
               },
             };
@@ -967,7 +1009,7 @@
             }
           },
           formatFromMB(mb) {
-            const units = ['MB', 'GB', 'TB'];
+            const units = ["MB", "GB", "TB"];
             let value = Number(mb);
             let i = 0;
             while (value >= 1024 && i < units.length - 1) {
@@ -976,12 +1018,17 @@
             }
             return {
               value: value.toFixed(2),
-              unit: units[i]
+              unit: units[i],
             };
           },
-          getformatTableTime(date,time) {
-            const dataType = { hour: "fiveminute",day: "hour", month: "day", year: "month" }[this.timeRangeType]
-            return this.getXValue(date,time,dataType)
+          getformatTableTime(date, time) {
+            const dataType = {
+              hour: "fiveminute",
+              day: "hour",
+              month: "day",
+              year: "month",
+            }[this.timeRangeType];
+            return this.getXValue(date, time, dataType);
           },
           getXAxisTitle() {
             return {
@@ -1014,16 +1061,15 @@
           const response = await fetch(this.vnStatApi);
           this.rawData = await response.json();
           this.interfaces = this.rawData.interfaces;
-          if(this.interfaces.length>0){
-              const defaultInterface = this.interfaces.find(
-              intf => intf.name === this.defaultInterface
+          if (this.interfaces.length > 0) {
+            const defaultInterface = this.interfaces.find(
+              (intf) => intf.name === this.defaultInterface
             );
             this.selectedInterface = defaultInterface || this.interfaces[0];
           }
           await this.$nextTick();
         },
       });
-          
     </script>
   </body>
 </html>
