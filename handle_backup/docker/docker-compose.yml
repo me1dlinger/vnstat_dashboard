@@ -8,6 +8,7 @@ services:
     ports:
       - "19328:19328"
     volumes:
+        #填写自己宿主机的路径
       - :path:/data/vnstat_backup/json
     environment:
       - TZ=Asia/Shanghai

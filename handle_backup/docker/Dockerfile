@@ -1,7 +1,6 @@
-# Dockerfile
 FROM debian:12-slim
 
-# 创建并配置阿里云镜像源（Debian 12代号bookworm）
+# 创建并配置阿里云镜像源
 RUN echo "deb http://mirrors.aliyun.com/debian/ bookworm main non-free contrib" > /etc/apt/sources.list && \
   echo "deb http://mirrors.aliyun.com/debian/ bookworm-updates main non-free contrib" >> /etc/apt/sources.list && \
   echo "deb http://mirrors.aliyun.com/debian-security bookworm-security main" >> /etc/apt/sources.list
