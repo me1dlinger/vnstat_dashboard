@@ -13,7 +13,7 @@
 ### API配置要求
 
 ```
-替换vnStatApi为对应vnstat api 一般为host:8685/json.cgi
+替换assistApi为工具容器的接口服务
 ```
 
 
