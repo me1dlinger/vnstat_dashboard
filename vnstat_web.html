@@ -26,7 +26,44 @@
         padding: 20px;
         color: black;
       }
+      /* 添加登录界面样式 */
+      .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f0f2f5;
+      }
 
+      .login-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        width: 400px;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #666;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .error-message {
+        color: #ff4444;
+        margin-top: 1rem;
+      }
       .grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(250px, 1fr));
@@ -322,267 +359,298 @@
 
   <body>
     <div id="app">
-      <!-- 统计卡片 -->
-      <div class="stat-container" v-if="currentInterface">
-        <!-- 总统计 -->
-        <div class="stat-card">
-          <div class="stat-row">
-            <i class="fas fa-tachometer-alt stat-icon"></i>
-            <div class="stat-value">
-              {{ formatSum(currentInterface.traffic.total).value }}
-              <span class="stat-unit"
-                >{{ formatSum(currentInterface.traffic.total).unit }}</span
-              >
+      <!-- 登录界面 -->
+      <div v-if="!isAuthenticated" class="login-container">
+        <div class="login-box">
+          <h2>网络流量统计系统</h2>
+          <form @submit.prevent="handleLogin">
+            <div class="form-group">
+              <label><i class="fas fa-user"></i> 用户名</label>
+              <input type="text" v-model="loginForm.username" required>
             </div>
-          </div>
-          <div class="stat-row">
-            <i class="fas fa-arrow-down stat-icon"></i>
-            <div class="stat-value">
-              {{ formatBytes(currentInterface.traffic.total.rx).value }}
-              <span class="stat-unit"
-                >{{ formatBytes(currentInterface.traffic.total.rx).unit }}</span
-              >
+            <div class="form-group">
+              <label><i class="fas fa-lock"></i> 密码</label>
+              <input type="password" v-model="loginForm.password" required>
             </div>
-          </div>
-          <div class="stat-row">
-            <i class="fas fa-arrow-up stat-icon"></i>
-            <div class="stat-value">
-              {{ formatBytes(currentInterface.traffic.total.tx).value }}
-              <span class="stat-unit"
-                >{{ formatBytes(currentInterface.traffic.total.tx).unit }}</span
-              >
-            </div>
-          </div>
-          <div class="stat-label">总计</div>
-        </div>
-        <div
-          class="stat-card"
-          v-for="(data, title) in summaryData"
-          :key="title"
-        >
-          <div class="stat-row">
-            <i class="fas fa-chart-bar stat-icon"></i>
-            <div class="stat-value">
-              {{ formatSum(data).value }}
-              <span class="stat-unit">{{ formatSum(data).unit }}</span>
-            </div>
-          </div>
-          <div class="stat-row">
-            <i class="fas fa-arrow-down stat-icon"></i>
-            <div class="stat-value">
-              {{ formatBytes(data.rx).value }}
-              <span class="stat-unit">{{ formatBytes(data.rx).unit }}</span>
-            </div>
-          </div>
-          <div class="stat-row">
-            <i class="fas fa-arrow-up stat-icon"></i>
-            <div class="stat-value">
-              {{ formatBytes(data.tx).value }}
-              <span class="stat-unit">{{ formatBytes(data.tx).unit }}</span>
-            </div>
-          </div>
-          <div class="stat-label">{{ title.toUpperCase() }}</div>
+            <button type="submit" :disabled="loggingIn">
+              {{ loggingIn ? '登录中...' : '登录' }}
+            </button>
+            <div v-if="loginError" class="error-message">{{ loginError }}</div>
+          </form>
         </div>
       </div>
-
-      <!-- 修改后的控制条结构 -->
-      <div class="control-bar">
-        <!-- 左侧控件 -->
-        <div class="control-group left" v-show="!interfacesDataMode">
-          <select v-model="timeRangeType">
-            <option value="hour">按时</option>
-            <option value="day">按日</option>
-            <option value="month">按月</option>
-            <option value="year">按年</option>
-          </select>
-        </div>
-        <div class="control-group center" v-show="!interfacesDataMode">
-          <button @click="adjustTime(-1)">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <span class="date-range">{{ dateRange }}</span>
-          <button
-            :style="{ visibility: showNextButton ? 'visible' : 'hidden' }"
-            @click="adjustTime(1)"
+      <div v-else>
+        <!-- 统计卡片 -->
+        <div class="stat-container" v-if="currentInterface">
+          <!-- 总统计 -->
+          <div class="stat-card">
+            <div class="stat-row">
+              <i class="fas fa-tachometer-alt stat-icon"></i>
+              <div class="stat-value">
+                {{ formatSum(currentInterface.traffic.total).value }}
+                <span class="stat-unit"
+                  >{{ formatSum(currentInterface.traffic.total).unit }}</span
+                >
+              </div>
+            </div>
+            <div class="stat-row">
+              <i class="fas fa-arrow-down stat-icon"></i>
+              <div class="stat-value">
+                {{ formatBytes(currentInterface.traffic.total.rx).value }}
+                <span class="stat-unit"
+                  >{{ formatBytes(currentInterface.traffic.total.rx).unit }}</span
+                >
+              </div>
+            </div>
+            <div class="stat-row">
+              <i class="fas fa-arrow-up stat-icon"></i>
+              <div class="stat-value">
+                {{ formatBytes(currentInterface.traffic.total.tx).value }}
+                <span class="stat-unit"
+                  >{{ formatBytes(currentInterface.traffic.total.tx).unit }}</span
+                >
+              </div>
+            </div>
+            <div class="stat-label">总计</div>
+          </div>
+          <div
+            class="stat-card"
+            v-for="(data, title) in summaryData"
+            :key="title"
           >
-            <i class="fas fa-chevron-right"></i>
-          </button>
+            <div class="stat-row">
+              <i class="fas fa-chart-bar stat-icon"></i>
+              <div class="stat-value">
+                {{ formatSum(data).value }}
+                <span class="stat-unit">{{ formatSum(data).unit }}</span>
+              </div>
+            </div>
+            <div class="stat-row">
+              <i class="fas fa-arrow-down stat-icon"></i>
+              <div class="stat-value">
+                {{ formatBytes(data.rx).value }}
+                <span class="stat-unit">{{ formatBytes(data.rx).unit }}</span>
+              </div>
+            </div>
+            <div class="stat-row">
+              <i class="fas fa-arrow-up stat-icon"></i>
+              <div class="stat-value">
+                {{ formatBytes(data.tx).value }}
+                <span class="stat-unit">{{ formatBytes(data.tx).unit }}</span>
+              </div>
+            </div>
+            <div class="stat-label">{{ title.toUpperCase() }}</div>
+          </div>
         </div>
 
-        <!-- 右侧网卡选择 -->
-        <div class="control-group right">
-          <div class="time-display" v-if="selectedInterface">
-            <div class="time-row">
-              <span class="time-label">统计开始：</span>
-              <span class="time-value"
-                >{{ formatTime(selectedInterface.created) }}</span
-              >
-            </div>
-            <div class="time-row">
-              <span class="time-label">最后更新：</span>
-              <span class="time-value"
-                >{{ formatTime(selectedInterface.updated) }}</span
-              >
-            </div>
+        <!-- 修改后的控制条结构 -->
+        <div class="control-bar">
+          <!-- 左侧控件 -->
+          <div class="control-group left" v-show="!interfacesDataMode">
+            <select v-model="timeRangeType">
+              <option value="hour">按时</option>
+              <option value="day">按日</option>
+              <option value="month">按月</option>
+              <option value="year">按年</option>
+            </select>
           </div>
-          <select v-model="selectedInterface" v-show="!interfacesDataMode">
-            <option v-for="iface in interfaces" :value="iface">
-              {{ iface.name }}
-            </option>
-          </select>
-          <button title="按网卡统计" @click="handleShowInterfaceData()">
-            <i class="fas fa-network-wired"></i>
-          </button>
-        </div>
-      </div>
-      <div v-show="!interfacesDataMode">
-        <div class="traffic-summary">
-          <div class="summary-item" title="上行流量">
-            <i class="fas fa-upload text-blue-500"></i>
-            <span>{{ uploadGB }}</span>
-          </div>
-          <div class="summary-item" title="总流量">
-            <i class="fas fa-exchange-alt text-purple-500"></i>
-            <span>{{ totalGB }}</span>
-          </div>
-          <div class="summary-item" title="下行流量">
-            <i class="fas fa-download text-green-500"></i>
-            <span>{{ downloadGB }}</span>
-          </div>
-        </div>
-        <!-- 在图表容器上方添加 -->
-        <div class="view-switcher right">
-          <div class="switch-container">
-            <button
-              @click="currentView = 'chart'"
-              class="view-switch"
-              :class="{active: currentView === 'chart'} "
-              title="图表视图"
-            >
-              <i class="fas fa-chart-line"></i>
+          <div class="control-group center" v-show="!interfacesDataMode">
+            <button @click="adjustTime(-1)">
+              <i class="fas fa-chevron-left"></i>
             </button>
+            <span class="date-range">{{ dateRange }}</span>
             <button
-              @click="currentView = 'table'"
-              class="view-switch"
-              :class="{active: currentView === 'table'}"
-              title="表格视图"
+              :style="{ visibility: showNextButton ? 'visible' : 'hidden' }"
+              @click="adjustTime(1)"
             >
-              <i class="fas fa-table"></i>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- 右侧网卡选择 -->
+          <div class="control-group right">
+            <div class="time-display" v-if="selectedInterface">
+              <div class="time-row">
+                <span class="time-label">统计开始：</span>
+                <span class="time-value"
+                  >{{ formatTime(selectedInterface.created) }}</span
+                >
+              </div>
+              <div class="time-row">
+                <span class="time-label">最后更新：</span>
+                <span class="time-value"
+                  >{{ formatTime(selectedInterface.updated) }}</span
+                >
+              </div>
+            </div>
+            <select v-model="selectedInterface" v-show="!interfacesDataMode">
+              <option v-for="iface in interfaces" :value="iface">
+                {{ iface.name }}
+              </option>
+            </select>
+            <button title="按网卡统计" @click="handleShowInterfaceData()">
+              <i class="fas fa-network-wired"></i>
             </button>
           </div>
         </div>
-        <!-- 图表容器 -->
-        <div class="chart-container">
-          <div v-show="currentView === 'chart'" id="trafficChart"></div>
-          <div v-show="currentView === 'table'" class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th @click="sortTable('timestamp')">
-                    日期/时间
-                    <i class="fas" :class="sortIcon('timestamp')"></i>
-                  </th>
-                  <th @click="sortTable('tx')">
-                    上行
-                    <i class="fas" :class="sortIcon('tx')"></i>
-                  </th>
-                  <th @click="sortTable('rx')">
-                    下行
-                    <i class="fas" :class="sortIcon('rx')"></i>
-                  </th>
-                  <th>总计</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in sortedTableData" :key="item.timestamp">
-                  <td>{{ getformatTableTime(item.date,item.time) }}</td>
-                  <td>
-                    {{ formatBytes(item.tx).value+formatBytes(item.tx).unit }}
-                  </td>
-                  <td>
-                    {{ formatBytes(item.rx).value +formatBytes(item.rx).unit}}
-                  </td>
-                  <td>
-                    {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx
-                    + item.rx).unit }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <div v-show="!interfacesDataMode">
+          <div class="traffic-summary">
+            <div class="summary-item" title="上行流量">
+              <i class="fas fa-upload text-blue-500"></i>
+              <span>{{ uploadGB }}</span>
+            </div>
+            <div class="summary-item" title="总流量">
+              <i class="fas fa-exchange-alt text-purple-500"></i>
+              <span>{{ totalGB }}</span>
+            </div>
+            <div class="summary-item" title="下行流量">
+              <i class="fas fa-download text-green-500"></i>
+              <span>{{ downloadGB }}</span>
+            </div>
+          </div>
+          <!-- 在图表容器上方添加 -->
+          <div class="view-switcher right">
+            <div class="switch-container">
+              <button
+                @click="currentView = 'chart'"
+                class="view-switch"
+                :class="{active: currentView === 'chart'} "
+                title="图表视图"
+              >
+                <i class="fas fa-chart-line"></i>
+              </button>
+              <button
+                @click="currentView = 'table'"
+                class="view-switch"
+                :class="{active: currentView === 'table'}"
+                title="表格视图"
+              >
+                <i class="fas fa-table"></i>
+              </button>
+            </div>
+          </div>
+          <!-- 图表容器 -->
+          <div class="chart-container">
+            <div v-show="currentView === 'chart'" id="trafficChart"></div>
+            <div v-show="currentView === 'table'" class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th @click="sortTable('timestamp')">
+                      日期/时间
+                      <i class="fas" :class="sortIcon('timestamp')"></i>
+                    </th>
+                    <th @click="sortTable('tx')">
+                      上行
+                      <i class="fas" :class="sortIcon('tx')"></i>
+                    </th>
+                    <th @click="sortTable('rx')">
+                      下行
+                      <i class="fas" :class="sortIcon('rx')"></i>
+                    </th>
+                    <th>总计</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in sortedTableData" :key="item.timestamp">
+                    <td>{{ getformatTableTime(item.date,item.time) }}</td>
+                    <td>
+                      {{ formatBytes(item.tx).value+formatBytes(item.tx).unit }}
+                    </td>
+                    <td>
+                      {{ formatBytes(item.rx).value +formatBytes(item.rx).unit}}
+                    </td>
+                    <td>
+                      {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx
+                      + item.rx).unit }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+        <!-- 网卡统计表格 -->
+        <div v-show="interfacesDataMode" class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th @click="sortTable('name')">
+                  网卡名称
+                  <i class="fas" :class="sortIcon('name')"></i>
+                </th>
+                <th @click="sortTable('todayRx')">
+                  今日下行
+                  <i class="fas" :class="sortIcon('todayRx')"></i>
+                </th>
+                <th @click="sortTable('todayTx')">
+                  今日上行
+                  <i class="fas" :class="sortIcon('todayTx')"></i>
+                </th>
+                <th @click="sortTable('todayTotal')">
+                  今日总计
+                  <i class="fas" :class="sortIcon('todayTotal')"></i>
+                </th>
+                <th @click="sortTable('totalRx')">
+                  全部下行
+                  <i class="fas" :class="sortIcon('totalRx')"></i>
+                </th>
+                <th @click="sortTable('totalTx')">
+                  全部上行
+                  <i class="fas" :class="sortIcon('totalTx')"></i>
+                </th>
+                <th @click="sortTable('totalTotal')">
+                  全部总计
+                  <i class="fas" :class="sortIcon('totalTotal')"></i>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in sortedInterfaces" :key="item.name">
+                <td>{{ item.name }}</td>
+                <td>
+                  {{ formatBytes(item.todayRx).value }}{{
+                  formatBytes(item.todayRx).unit }}
+                </td>
+                <td>
+                  {{ formatBytes(item.todayTx).value }}{{
+                  formatBytes(item.todayTx).unit }}
+                </td>
+                <td>
+                  {{ formatBytes(item.todayTotal).value }}{{
+                  formatBytes(item.todayTotal).unit }}
+                </td>
+                <td>
+                  {{ formatBytes(item.totalRx).value }}{{
+                  formatBytes(item.totalRx).unit }}
+                </td>
+                <td>
+                  {{ formatBytes(item.totalTx).value }}{{
+                  formatBytes(item.totalTx).unit }}
+                </td>
+                <td>
+                  {{ formatBytes(item.totalTotal).value }}{{
+                  formatBytes(item.totalTotal).unit }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <!-- 网卡统计表格 -->
-      <div v-show="interfacesDataMode" class="data-table">
-        <table>
-          <thead>
-            <tr>
-              <th @click="sortTable('name')">
-                网卡名称
-                <i class="fas" :class="sortIcon('name')"></i>
-              </th>
-              <th @click="sortTable('todayRx')">
-                今日下行
-                <i class="fas" :class="sortIcon('todayRx')"></i>
-              </th>
-              <th @click="sortTable('todayTx')">
-                今日上行
-                <i class="fas" :class="sortIcon('todayTx')"></i>
-              </th>
-              <th @click="sortTable('todayTotal')">
-                今日总计
-                <i class="fas" :class="sortIcon('todayTotal')"></i>
-              </th>
-              <th @click="sortTable('totalRx')">
-                全部下行
-                <i class="fas" :class="sortIcon('totalRx')"></i>
-              </th>
-              <th @click="sortTable('totalTx')">
-                全部上行
-                <i class="fas" :class="sortIcon('totalTx')"></i>
-              </th>
-              <th @click="sortTable('totalTotal')">
-                全部总计
-                <i class="fas" :class="sortIcon('totalTotal')"></i>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in sortedInterfaces" :key="item.name">
-              <td>{{ item.name }}</td>
-              <td>
-                {{ formatBytes(item.todayRx).value }}{{
-                formatBytes(item.todayRx).unit }}
-              </td>
-              <td>
-                {{ formatBytes(item.todayTx).value }}{{
-                formatBytes(item.todayTx).unit }}
-              </td>
-              <td>
-                {{ formatBytes(item.todayTotal).value }}{{
-                formatBytes(item.todayTotal).unit }}
-              </td>
-              <td>
-                {{ formatBytes(item.totalRx).value }}{{
-                formatBytes(item.totalRx).unit }}
-              </td>
-              <td>
-                {{ formatBytes(item.totalTx).value }}{{
-                formatBytes(item.totalTx).unit }}
-              </td>
-              <td>
-                {{ formatBytes(item.totalTotal).value }}{{
-                formatBytes(item.totalTotal).unit }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      
     </div>
     <script>
       new Vue({
         el: "#app",
         data: {
+          // 认证相关数据
+          isAuthenticated: true,
+          loginForm: { username: '', password: '' },
+          loggingIn: false,
+          loginError: '',
+          authToken: null,
+          tokenRefreshTimer: null,
+
           rawData: {},
           interfaces: [],
           selectedInterface: null,
@@ -598,7 +666,8 @@
           sortOrder: "asc", // 'asc'或'desc'
           interfacesTableData: [],
           tableData: [],
-          vnStatApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
+          vnStatApi: `${window.location.protocol}//${window.location.host}/assist-vnstat/json.cgi`,
+          assistApi: `${window.location.protocol}//${window.location.host}/assist-vnstat`,
           defaultInterface: "enp3s0",
         },
         computed: {
@@ -703,6 +772,70 @@
           },
         },
         methods: {
+          // 登录逻辑
+          async handleLogin() {
+            this.loggingIn = true;
+            this.loginError = '';
+            try {
+              const response = await fetch(`${this.assistApi}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.loginForm)
+              });
+              if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || '登录失败');
+              }
+
+              const { token } = await response.json();
+              this.handleAuthSuccess(token);
+            } catch (err) {
+              this.loginError = err.message || '登录请求失败';
+            } finally {
+              this.loggingIn = false;
+            }
+          },
+          // 认证成功处理
+          handleAuthSuccess(token) {
+            // 存储Token
+            localStorage.setItem('jwt_token', token);
+            this.authToken = token;
+            this.isAuthenticated = true;
+            // 加载数据
+            this.loadData();
+          },
+          // 注销处理
+          handleLogout() {
+            localStorage.removeItem('jwt_token');
+            this.isAuthenticated = false;
+            this.authToken = null;
+          },
+          async loadData(){
+            const response = await this.fetchWithAuth(this.vnStatApi);
+            console.log("🚀 ~ loadData ~ response:", response)
+            this.rawData = await response.json();
+            this.interfaces = this.rawData.interfaces;
+            if (this.interfaces.length > 0) {
+              const defaultInterface = this.interfaces.find(
+                (intf) => intf.name === this.defaultInterface
+              );
+              this.selectedInterface = defaultInterface || this.interfaces[0];
+            }
+            await this.$nextTick();
+          },
+          async fetchWithAuth(url, options = {}) {
+            const response = await fetch(url, {
+              ...options,
+              headers: {
+                'Authorization': `Bearer ${this.authToken}`,
+                ...options.headers
+              }
+            });
+            if (response.status === 401) {
+              this.handleLogout();
+            }
+            return response;
+          },
           formatBytes(bytes) {
             const units = ["B", "KB", "MB", "GB", "TB"];
             let i = 0;
@@ -1058,16 +1191,18 @@
           },
         },
         async mounted() {
-          const response = await fetch(this.vnStatApi);
-          this.rawData = await response.json();
-          this.interfaces = this.rawData.interfaces;
-          if (this.interfaces.length > 0) {
-            const defaultInterface = this.interfaces.find(
-              (intf) => intf.name === this.defaultInterface
-            );
-            this.selectedInterface = defaultInterface || this.interfaces[0];
+          // 初始化时检查本地Token
+          const storedToken = localStorage.getItem('jwt_token');
+          if (storedToken) {
+              // 验证Token有效性
+              this.authToken = storedToken
+              const response = await this.fetchWithAuth(`${this.assistApi}/auth/verify`)
+              if (response.ok) {
+                this.handleAuthSuccess(storedToken);
+              }
+          }else{
+            this.handleLogout();
           }
-          await this.$nextTick();
         },
       });
     </script>
