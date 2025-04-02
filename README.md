@@ -61,18 +61,6 @@ location ~ ^/assist-vnstat(/.*)$ {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-
-    # 统一CORS配置
-    add_header 'Access-Control-Allow-Origin' $http_origin always;
-    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
-    add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-Requested-With' always;
-    add_header 'Access-Control-Allow-Credentials' 'true' always;
-    add_header 'Access-Control-Max-Age' 1728000 always;
-
-    # 预检请求处理
-    if ($request_method = 'OPTIONS') {
-      return 204;
-    }
 }
 ```
 ## 🧩界面截图
