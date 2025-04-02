@@ -16,32 +16,6 @@
 替换vnStatApi为对应vnstat api 一般为host:8685/json.cgi
 ```
 
-### nginx配置参考
-
-```
-location /traffic/ {
-    alias /var/www/html/;
-    index vnstat_web.html;
-    try_files $uri $uri/ /traffic/vnstat_web.html;
-}
-location /json-vnstat/ {
-    rewrite ^/json-vnstat/(.*) /vnstat/$1 break;
-    proxy_pass $proxy_pass;
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    # CORS 配置
-    add_header 'Access-Control-Allow-Origin' '*' always;
-    add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS' always;
-    add_header 'Access-Control-Allow-Headers' 'Content-Type,Authorization' always;
-    add_header 'Access-Control-Max-Age' 1728000 always;
-    if ($request_method = 'OPTIONS') {
-        return 204;
-    }
-}
-```
 
 ### VNSTAT 历史数据备份
 
@@ -64,6 +38,34 @@ handle_backup ->备份操作文件夹
 
 #### TODO:vnstat api获取不到对应范围的数据时候调用备份数据接口展示
 
+### nginx配置参考
+
+```
+#vnstat可视化页面
+location /traffic/ {
+    alias /var/www/html/;
+    index vnstat_web.html;
+    try_files $uri $uri/ /traffic/vnstat_web.html;
+}
+#vnstat数据备份
+location /json-vnstat/ {
+    rewrite ^/json-vnstat/(.*) /vnstat/$1 break;
+    proxy_pass $proxy_pass;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # CORS 配置
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'Content-Type,Authorization' always;
+    add_header 'Access-Control-Max-Age' 1728000 always;
+    if ($request_method = 'OPTIONS') {
+        return 204;
+    }
+}
+```
 ## 🧩界面截图
 
 ![1](screenshots/1.png)
