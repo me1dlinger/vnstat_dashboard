@@ -666,7 +666,6 @@
           sortOrder: "asc", // 'asc'或'desc'
           interfacesTableData: [],
           tableData: [],
-          vnStatApi: `${window.location.protocol}//${window.location.host}/assist-vnstat/json.cgi`,
           assistApi: `${window.location.protocol}//${window.location.host}/assist-vnstat`,
           defaultInterface: "enp3s0",
         },
@@ -811,7 +810,7 @@
             this.authToken = null;
           },
           async loadData(){
-            const response = await this.fetchWithAuth(this.vnStatApi);
+            const response = await this.fetchWithAuth(this.assistApi+'/json.cgi');
             console.log("🚀 ~ loadData ~ response:", response)
             this.rawData = await response.json();
             this.interfaces = this.rawData.interfaces;
