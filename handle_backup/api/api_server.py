@@ -15,6 +15,7 @@ VALID_USER = {
     "username": "username",
     "password": "password"
 }
+VNSTAT_PROXY_URL = "$host:$port/vnstat/json.cgi"
 
 class JWTManager:
     @staticmethod
@@ -68,10 +69,58 @@ class JWTManager:
             return {"valid": False, "error": str(e)}
 
 class APIHandler(BaseHTTPRequestHandler):
+    def handle_verify(self):
+        """验证Token有效性"""
+        auth_header = self.headers.get('Authorization', '')
+        if not auth_header.startswith('Bearer '):
+            self._send_response(401, {"valid": False, "error": "Missing token"})
+            return
+        token = auth_header.split(' ')[1]
+        verification = JWTManager.verify_token(token)
+        
+        if verification["valid"]:
+            self._send_response(200, {"valid": True, "user": verification["payload"]["sub"]})
+        else:
+            self._send_response(401, verification)
+    def _proxy_vnstat_json(self):
+        """代理请求到vnstat的json.cgi接口"""
+        try:
+            # 验证Token
+            auth_header = self.headers.get('Authorization', '')
+            if not auth_header.startswith('Bearer '):
+                self._send_response(401, {"error": "Missing authorization token"})
+                return
+
+            token = auth_header.split(' ')[1]
+            verification = JWTManager.verify_token(token)
+
+            if not verification["valid"]:
+                self._send_response(401, {"error": verification["error"]})
+                return
+            # 发起代理请求
+            req = urllib.request.Request(VNSTAT_PROXY_URL)
+            with urllib.request.urlopen(req) as response:
+                data = response.read().decode('utf-8')
+                json_data = json.loads(data)
+                self._send_response(200, json_data)
+
+        except urllib.error.URLError as e:
+            self._send_response(502, {"error": f"Failed to proxy request: {str(e)}"})
+        except json.JSONDecodeError:
+            self._send_response(502, {"error": "Invalid JSON response from upstream"})
+        except Exception as e:
+            self._send_response(500, {"error": str(e)})
+    def _set_cors_headers(self):
+        """设置CORS头"""
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.send_header('Access-Control-Allow-Credentials', 'true')
     def _send_response(self, status_code, data=None):
         """统一响应处理"""
         self.send_response(status_code)
         self.send_header('Content-type', 'application/json')
+        self._set_cors_headers()
         self.end_headers()
         if data is not None:
             self.wfile.write(json.dumps(data).encode())
@@ -80,7 +129,11 @@ class APIHandler(BaseHTTPRequestHandler):
         """解析请求体"""
         content_length = int(self.headers.get('Content-Length', 0))
         return json.loads(self.rfile.read(content_length)) if content_length else {}
-
+    def do_OPTIONS(self):
+        """处理 OPTIONS 预检请求"""
+        self.send_response(204)  # 直接返回 204
+        self._set_cors_headers()
+        self.end_headers()
     def do_POST(self):
         """处理登录请求"""
         parsed_path = urlparse(self.path)
@@ -100,7 +153,14 @@ class APIHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """处理数据请求"""
         parsed_path = urlparse(self.path)
-        if parsed_path.path.startswith('/backups/'):
+
+        # 验证接口
+        if parsed_path.path == '/auth/verify':
+            return self.handle_verify()
+        # 代理vnstat json接口
+        elif parsed_path.path == '/vnstat-json/':
+            return self._proxy_vnstat_json()
+        elif parsed_path.path.startswith('/backups/'):
             # 验证Token
             auth_header = self.headers.get('Authorization', '')
             if not auth_header.startswith('Bearer '):
