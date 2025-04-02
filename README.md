@@ -24,6 +24,23 @@ location /traffic/ {
     index vnstat_web.html;
     try_files $uri $uri/ /traffic/vnstat_web.html;
 }
+location /json-vnstat/ {
+    rewrite ^/json-vnstat/(.*) /vnstat/$1 break;
+    proxy_pass $proxy_pass;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # CORS 配置
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'Content-Type,Authorization' always;
+    add_header 'Access-Control-Max-Age' 1728000 always;
+    if ($request_method = 'OPTIONS') {
+        return 204;
+    }
+}
 ```
 
 ### VNSTAT 历史数据备份
