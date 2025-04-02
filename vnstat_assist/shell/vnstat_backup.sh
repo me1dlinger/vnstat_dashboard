@@ -35,7 +35,7 @@ if ! api_response=$(curl -sSf "$api_url" 2>/dev/null); then
 fi
 
 # 创建备份目录
-output_dir="/data/vnstat_backup/json"
+output_dir="/data/vnstat-assist/json"
 mkdir -p "$output_dir"
 
 # 批量处理最近N天数据

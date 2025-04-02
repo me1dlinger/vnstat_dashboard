@@ -19,20 +19,20 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
 
 # 创建目录结构
-RUN mkdir -p /data/vnstat_backup/{shell,json,api}
+RUN mkdir -p /data/vnstat-assist/{shell,json,api}
 # 复制脚本和API文件
-COPY shell/vnstat_backup.sh /data/vnstat_backup/shell/
-COPY api/api_server.py /data/vnstat_backup/api/
+COPY shell/vnstat-assist.sh /data/vnstat-assist/shell/
+COPY api/api_server.py /data/vnstat-assist/api/
 
 # 设置定时任务
-RUN chmod +x /data/vnstat_backup/shell/vnstat_backup.sh \
-  && chmod +x  /data/vnstat_backup/api/api_server.py 
+RUN chmod +x /data/vnstat-assist/shell/vnstat-assist.sh \
+  && chmod +x  /data/vnstat-assist/api/api_server.py 
 
 # 配置cron任务
-RUN echo "0 1 * * * root /data/vnstat_backup/shell/vnstat_backup.sh" > /etc/cron.d/vnstat-backup
+RUN echo "0 1 * * * root /data/vnstat-assist/shell/vnstat-assist.sh" > /etc/cron.d/vnstat-backup
 
 
 EXPOSE 19328
 
 # 启动命令
-CMD bash -c "service cron start && cd /data/vnstat_backup/api && python3 api_server.py"
+CMD bash -c "service cron start && cd /data/vnstat-assist/api && python3 api_server.py"

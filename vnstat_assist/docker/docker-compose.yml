@@ -1,13 +1,13 @@
 version: '3'
 services:
-  vnstat-backup:
+  vnstat-assist:
     build: .
-    container_name: vnstat-backup
+    container_name: vnstat-assist
     restart: unless-stopped
     ports:
       - "19328:19328"
     volumes:
         #填写自己宿主机的路径
-      - :path:/data/vnstat_backup/json
+      - :path:/data/vnstat-assist/json
     environment:
       - TZ=Asia/Shanghai
