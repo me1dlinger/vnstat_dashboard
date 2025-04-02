@@ -1,0 +1,10 @@
+{
+  "port": 19328,
+  "json_dir": "/data/vnstat_backup/json",
+  "secret_key": "secret_key",
+  "user": {
+    "username": "username",
+    "password": "password"
+  },
+  "proxy_api": "http://$host:$port/vnstat/json.cgi"
+}

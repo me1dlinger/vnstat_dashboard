@@ -7,15 +7,38 @@ import time
 from hashlib import sha256
 from urllib.parse import urlparse
 import urllib.request
-# 配置信息
-PORT = 19328
-JSON_DIR = "/data/vnstat_backup/json"
-SECRET_KEY = b"secret_key"
-VALID_USER = {
-    "username": "username",
-    "password": "password"
+# 默认配置
+DEFAULT_CONFIG = {
+    "port": 19328,
+    "json_dir": "/data/vnstat_backup/json",
+    "secret_key": "secret_key",
+    "user": {
+        "username": "username",
+        "password": "password"
+    },
+    "proxy_api": "$host:$port/vnstat/json.cgi"
 }
-VNSTAT_PROXY_URL = "$host:$port/vnstat/json.cgi"
+# 读取配置
+def load_config():
+    try:
+        with open('conf.json', 'r') as f:
+            config = json.load(f)
+        final_config = DEFAULT_CONFIG.copy()
+        for key in config:
+            if isinstance(config[key], dict) and key in final_config:
+                final_config[key].update(config[key])
+            else:
+                final_config[key] = config[key]
+        
+        return final_config
+    except (FileNotFoundError, json.JSONDecodeError):
+        return DEFAULT_CONFIG
+CONFIG = load_config()
+PORT = CONFIG['port']
+JSON_DIR = CONFIG['json_dir']
+SECRET_KEY = CONFIG['secret_key'].encode()  # Convert to bytes for HMAC
+VALID_USER = CONFIG['user']
+VNSTAT_PROXY_URL = CONFIG['proxy_api']
 
 class JWTManager:
     @staticmethod
