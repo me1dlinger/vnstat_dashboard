@@ -27,9 +27,9 @@
 文件结构
 
 ```
-handle_backup ->备份操作文件夹
+vnstat-assist ->备份操作文件夹
   -shell
-    -vnstat-assist.sh ->请求接口并保存昨天数据的脚本
+    -vnstat_backup.sh ->请求接口并保存昨天数据的脚本
   -api
     -api_server.py ->python api服务，获取本地文件并响应
   -docker
