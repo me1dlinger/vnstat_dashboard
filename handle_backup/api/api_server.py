@@ -6,7 +6,7 @@ import hmac
 import time
 from hashlib import sha256
 from urllib.parse import urlparse
-
+import urllib.request
 # 配置信息
 PORT = 19328
 JSON_DIR = "/data/vnstat_backup/json"
@@ -158,7 +158,7 @@ class APIHandler(BaseHTTPRequestHandler):
         if parsed_path.path == '/auth/verify':
             return self.handle_verify()
         # 代理vnstat json接口
-        elif parsed_path.path == '/vnstat-json/':
+        elif parsed_path.path == '/json.cgi':
             return self._proxy_vnstat_json()
         elif parsed_path.path.startswith('/backups/'):
             # 验证Token
