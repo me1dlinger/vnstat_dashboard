@@ -47,22 +47,31 @@ location /traffic/ {
     index vnstat_web.html;
     try_files $uri $uri/ /traffic/vnstat_web.html;
 }
-#vnstat数据备份
-location /json-vnstat/ {
-    rewrite ^/json-vnstat/(.*) /vnstat/$1 break;
-    proxy_pass $proxy_pass;
+# 统一API入口
+location ~ ^/assist-vnstat(/.*)$ {
+    # 统一去除前缀
+    rewrite ^/assist-vnstat(/.*)$ $1 break;
+    # 代理到后端
+    proxy_pass host;
     proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # CORS 配置
-    add_header 'Access-Control-Allow-Origin' '*' always;
-    add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS' always;
-    add_header 'Access-Control-Allow-Headers' 'Content-Type,Authorization' always;
+
+    # 统一CORS配置
+    add_header 'Access-Control-Allow-Origin' $http_origin always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-Requested-With' always;
+    add_header 'Access-Control-Allow-Credentials' 'true' always;
     add_header 'Access-Control-Max-Age' 1728000 always;
+
+    # 预检请求处理
     if ($request_method = 'OPTIONS') {
-        return 204;
+      return 204;
     }
 }
 ```
