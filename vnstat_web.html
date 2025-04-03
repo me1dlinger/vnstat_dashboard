@@ -356,18 +356,18 @@
       }
       /* API 设置按钮和弹窗样式 */
       .api-settings-button {
+        font-size: 17px;
         position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #fff;
-        color: #000;
+        top: 30px;
+        right: 25px;
+        background: #ffffff00;
+        color: #E5CCAF;
         border: none;
         border-radius: 4px;
         padding: 8px 15px;
         cursor: pointer;
         z-index: 1000;
       }
-
       .api-settings-modal {
         position: fixed;
         top: 0;
@@ -429,6 +429,19 @@
 
   <body>
     <div id="app">
+      <button class="api-settings-button" @click="showApiSettings">
+        <i class="fas fa-cog"></i>
+      </button>
+      <div class="api-settings-modal" v-if="apiSettingsVisible">
+        <div class="api-settings-content">
+          <h3>API 接口设置</h3>
+          <input type="text" class="api-input" v-model="assistApi" placeholder="请输入API地址">
+          <div class="api-settings-buttons">
+              <button class="cancel-button" @click="cancelApiSettings">取消</button>
+            <button class="save-button" @click="saveApiSettings">保存</button>
+          </div>
+        </div>
+      </div>
       <!-- 登录界面 -->
       <div v-if="!isAuthenticated" class="login-container">
         <div class="login-box">
@@ -450,21 +463,6 @@
         </div>
       </div>
       <div v-else>
-        <!-- API设置按钮 -->
-        <button class="api-settings-button" @click="showApiSettings">
-          <i class="fas fa-cog"></i>
-        </button>
-        <!-- API设置弹窗 -->
-        <div class="api-settings-modal" v-if="apiSettingsVisible">
-          <div class="api-settings-content">
-            <h3>API 接口设置</h3>
-            <input type="text" class="api-input" v-model="assistApi" placeholder="请输入API地址">
-            <div class="api-settings-buttons">
-                <button class="cancel-button" @click="cancelApiSettings">取消</button>
-              <button class="save-button" @click="saveApiSettings">保存</button>
-            </div>
-          </div>
-        </div>
         <!-- 统计卡片 -->
         <div class="stat-container" v-if="currentInterface">
           <!-- 总统计 -->
@@ -751,7 +749,7 @@
           sortOrder: "asc",
           interfacesTableData: [],
           tableData: [],
-          assistApi: `${window.location.protocol}//${window.location.host}/assist-vnstat`,
+          assistApi: null,
           defaultInterface: "enp3s0",
           apiSettingsVisible:false,
         },
@@ -859,10 +857,14 @@
         methods: {
           // 登录逻辑
           async handleLogin() {
+            if(!this.assistApi){
+              alert("请先点击右上角设置统一API入口")
+              return
+            }
             this.loggingIn = true;
             this.loginError = '';
             try {
-              const response = await fetch(`${this.assistApi}/auth/login`, {
+              const response = await fetch(this.assistApi + '/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(this.loginForm)
@@ -871,7 +873,6 @@
                 const error = await response.json();
                 throw new Error(error.error || '登录失败');
               }
-
               const { token } = await response.json();
               this.handleAuthSuccess(token);
             } catch (err) {
@@ -896,8 +897,7 @@
             this.authToken = null;
           },
           async loadData(){
-            const response = await this.fetchWithAuth(this.assistApi+'/json.cgi');
-            console.log("🚀 ~ loadData ~ response:", response)
+            const response = await this.fetchWithAuth(this.assistApi +'/json.cgi');
             this.rawData = await response.json();
             this.interfaces = this.rawData.interfaces;
             if (this.interfaces.length > 0) {
@@ -1047,7 +1047,9 @@
           saveApiSettings(){
             localStorage.setItem('assist_api', this.assistApi);
             this.apiSettingsVisible = false;
-            this.loadData()
+            if(this.isAuthenticated){
+              this.loadData();
+            }
           },
           cancelApiSettings(){
             this.apiSettingsVisible = false;
@@ -1294,12 +1296,19 @@
           if(assistApi){
             this.assistApi = assistApi
           }
+          if(!this.assistApi){
+            alert("请先点击右上角设置统一API入口")
+            this.handleLogout();
+            return;
+          }
           if (storedToken) {
               // 验证Token有效性
               this.authToken = storedToken
-              const response = await this.fetchWithAuth(`${this.assistApi}/auth/verify`)
+              const response = await this.fetchWithAuth(this.assistApi + '/auth/verify')
               if (response.ok) {
                 this.handleAuthSuccess(storedToken);
+              } else{
+                this.handleLogout();
               }
           }else{
             this.handleLogout();
