@@ -1045,11 +1045,22 @@
             this.apiSettingsVisible = !this.apiSettingsVisible;
           },
           saveApiSettings(){
+            this.assistApi = this.normalizeUrl(this.assistApi)
             localStorage.setItem('assist_api', this.assistApi);
             this.apiSettingsVisible = false;
             if(this.isAuthenticated){
               this.loadData();
             }
+          },
+          normalizeUrl(url) {
+            const trimmedUrl = url.trim();
+            if (/^\/\//.test(trimmedUrl)) {
+              return `http:${trimmedUrl}`;
+            }
+            if (!/^https?:\/\//i.test(trimmedUrl)) {
+              return `http://${trimmedUrl}`;
+            }
+            return trimmedUrl;
           },
           cancelApiSettings(){
             this.apiSettingsVisible = false;
