@@ -2,6 +2,7 @@
   "port": 19328,
   "json_dir": "/data/vnstat-assist/json",
   "secret_key": "secret_key",
+  "expire_seconds": 3600,
   "user": {
     "username": "username",
     "password": "password"

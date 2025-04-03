@@ -12,6 +12,7 @@ DEFAULT_CONFIG = {
     "port": 19328,
     "json_dir": "/data/vnstat-assist/json",
     "secret_key": "secret_key",
+    "expire_seconds": 3600,
     "user": {
         "username": "username",
         "password": "password"
@@ -39,15 +40,16 @@ JSON_DIR = CONFIG['json_dir']
 SECRET_KEY = CONFIG['secret_key'].encode()  # Convert to bytes for HMAC
 VALID_USER = CONFIG['user']
 VNSTAT_PROXY_URL = CONFIG['proxy_api']
+EXPIRE_SECONDS = CONFIG['expire_seconds']
 
 class JWTManager:
     @staticmethod
-    def generate_token(username, expire_seconds=3600):
+    def generate_token(username):
         """生成JWT Token"""
         header = json.dumps({"alg": "HS256", "typ": "JWT"}).encode()
         payload = json.dumps({
             "sub": username,
-            "exp": int(time.time()) + expire_seconds,
+            "exp": int(time.time()) + EXPIRE_SECONDS,
             "iat": int(time.time())
         }).encode()
         
@@ -165,7 +167,7 @@ class APIHandler(BaseHTTPRequestHandler):
                 data = self._parse_body()
                 if data.get('username') == VALID_USER['username'] and data.get('password') == VALID_USER['password']:
                     token = JWTManager.generate_token(VALID_USER['username'])
-                    self._send_response(200, {"token": token, "expires_in": 3600})
+                    self._send_response(200, {"token": token, "expires_in": EXPIRE_SECONDS})
                 else:
                     self._send_response(401, {"error": "Invalid credentials"})
             except Exception as e:
