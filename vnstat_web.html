@@ -317,11 +317,95 @@
       tr:nth-child(even) {
         background: #f8fafc;
       }
+            /* API 设置按钮和弹窗样式 */
+            .api-settings-button {
+        font-size: 17px;
+        position: fixed;
+        top: 30px;
+        right: 25px;
+        background: #ffffff00;
+        color: #E5CCAF;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 15px;
+        cursor: pointer;
+        z-index: 1000;
+      }
+      .api-settings-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+      }
+
+      .api-settings-content {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        width: 400px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .api-settings-content h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .api-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      .api-settings-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .api-settings-buttons button {
+        padding: 8px 15px;
+        cursor: pointer;
+      }
+
+      .save-button {
+        background: #cd6d27;
+        color: white;
+      }
+
+      .cancel-button {
+        background: #f0f0f0;
+        color: #333;
+      }
     </style>
   </head>
 
   <body>
     <div id="app">
+      <button class="api-settings-button" @click="showApiSettings">
+        <i class="fas fa-cog"></i>
+      </button>
+      <div class="api-settings-modal" v-if="apiSettingsVisible">
+        <div class="api-settings-content">
+          <h3>API 接口设置</h3>
+          <input type="text" class="api-input" v-model="url.vnstatDataApi" placeholder="请输入VNSTAT API地址">
+          <input type="text" class="api-input" v-model="url.vnstatBackupApi" placeholder="请输入VNSTAT 备份API地址">
+          <div class="api-settings-buttons">
+              <button class="cancel-button" @click="cancelApiSettings">取消</button>
+            <button class="save-button" @click="saveApiSettings">保存</button>
+          </div>
+        </div>
+      </div>
       <!-- 统计卡片 -->
       <div class="stat-container" v-if="currentInterface">
         <!-- 总统计 -->
@@ -599,9 +683,10 @@
           interfacesTableData: [],
           tableData: [],
           defaultInterface: "enp3s0",
+          apiSettingsVisible: false,
           url:{
-            getVnStatDataApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
-            getVnstatBackupApi: ''
+            vnstatDataApi: undefined,
+            vnstatBackupApi: undefined
           }
         },
         computed: {
@@ -825,6 +910,30 @@
               date1.getMonth() === date2.getMonth() &&
               date1.getDate() === date2.getDate()
             );
+          },
+          showApiSettings(){
+            this.apiSettingsVisible = !this.apiSettingsVisible;
+          },
+          saveApiSettings(){
+            this.url.vnstatDataApi = this.url.vnstatDataApi?this.normalizeUrl(this.url.vnstatDataApi):undefined
+            this.url.vnstatBackupApi = this.url.vnstatBackupApi?this.normalizeUrl(this.url.vnstatBackupApi):undefined
+            localStorage.setItem('vnstat_data_api', this.url.vnstatDataApi);
+            localStorage.setItem('vnstat_backup_api', this.url.vnstatBackupApi);
+            this.apiSettingsVisible = false;
+            this.loadData()
+          },
+          normalizeUrl(url) {
+            const trimmedUrl = url.trim();
+            if (/^\/\//.test(trimmedUrl)) {
+              return `http:${trimmedUrl}`;
+            }
+            if (!/^https?:\/\//i.test(trimmedUrl)) {
+              return `http://${trimmedUrl}`;
+            }
+            return trimmedUrl;
+          },
+          cancelApiSettings(){
+            this.apiSettingsVisible = false;
           },
           handleShowInterfaceData() {
             if (this.interfacesDataMode) {
@@ -1059,18 +1168,34 @@
             date.setMinutes(date.getMinutes() + date.getTimezoneOffset() + 480); // UTC+8
             return date;
           },
+          async loadData(){
+            const response = await fetch(this.url.vnstatDataApi);
+            this.rawData = await response.json();
+            this.interfaces = this.rawData.interfaces;
+            if (this.interfaces.length > 0) {
+              const defaultInterface = this.interfaces.find(
+                (intf) => intf.name === this.defaultInterface
+              );
+              this.selectedInterface = defaultInterface || this.interfaces[0];
+            }
+            await this.$nextTick();
+          },
         },
         async mounted() {
-          const response = await fetch(this.url.getVnStatDataApi);
-          this.rawData = await response.json();
-          this.interfaces = this.rawData.interfaces;
-          if (this.interfaces.length > 0) {
-            const defaultInterface = this.interfaces.find(
-              (intf) => intf.name === this.defaultInterface
-            );
-            this.selectedInterface = defaultInterface || this.interfaces[0];
+          // 初始化检查缓存api选项
+          const vnstatDataApi = localStorage.getItem('vnstat_data_api');
+          const vnstatBackupApi = localStorage.getItem('vnstat_backup_api');
+          if(vnstatDataApi){
+            this.url.vnstatDataApi = vnstatDataApi
           }
-          await this.$nextTick();
+          if(vnstatBackupApi){
+            this.url.vnstatBackupApi = vnstatBackupApi
+          }
+          if(!this.url.vnstatDataApi){
+            alert("请先点击右上角设置API入口")
+            return;
+          }
+          this.loadData()
         },
       });
     </script>
