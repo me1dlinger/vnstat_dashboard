@@ -354,6 +354,76 @@
       tr:nth-child(even) {
         background: #f8fafc;
       }
+      /* API 设置按钮和弹窗样式 */
+      .api-settings-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #fff;
+        color: #000;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 15px;
+        cursor: pointer;
+        z-index: 1000;
+      }
+
+      .api-settings-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+      }
+
+      .api-settings-content {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        width: 400px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .api-settings-content h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .api-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      .api-settings-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .api-settings-buttons button {
+        padding: 8px 15px;
+        cursor: pointer;
+      }
+
+      .save-button {
+        background: #cd6d27;
+        color: white;
+      }
+
+      .cancel-button {
+        background: #f0f0f0;
+        color: #333;
+      }
     </style>
   </head>
 
@@ -380,6 +450,21 @@
         </div>
       </div>
       <div v-else>
+        <!-- API设置按钮 -->
+        <button class="api-settings-button" @click="showApiSettings">
+          <i class="fas fa-cog"></i>
+        </button>
+        <!-- API设置弹窗 -->
+        <div class="api-settings-modal" v-if="apiSettingsVisible">
+          <div class="api-settings-content">
+            <h3>API 接口设置</h3>
+            <input type="text" class="api-input" v-model="assistApi" placeholder="请输入API地址">
+            <div class="api-settings-buttons">
+                <button class="cancel-button" @click="cancelApiSettings">取消</button>
+              <button class="save-button" @click="saveApiSettings">保存</button>
+            </div>
+          </div>
+        </div>
         <!-- 统计卡片 -->
         <div class="stat-container" v-if="currentInterface">
           <!-- 总统计 -->
@@ -637,7 +722,7 @@
           </table>
         </div>
       </div>
-      
+
     </div>
     <script>
       new Vue({
@@ -663,11 +748,12 @@
           interfacesDataMode: false,
           showNextButton: false,
           sortKey: "name",
-          sortOrder: "asc", // 'asc'或'desc'
+          sortOrder: "asc",
           interfacesTableData: [],
           tableData: [],
           assistApi: `${window.location.protocol}//${window.location.host}/assist-vnstat`,
           defaultInterface: "enp3s0",
+          apiSettingsVisible:false,
         },
         computed: {
           uploadGB() {
@@ -955,6 +1041,17 @@
               date1.getDate() === date2.getDate()
             );
           },
+          showApiSettings(){
+            this.apiSettingsVisible = !this.apiSettingsVisible;
+          },
+          saveApiSettings(){
+            localStorage.setItem('assist_api', this.assistApi);
+            this.apiSettingsVisible = false;
+            this.loadData()
+          },
+          cancelApiSettings(){
+            this.apiSettingsVisible = false;
+          },
           handleShowInterfaceData() {
             if (this.interfacesDataMode) {
               this.interfacesDataMode = false;
@@ -1174,7 +1271,7 @@
             const date = this.getBeijingTime(timeObj.timestamp);
             return `${date.getUTCFullYear()}-${this.pad(
               date.getUTCMonth() + 1
-            )}-${this.pad(date.getUTCDate())} 
+            )}-${this.pad(date.getUTCDate())}
                 ${this.pad(date.getUTCHours())}:${this.pad(
               date.getUTCMinutes()
             )}`;
@@ -1192,6 +1289,11 @@
         async mounted() {
           // 初始化时检查本地Token
           const storedToken = localStorage.getItem('jwt_token');
+          // 初始化检查缓存api选项
+          const assistApi = localStorage.getItem('assist_api');
+          if(assistApi){
+            this.assistApi = assistApi
+          }
           if (storedToken) {
               // 验证Token有效性
               this.authToken = storedToken
