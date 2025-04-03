@@ -8,6 +8,6 @@ services:
       - "19328:19328"
     volumes:
         #填写自己宿主机的路径
-      - :path:/data/vnstat-assist/json
+      - :path:/data/vnstat-assist
     environment:
       - TZ=Asia/Shanghai

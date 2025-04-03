@@ -23,6 +23,7 @@ RUN mkdir -p /data/vnstat-assist/{shell,json,api}
 # 复制脚本和API文件
 COPY shell/vnstat_backup.sh /data/vnstat-assist/shell/
 COPY api/api_server.py /data/vnstat-assist/api/
+COPY api/conf.json /data/vnstat-assist/api/
 
 # 设置定时任务
 RUN chmod +x /data/vnstat-assist/shell/vnstat_backup.sh \

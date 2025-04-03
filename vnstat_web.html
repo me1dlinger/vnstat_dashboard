@@ -733,7 +733,6 @@
           loginError: '',
           authToken: null,
           tokenRefreshTimer: null,
-
           rawData: {},
           interfaces: [],
           selectedInterface: null,
@@ -749,9 +748,10 @@
           sortOrder: "asc",
           interfacesTableData: [],
           tableData: [],
-          assistApi: null,
           defaultInterface: "enp3s0",
           apiSettingsVisible:false,
+          assistApi: null,
+          url: {}
         },
         computed: {
           uploadGB() {
@@ -863,8 +863,9 @@
             }
             this.loggingIn = true;
             this.loginError = '';
+            console.log(this.url.login)
             try {
-              const response = await fetch(this.assistApi + '/auth/login', {
+              const response = await fetch(this.url.login, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(this.loginForm)
@@ -897,7 +898,7 @@
             this.authToken = null;
           },
           async loadData(){
-            const response = await this.fetchWithAuth(this.assistApi +'/json.cgi');
+            const response = await this.fetchWithAuth(this.url.loadJson);
             this.rawData = await response.json();
             this.interfaces = this.rawData.interfaces;
             if (this.interfaces.length > 0) {
@@ -1306,6 +1307,12 @@
           const assistApi = localStorage.getItem('assist_api');
           if(assistApi){
             this.assistApi = assistApi
+            this.url = {
+              login: this.assistApi + '/auth/login',
+              verify: this.assistApi + '/auth/verify',
+              loadJson: this.assistApi + '/json.cgi',
+              backups: this.assistApi + '/backups/',
+            }
           }
           if(!this.assistApi){
             alert("请先点击右上角设置统一API入口")
@@ -1315,7 +1322,7 @@
           if (storedToken) {
               // 验证Token有效性
               this.authToken = storedToken
-              const response = await this.fetchWithAuth(this.assistApi + '/auth/verify')
+              const response = await this.fetchWithAuth(this.url.verify)
               if (response.ok) {
                 this.handleAuthSuccess(storedToken);
               } else{

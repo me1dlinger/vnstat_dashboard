@@ -10,7 +10,7 @@ import urllib.request
 # 默认配置
 DEFAULT_CONFIG = {
     "port": 19328,
-    "json_dir": "/data/vnstat-assist/json",
+    "json_dir": "/data/vnstat-assist/backups",
     "secret_key": "secret_key",
     "expire_seconds": 3600,
     "user": {
