@@ -25,7 +25,7 @@ COPY shell/vnstat_backup.sh /data/vnstat-assist/shell/
 COPY api/api_server.py /data/vnstat-assist/api/
 
 # 设置定时任务
-RUN chmod +x /data/vnstat-assist/shell/vnstat-assist.sh \
+RUN chmod +x /data/vnstat-assist/shell/vnstat_backup.sh \
   && chmod +x  /data/vnstat-assist/api/api_server.py 
 
 # 配置cron任务
