@@ -72,7 +72,7 @@ processed_json=$(jq --arg y_year "$y_year" \
 ' <<< "$api_response")
 
 # 保存结果到文件
-output_file="/data/vnstat_backup/json/vnstat_${yesterday}.json"
+output_file="/data/vnstat_assist/backups/vnstat_${yesterday}.json"
 echo "$processed_json" > "$output_file"
 
 echo "成功保存昨日数据到：$output_file"

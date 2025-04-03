@@ -1,0 +1,5 @@
+{
+  "port": 19328,
+  "json_dir": "/data/vnstat_assist/backups",
+  "proxy_api": "http://$host:$port/vnstat/json.cgi"
+}

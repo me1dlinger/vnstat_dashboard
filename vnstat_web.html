@@ -598,8 +598,11 @@
           sortOrder: "asc", // 'asc'或'desc'
           interfacesTableData: [],
           tableData: [],
-          vnStatApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
           defaultInterface: "enp3s0",
+          url:{
+            getVnStatDataApi: `${window.location.protocol}//${window.location.host}/vnstat/json.cgi`,
+            getVnstatBackupApi: ''
+          }
         },
         computed: {
           uploadGB() {
@@ -1058,7 +1061,7 @@
           },
         },
         async mounted() {
-          const response = await fetch(this.vnStatApi);
+          const response = await fetch(this.url.getVnStatDataApi);
           this.rawData = await response.json();
           this.interfaces = this.rawData.interfaces;
           if (this.interfaces.length > 0) {
