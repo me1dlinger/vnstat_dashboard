@@ -26,11 +26,12 @@
 文件结构
 
 ```
-handle_backup ->备份操作文件夹
+vnstat_assist ->工具文件夹
   -shell 
     -vnstat_backup.sh ->请求接口并保存昨天数据的脚本
   -api 
     -api_server.py ->python api服务，获取本地文件并响应
+    -conf.json ->python服务需要的本地配置
   -docker
     -Dockerfile
     -docker-compose.yml
@@ -56,14 +57,6 @@ location /json-vnstat/ {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # CORS 配置
-    add_header 'Access-Control-Allow-Origin' '*' always;
-    add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS' always;
-    add_header 'Access-Control-Allow-Headers' 'Content-Type,Authorization' always;
-    add_header 'Access-Control-Max-Age' 1728000 always;
-    if ($request_method = 'OPTIONS') {
-        return 204;
-    }
 }
 ```
 ## 🧩界面截图
