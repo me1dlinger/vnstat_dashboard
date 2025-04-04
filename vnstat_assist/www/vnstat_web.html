@@ -763,7 +763,6 @@
           currentStats: {},
           currentView: "chart",
           filteredData: [],
-          filteredTableData: [],
           interfacesDataMode: false,
           showNextButton: false,
           sortKey: "name",
@@ -823,7 +822,7 @@
             });
           },
           sortedTableData() {
-            return [...this.filteredTableData].sort((a, b) => {
+            return [...this.filteredData].sort((a, b) => {
               let modifier = -1;
               if (this.sortOrder === "asc") modifier = 1;
               if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
@@ -1132,7 +1131,7 @@
               }
             );
           },
-          getMergedSeriesData() {
+          async getMergedSeriesData() {
             const dataType = {
               hour: "fiveminute",
               day: "hour",
@@ -1148,15 +1147,14 @@
               (this.timeRangeType === "hour" || this.timeRangeType === "day");
             if (useBackup) {
               const dateStr = this.getDateString(currentDate);
-              this.getBackupData(dateStr).then((backupData) => {
-                if (backupData) {
-                  return this.processBackupData(
-                    currentDate,
-                    backupData,
-                    dataType
-                  );
-                }
-              });
+              const backupData = await this.getBackupData(dateStr);
+              if (backupData) {
+                return this.processBackupData(
+                  currentDate,
+                  backupData,
+                  dataType
+                );
+              }
             }
             //原有处理逻辑
             const latestRawData =
@@ -1230,7 +1228,6 @@
               tx: totalTx,
               total: totalRx + totalTx,
             };
-            this.filteredTableData = this.filteredData;
             const getXValue = (date, time) =>
               this.getXValue(date, time, dataType);
             return [
@@ -1261,19 +1258,23 @@
               const url = `${this.url.backups}${dateStr}`;
               const response = await this.fetchWithAuth(url);
               const data = await response.json();
-              // 插入新数据
-              this.backupCache[dateStr] = data;
-              this.cacheKeys.push(dateStr);
-              // 如果长度超过5，删除最旧的键
-              if (this.cacheKeys.length > 5) {
-                const oldestKey = this.cacheKeys.shift();
-                delete this.backupCache[oldestKey];
+              if (data && !data.error) {
+                // 插入新数据
+                this.backupCache[dateStr] = data;
+                this.cacheKeys.push(dateStr);
+                // 如果长度超过5，删除最旧的键
+                if (this.cacheKeys.length > 5) {
+                  const oldestKey = this.cacheKeys.shift();
+                  delete this.backupCache[oldestKey];
+                }
+                localStorage.setItem(
+                  `backup_data`,
+                  JSON.stringify(this.backupCache)
+                );
+                return data;
+              } else {
+                return null;
               }
-              localStorage.setItem(
-                `backup_data`,
-                JSON.stringify(this.backupCache)
-              );
-              return data;
             } catch (e) {
               console.error("备份数据获取失败:", e);
               return null;
@@ -1285,7 +1286,7 @@
               (item) => item.name === this.latestSelectedInterfaceData.name
             );
             // 筛选逻辑（示例处理小时粒度）
-            const rawData = selectedInterfaceData.traffic[dataType];
+            const rawData = selectedInterfaceData.traffic[dataType] || [];
             return this.processData(currentDate, rawData, dataType);
           },
           generateSeries(name, field, color, getX) {
@@ -1319,10 +1320,12 @@
                 return `${itemYear}-${itemMonth}`;
             }
           },
-          updateChart() {
+          async updateChart() {
+            const seriesData = await this.getMergedSeriesData();
+
             const options = {
               chart: { type: "area", height: 400 },
-              series: this.getMergedSeriesData(),
+              series: seriesData,
               fill: {
                 type: "solid",
               },
