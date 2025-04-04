@@ -39,7 +39,7 @@
         background: white;
         padding: 2rem;
         border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         width: 400px;
       }
 
@@ -361,7 +361,7 @@
         top: 30px;
         right: 25px;
         background: #ffffff00;
-        color: #E5CCAF;
+        color: #e5ccaf;
         border: none;
         border-radius: 4px;
         padding: 8px 15px;
@@ -434,10 +434,27 @@
       </button>
       <div class="api-settings-modal" v-if="apiSettingsVisible">
         <div class="api-settings-content">
-          <h3>API 接口设置</h3>
-          <input type="text" class="api-input" v-model="assistApi" placeholder="请输入API地址">
+          <h3>页面配置</h3>
+          <label class="switch-label">API 接口设置：</label>
+          <input
+            type="text"
+            class="api-input"
+            v-model="assistApi"
+            placeholder="请输入API地址"
+          />
+          <!-- 新增备份数据开关 -->
+          <div>
+            <label>启用备份数据：</label>
+            <label class="switch">
+              <input type="checkbox" v-model="enableBackupData" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
           <div class="api-settings-buttons">
-              <button class="cancel-button" @click="cancelApiSettings">取消</button>
+            <button class="cancel-button" @click="cancelApiSettings">
+              取消
+            </button>
             <button class="save-button" @click="saveApiSettings">保存</button>
           </div>
         </div>
@@ -449,11 +466,11 @@
           <form @submit.prevent="handleLogin">
             <div class="form-group">
               <label><i class="fas fa-user"></i> 用户名</label>
-              <input type="text" v-model="loginForm.username" required>
+              <input type="text" v-model="loginForm.username" required />
             </div>
             <div class="form-group">
               <label><i class="fas fa-lock"></i> 密码</label>
-              <input type="password" v-model="loginForm.password" required>
+              <input type="password" v-model="loginForm.password" required />
             </div>
             <button type="submit" :disabled="loggingIn">
               {{ loggingIn ? '登录中...' : '登录' }}
@@ -481,7 +498,8 @@
               <div class="stat-value">
                 {{ formatBytes(currentInterface.traffic.total.rx).value }}
                 <span class="stat-unit"
-                  >{{ formatBytes(currentInterface.traffic.total.rx).unit }}</span
+                  >{{ formatBytes(currentInterface.traffic.total.rx).unit
+                  }}</span
                 >
               </div>
             </div>
@@ -490,7 +508,8 @@
               <div class="stat-value">
                 {{ formatBytes(currentInterface.traffic.total.tx).value }}
                 <span class="stat-unit"
-                  >{{ formatBytes(currentInterface.traffic.total.tx).unit }}</span
+                  >{{ formatBytes(currentInterface.traffic.total.tx).unit
+                  }}</span
                 >
               </div>
             </div>
@@ -552,22 +571,25 @@
 
           <!-- 右侧网卡选择 -->
           <div class="control-group right">
-            <div class="time-display" v-if="selectedInterface">
+            <div class="time-display" v-if="latestSelectedInterfaceData">
               <div class="time-row">
                 <span class="time-label">统计开始：</span>
                 <span class="time-value"
-                  >{{ formatTime(selectedInterface.created) }}</span
+                  >{{ formatTime(latestSelectedInterfaceData.created) }}</span
                 >
               </div>
               <div class="time-row">
                 <span class="time-label">最后更新：</span>
                 <span class="time-value"
-                  >{{ formatTime(selectedInterface.updated) }}</span
+                  >{{ formatTime(latestSelectedInterfaceData.updated) }}</span
                 >
               </div>
             </div>
-            <select v-model="selectedInterface" v-show="!interfacesDataMode">
-              <option v-for="iface in interfaces" :value="iface">
+            <select
+              v-model="latestSelectedInterfaceData"
+              v-show="!interfacesDataMode"
+            >
+              <option v-for="iface in latestInterfacesData" :value="iface">
                 {{ iface.name }}
               </option>
             </select>
@@ -644,8 +666,8 @@
                       {{ formatBytes(item.rx).value +formatBytes(item.rx).unit}}
                     </td>
                     <td>
-                      {{ formatBytes(item.tx + item.rx).value+formatBytes(item.tx
-                      + item.rx).unit }}
+                      {{ formatBytes(item.tx +
+                      item.rx).value+formatBytes(item.tx + item.rx).unit }}
                     </td>
                   </tr>
                 </tbody>
@@ -720,7 +742,6 @@
           </table>
         </div>
       </div>
-
     </div>
     <script>
       new Vue({
@@ -728,30 +749,36 @@
         data: {
           // 认证相关数据
           isAuthenticated: true,
-          loginForm: { username: '', password: '' },
+          loginForm: { username: "", password: "" },
           loggingIn: false,
-          loginError: '',
+          loginError: "",
           authToken: null,
-          tokenRefreshTimer: null,
-          rawData: {},
-          interfaces: [],
-          selectedInterface: null,
+          latestRawData: {},
+          latestInterfacesTableData: [],
+          latestInterfacesData: [],
+          latestSelectedInterfaceData: null,
           chart: null,
           timeRangeType: "day",
           currentRange: new Date(),
           currentStats: {},
           currentView: "chart",
           filteredData: [],
+          filteredTableData: [],
           interfacesDataMode: false,
           showNextButton: false,
           sortKey: "name",
           sortOrder: "asc",
-          interfacesTableData: [],
-          tableData: [],
           defaultInterface: "enp3s0",
-          apiSettingsVisible:false,
+          apiSettingsVisible: false,
           assistApi: null,
-          url: {}
+          url: {},
+          // 备份数据启用
+          enableBackupData: null,
+          // 内存缓存 {dateStr: data}
+          backupCache: {},
+          //维护键顺序
+          cacheKeys: [],
+          pendingBackups: new Set(),
         },
         computed: {
           uploadGB() {
@@ -773,23 +800,21 @@
             );
           },
           currentInterface() {
-            return this.selectedInterface || this.interfaces[0];
+            return (
+              this.latestSelectedInterfaceData || this.latestInterfacesData[0]
+            );
           },
           summaryData() {
+            const latestInterfacesData =
+              this.latestSelectedInterfaceData || this.latestInterfacesData[0];
             return {
-              本月: this.getMonthData(
-                this.selectedInterface || this.interfaces[0]
-              ),
-              今日: this.getDayData(
-                this.selectedInterface || this.interfaces[0]
-              ),
-              昨日: this.getYesterdayData(
-                this.selectedInterface || this.interfaces[0]
-              ),
+              本月: this.getMonthData(latestInterfacesData),
+              今日: this.getDayData(latestInterfacesData),
+              昨日: this.getYesterdayData(latestInterfacesData),
             };
           },
           sortedInterfaces() {
-            return [...this.interfacesTableData].sort((a, b) => {
+            return [...this.latestInterfacesTableData].sort((a, b) => {
               let modifier = -1;
               if (this.sortOrder === "asc") modifier = 1;
               if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
@@ -798,7 +823,7 @@
             });
           },
           sortedTableData() {
-            return [...this.tableData].sort((a, b) => {
+            return [...this.filteredTableData].sort((a, b) => {
               let modifier = -1;
               if (this.sortOrder === "asc") modifier = 1;
               if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
@@ -850,34 +875,33 @@
           currentDate() {
             this.updateChart();
           },
-          selectedInterface() {
+          latestSelectedInterfaceData() {
             this.updateChart();
           },
         },
         methods: {
           // 登录逻辑
           async handleLogin() {
-            if(!this.assistApi){
-              alert("请先点击右上角设置统一API入口")
-              return
+            if (!this.assistApi) {
+              alert("请先点击右上角设置统一API入口");
+              return;
             }
             this.loggingIn = true;
-            this.loginError = '';
-            console.log(this.url.login)
+            this.loginError = "";
             try {
               const response = await fetch(this.url.login, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(this.loginForm)
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(this.loginForm),
               });
               if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || '登录失败');
+                throw new Error(error.error || "登录失败");
               }
               const { token } = await response.json();
               this.handleAuthSuccess(token);
             } catch (err) {
-              this.loginError = err.message || '登录请求失败';
+              this.loginError = err.message || "登录请求失败";
             } finally {
               this.loggingIn = false;
             }
@@ -885,7 +909,7 @@
           // 认证成功处理
           handleAuthSuccess(token) {
             // 存储Token
-            localStorage.setItem('jwt_token', token);
+            localStorage.setItem("jwt_token", token);
             this.authToken = token;
             this.isAuthenticated = true;
             // 加载数据
@@ -893,19 +917,20 @@
           },
           // 注销处理
           handleLogout() {
-            localStorage.removeItem('jwt_token');
+            localStorage.removeItem("jwt_token");
             this.isAuthenticated = false;
             this.authToken = null;
           },
-          async loadData(){
+          async loadData() {
             const response = await this.fetchWithAuth(this.url.loadJson);
-            this.rawData = await response.json();
-            this.interfaces = this.rawData.interfaces;
-            if (this.interfaces.length > 0) {
-              const defaultInterface = this.interfaces.find(
+            this.latestRawData = await response.json();
+            this.latestInterfacesData = this.latestRawData.interfaces;
+            if (this.latestInterfacesData.length > 0) {
+              const defaultInterface = this.latestInterfacesData.find(
                 (intf) => intf.name === this.defaultInterface
               );
-              this.selectedInterface = defaultInterface || this.interfaces[0];
+              this.latestSelectedInterfaceData =
+                defaultInterface || this.latestInterfacesData[0];
             }
             await this.$nextTick();
           },
@@ -913,9 +938,9 @@
             const response = await fetch(url, {
               ...options,
               headers: {
-                'Authorization': `Bearer ${this.authToken}`,
-                ...options.headers
-              }
+                Authorization: `Bearer ${this.authToken}`,
+                ...options.headers,
+              },
             });
             if (response.status === 401) {
               this.handleLogout();
@@ -1042,14 +1067,18 @@
               date1.getDate() === date2.getDate()
             );
           },
-          showApiSettings(){
+          showApiSettings() {
             this.apiSettingsVisible = !this.apiSettingsVisible;
           },
-          saveApiSettings(){
-            this.assistApi = this.normalizeUrl(this.assistApi)
-            localStorage.setItem('assist_api', this.assistApi);
+          saveApiSettings() {
+            this.assistApi = this.normalizeUrl(this.assistApi);
+            localStorage.setItem("assist_api", this.assistApi);
+            localStorage.setItem("enable_backup", this.enableBackupData);
+            if (!this.enableBackupData) {
+              localStorage.removeItem("backup_data");
+            }
             this.apiSettingsVisible = false;
-            if(this.isAuthenticated){
+            if (this.isAuthenticated) {
               this.loadData();
             }
           },
@@ -1063,7 +1092,7 @@
             }
             return trimmedUrl;
           },
-          cancelApiSettings(){
+          cancelApiSettings() {
             this.apiSettingsVisible = false;
           },
           handleShowInterfaceData() {
@@ -1072,7 +1101,7 @@
               this.updateChart();
             } else {
               this.interfacesDataMode = true;
-              this.handleInterfacesData();
+              this.handleLatestInterfacesData();
             }
           },
           sortTable(key) {
@@ -1087,19 +1116,21 @@
             if (this.sortKey !== key) return "fa-sort";
             return this.sortOrder === "asc" ? "fa-sort-up" : "fa-sort-down";
           },
-          handleInterfacesData() {
-            this.interfacesTableData = this.interfaces.map((item) => {
-              const todayData = this.getDayData(item);
-              return {
-                name: item.name,
-                todayRx: todayData.rx,
-                todayTx: todayData.tx,
-                todayTotal: todayData.rx + todayData.tx,
-                totalRx: item.traffic.total.rx,
-                totalTx: item.traffic.total.tx,
-                totalTotal: item.traffic.total.rx + item.traffic.total.tx,
-              };
-            });
+          handleLatestInterfacesData() {
+            this.latestInterfacesTableData = this.latestInterfacesData.map(
+              (item) => {
+                const todayData = this.getDayData(item);
+                return {
+                  name: item.name,
+                  todayRx: todayData.rx,
+                  todayTx: todayData.tx,
+                  todayTotal: todayData.rx + todayData.tx,
+                  totalRx: item.traffic.total.rx,
+                  totalTx: item.traffic.total.tx,
+                  totalTotal: item.traffic.total.rx + item.traffic.total.tx,
+                };
+              }
+            );
           },
           getMergedSeriesData() {
             const dataType = {
@@ -1108,10 +1139,48 @@
               month: "day",
               year: "month",
             }[this.timeRangeType];
+            const currentDate = new Date(this.currentRange);
+            const isPastDate = this.isPastDate(currentDate);
+            // 判断是否需要使用备份数据
+            let useBackup =
+              this.enableBackupData &&
+              isPastDate &&
+              (this.timeRangeType === "hour" || this.timeRangeType === "day");
+            if (useBackup) {
+              const dateStr = this.getDateString(currentDate);
+              this.getBackupData(dateStr).then((backupData) => {
+                if (backupData) {
+                  return this.processBackupData(
+                    currentDate,
+                    backupData,
+                    dataType
+                  );
+                }
+              });
+            }
+            //原有处理逻辑
+            const latestRawData =
+              this.latestSelectedInterfaceData.traffic[dataType];
+            return this.processData(currentDate, latestRawData, dataType);
+          },
+          //判断是否是过去日期，保险起见昨天之前的数据都从备份中获取
+          isPastDate(date) {
+            const now = new Date();
+            const compareDate = new Date(date);
+            compareDate.setHours(23, 59, 59, 999);
+            return compareDate < now;
+          },
+          //获取日期字符串
+          getDateString(date) {
+            return [
+              date.getFullYear(),
+              String(date.getMonth() + 1).padStart(2, "0"),
+              String(date.getDate()).padStart(2, "0"),
+            ].join("");
+          },
+          processData(currentDate, rawData, dataType) {
             let totalRx = 0,
               totalTx = 0;
-            const rawData = this.selectedInterface.traffic[dataType];
-            const currentDate = new Date(this.currentRange);
             const rangeYear = currentDate.getFullYear();
             const rangeMonth = currentDate.getMonth() + 1;
             const rangeDay = currentDate.getDate();
@@ -1161,13 +1230,63 @@
               tx: totalTx,
               total: totalRx + totalTx,
             };
-            this.tableData = this.filteredData;
+            this.filteredTableData = this.filteredData;
             const getXValue = (date, time) =>
               this.getXValue(date, time, dataType);
             return [
               this.generateSeries("上行", "tx", "#E0C3A1", getXValue),
               this.generateSeries("下行", "rx", "#E37563", getXValue),
             ];
+          },
+          processCurrentData(currentDate, dataType) {},
+          //获取备份数据（带缓存）
+          async getBackupData(dateStr) {
+            // 初始化 backupCache 为 Map（若尚未初始化）
+            if (!(this.backupCache instanceof Map)) {
+              this.backupCache = new Map();
+            }
+            //先检查内存缓存
+            if (this.backupCache[dateStr]) {
+              return this.backupCache[dateStr];
+            }
+            //再检查localStorage
+            const cachedData = localStorage.getItem(`backup_data`);
+            if (cachedData) {
+              this.backupCache = JSON.parse(cachedData);
+              if (this.backupCache[dateStr]) {
+                return this.backupCache[dateStr];
+              }
+            }
+            try {
+              const url = `${this.url.backups}${dateStr}`;
+              const response = await this.fetchWithAuth(url);
+              const data = await response.json();
+              // 插入新数据
+              this.backupCache[dateStr] = data;
+              this.cacheKeys.push(dateStr);
+              // 如果长度超过5，删除最旧的键
+              if (this.cacheKeys.length > 5) {
+                const oldestKey = this.cacheKeys.shift();
+                delete this.backupCache[oldestKey];
+              }
+              localStorage.setItem(
+                `backup_data`,
+                JSON.stringify(this.backupCache)
+              );
+              return data;
+            } catch (e) {
+              console.error("备份数据获取失败:", e);
+              return null;
+            }
+          },
+          //处理备份数据
+          processBackupData(currentDate, backupData, dataType) {
+            const selectedInterfaceData = backupData.interfaces.find(
+              (item) => item.name === this.latestSelectedInterfaceData.name
+            );
+            // 筛选逻辑（示例处理小时粒度）
+            const rawData = selectedInterfaceData.traffic[dataType];
+            return this.processData(currentDate, rawData, dataType);
           },
           generateSeries(name, field, color, getX) {
             return {
@@ -1302,33 +1421,39 @@
         },
         async mounted() {
           // 初始化时检查本地Token
-          const storedToken = localStorage.getItem('jwt_token');
+          const storedToken = localStorage.getItem("jwt_token");
           // 初始化检查缓存api选项
-          const assistApi = localStorage.getItem('assist_api');
-          if(assistApi){
-            this.assistApi = assistApi
-            this.url = {
-              login: this.assistApi + '/auth/login',
-              verify: this.assistApi + '/auth/verify',
-              loadJson: this.assistApi + '/json.cgi',
-              backups: this.assistApi + '/backups/',
-            }
+          const assistApi = localStorage.getItem("assist_api");
+          const savedEnable = localStorage.getItem("enable_backup");
+          this.enableBackupData =
+            savedEnable !== null ? savedEnable === "true" : true;
+          if (!this.enableBackupData) {
+            localStorage.removeItem("backup_data");
           }
-          if(!this.assistApi){
-            alert("请先点击右上角设置统一API入口")
+          if (assistApi) {
+            this.assistApi = assistApi;
+            this.url = {
+              login: this.assistApi + "/auth/login",
+              verify: this.assistApi + "/auth/verify",
+              loadJson: this.assistApi + "/json.cgi",
+              backups: this.assistApi + "/backups/",
+            };
+          }
+          if (!this.assistApi) {
+            alert("请先点击右上角设置统一API入口");
             this.handleLogout();
             return;
           }
           if (storedToken) {
-              // 验证Token有效性
-              this.authToken = storedToken
-              const response = await this.fetchWithAuth(this.url.verify)
-              if (response.ok) {
-                this.handleAuthSuccess(storedToken);
-              } else{
-                this.handleLogout();
-              }
-          }else{
+            // 验证Token有效性
+            this.authToken = storedToken;
+            const response = await this.fetchWithAuth(this.url.verify);
+            if (response.ok) {
+              this.handleAuthSuccess(storedToken);
+            } else {
+              this.handleLogout();
+            }
+          } else {
             this.handleLogout();
           }
         },
