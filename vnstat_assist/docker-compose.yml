@@ -1,13 +1,21 @@
 version: '3'
 services:
-  vnstat-assist:
-    build: .
-    container_name: vnstat-assist
-    restart: unless-stopped
+  vnstat-dashboard:
+    image: vnstat-dashboard:1.0.0
+    container_name: vnstat-dashboard
+    restart: always
     ports:
-      - "19328:19328"
+      - "19329:80"
     volumes:
         #填写自己宿主机的路径
-      - :path:/data/vnstat-assist
+      - :backupsPath:/app/backups
+      - :logPath:/app/log
+      - :shellPath:/app/shell
+      - :nginxConfPath:/etc/nginx/nginx.conf
     environment:
       - TZ=Asia/Shanghai
+      - VNSTAT_API_URL=:VNSTAT_API_URL
+      - VNA_SECRET_KEY=:secret_key
+      - VNA_EXPIRE_SECONDS=3600
+      - VNA_USERNAME=:VNA_USERNAME
+      - VNA_PASSWORD=:VNA_PASSWORD

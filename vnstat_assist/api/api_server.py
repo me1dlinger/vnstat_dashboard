@@ -9,37 +9,40 @@ from urllib.parse import urlparse
 import urllib.request
 # 默认配置
 DEFAULT_CONFIG = {
-    "port": 19328,
-    "json_dir": "/data/vnstat-assist/backups",
     "secret_key": "secret_key",
     "expire_seconds": 3600,
     "user": {
         "username": "username",
         "password": "password"
     },
-    "proxy_api": "$host:$port/vnstat/json.cgi"
+    "vnstat_api": "$host:$port/vnstat/json.cgi"
 }
-# 读取配置
-def load_config():
-    try:
-        with open('conf.json', 'r') as f:
-            config = json.load(f)
-        final_config = DEFAULT_CONFIG.copy()
-        for key in config:
-            if isinstance(config[key], dict) and key in final_config:
-                final_config[key].update(config[key])
-            else:
-                final_config[key] = config[key]
-        
-        return final_config
-    except (FileNotFoundError, json.JSONDecodeError):
-        return DEFAULT_CONFIG
-CONFIG = load_config()
-PORT = CONFIG['port']
-JSON_DIR = CONFIG['json_dir']
+def load_config_from_env():
+    """从环境变量加载配置"""
+    # 基础配置
+    config = {
+        "secret_key": os.environ["VNA_SECRET_KEY"],  # 强制要求
+        "expire_seconds": int(os.getenv("VNA_EXPIRE_SECONDS", "3600")),
+        "user": {
+            "username": os.environ["VNA_USERNAME"],
+            "password": os.environ["VNA_PASSWORD"]
+        },
+        "vnstat_api": os.environ["VNSTAT_API_URL"]
+    }
+    # 验证必要字段
+    required_keys = ["secret_key", "user.username", "user.password", "vnstat_api"]
+    for key in required_keys:
+        if not config.get(key.split('.')[0]):
+            raise ValueError(f"环境变量 {key} 必须配置")
+    return config
+
+PORT = 19328
+JSON_DIR = "/app/backups/json"
+
+CONFIG = load_config_from_env()
 SECRET_KEY = CONFIG['secret_key'].encode()  # Convert to bytes for HMAC
 VALID_USER = CONFIG['user']
-VNSTAT_PROXY_URL = CONFIG['proxy_api']
+VNSTAT_PROXY_URL = CONFIG['vnstat_api']
 EXPIRE_SECONDS = CONFIG['expire_seconds']
 
 class JWTManager:
