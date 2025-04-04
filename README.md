@@ -34,9 +34,10 @@ vnstat-assist ->备份操作文件夹
     -vnstat_backup.sh ->请求接口并保存昨天数据的脚本
   -api
     -api_server.py ->python api服务，获取本地文件并响应
-  -docker
-    -Dockerfile
-    -docker-compose.yml
+  -www
+    -vnstat_web.html -> vnstat面板
+  -Dockerfile
+  -docker-compose.yml
 ```
 
 ### nginx 配置参考
