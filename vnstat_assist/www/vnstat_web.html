@@ -24,11 +24,26 @@
         --accent-color: #3b82f6;
         --main-color: #0f172a;
         --contrast-color: #f8fafc;
+        --accent-rgb: 205, 109, 39;
+        --table-row-even: #f8fafc;
+      }
+      .night-mode {
+        --bg-color: #1a1a1a;
+        --text-color: #e5e5e5;
+        --border-color: #4d4d4d;
+        --accent-rgb: 205, 109, 39;
+        --table-row-even: #2a2a2a;
+        tr:nth-child(even) {
+          background: color-mix(in srgb, var(--table-row-even) 90%, #000);
+        }
       }
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           sans-serif;
         padding: 20px;
+        background: var(--bg-color);
+        color: var(--text-color);
+        transition: all 0.3s ease;
       }
       /* 添加登录界面样式 */
       .login-container {
@@ -159,6 +174,7 @@
         min-width: 220px;
         margin: 0 1%;
         flex-shrink: 0;
+        transition: background 0.3s, border-color 0.3s;
       }
 
       /* 响应式处理 */
@@ -229,7 +245,14 @@
         align-items: center;
         padding: 13px 30px;
       }
-
+      /* 排除需要保持主题色的元素 */
+      .stat-card,
+      .control-bar {
+        /* 保持原有主题变量 */
+        background: var(--main-color) !important;
+        border-color: var(--accent-color) !important;
+        color: var(--contrast-color) !important;
+      }
       .control-group {
         display: flex;
         align-items: center;
@@ -344,60 +367,56 @@
         display: flex;
         gap: 8px;
       }
-
-      /* 移除全局button样式，改为指定类名 */
       .view-switch {
-        background: white !important;
-        color: #333 !important;
-        /* 深色文字 */
-        border: 1px solid #e4e4e7 !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background: var(--bg-color) !important; /* 使用全局背景变量 */
+        color: var(--text-color) !important; /* 使用全局文字颜色 */
         transition: all 0.2s;
       }
-
       .view-switch.active {
         border-color: var(--accent-color) !important;
         color: var(--accent-color) !important;
-        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
       }
-
       .data-table {
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--border-color);
         border-radius: 8px;
         overflow: hidden;
+        background: var(--bg-color);
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
         font-size: 0.9em;
+        color: var(--text-color);
       }
 
       th {
-        background: #f8fafc;
+        background: var(--table-header-bg);
         padding: 12px 16px;
         text-align: left;
         font-weight: 600;
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid var(--border-color);
         cursor: pointer;
         user-select: none;
         transition: background 0.2s;
       }
       th:hover {
-        background: #f1f5f9;
+        background: var(--table-header-hover);
       }
+
       th i {
         margin-left: 8px;
         font-size: 0.8em;
-        color: #64748b;
+        color: var(--table-header-icon);
       }
+
       td {
         padding: 12px 16px;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid var(--border-color);
       }
 
       tr:nth-child(even) {
-        background: #f8fafc;
+        background: var(--table-row-even);
       }
       /* API 设置按钮和弹窗样式 */
       .settings-button {
@@ -418,8 +437,9 @@
         color: var(--accent-color);
         transform: rotate(15deg);
       }
-      .settings-button:nth-last-child(1) { right: 25px; }   /* 设置按钮 */
-      .settings-button:nth-last-child(2) { right: 55px; }  /* 主题按钮 */
+      .settings-button:nth-last-child(1) { right: 25px; }
+      .settings-button:nth-last-child(2) { right: 85px; }
+      .settings-button:nth-last-child(3) { right: 55px; }
       .settings-modal {
         position: fixed;
         top: 0;
@@ -532,6 +552,9 @@
       </button>
       <button class="settings-button" @click="showThemeSettings">
         <i class="fas fa-palette"></i>
+      </button>
+      <button class="settings-button"  @click="toggleNightMode">
+        <i :class="isNightMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
       </button>
       <div class="settings-modal" v-if="themeSettingsVisible">
         <div class="settings-content">
@@ -948,6 +971,7 @@
           currentStats: {},
           currentView: "chart",
           filteredData: [],
+          isNightMode: false,
           interfacesDataMode: false,
           showNextButton: false,
           sortKey: "name",
@@ -1392,6 +1416,20 @@
               '--accent-color': theme.accent,
               'background': `linear-gradient(135deg, ${theme.main} 50%, ${theme.accent} 50%)`
             }
+          },
+          toggleNightMode(arg) {
+            if(arg==1){
+              this.isNightMode = true
+            }else{
+              this.isNightMode = !this.isNightMode
+            }
+            const htmlEl = document.documentElement
+            if (this.isNightMode) {
+              htmlEl.classList.add('night-mode')
+            } else {
+              htmlEl.classList.remove('night-mode')
+            }
+            localStorage.setItem('nightMode', this.isNightMode)
           },
           handleShowInterfaceData() {
             if (this.interfacesDataMode) {
