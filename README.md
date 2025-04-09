@@ -40,35 +40,10 @@ vnstat-assist ->总目录
     -vnstat_web.html -> vnstat面板
   -nginx
     -nginx.conf -> nginx配置，用于接口和页面统一出口
-  -Dockerfile
-  -docker-compose.yml
+  -Dockerfile ->打包配置
+  -docker-compose.yml ->docker构建配置,宿主机要先创建对应目录
 ```
 
-### nginx 配置参考
-
-```
-#vnstat可视化页面
-location /traffic/ {
-    alias /var/www/html/;
-    index vnstat_web.html;
-    try_files $uri $uri/ /traffic/vnstat_web.html;
-}
-# 统一API入口
-location ~ ^/assist-vnstat(/.*)$ {
-    # 统一去除前缀
-    rewrite ^/assist-vnstat(/.*)$ $1 break;
-    # 代理到后端
-    proxy_pass host;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-```
 
 ## 🧩 界面截图
 
