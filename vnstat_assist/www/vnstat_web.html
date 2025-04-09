@@ -575,6 +575,44 @@
         font-size: 0.8rem;
         text-align: center;
       }
+      .msg-container {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+      }
+
+      .message {
+        background: #f4f4f5;
+        color: #606266;
+        padding: 12px 20px;
+        border-radius: 4px;
+        box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+        transition: all 0.3s;
+        opacity: 0;
+        transform: translateY(-20px);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+      }
+
+      .message.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .message::before {
+        content: "🔔";
+        margin-right: 8px;
+      }
+
+      /* 夜间模式适配 */
+      .night-mode .message {
+        background: #2d2d2d;
+        color: #e5e5e5;
+        box-shadow: 0 2px 12px 0 rgba(255,255,255,.1);
+      }
     </style>
   </head>
 
@@ -1462,7 +1500,7 @@
             } else {
               htmlEl.classList.remove('night-mode')
             }
-            localStorage.setItem('nightMode', this.isNightMode)
+            // localStorage.setItem('nightMode', this.isNightMode)
           },
           handleShowInterfaceData() {
             if (this.interfacesDataMode) {
@@ -1809,8 +1847,34 @@
             }
             localStorage.setItem('themeColors', JSON.stringify(this.theme));
           },
+          isLateNight() {
+            const currentHour = new Date().getHours();
+            return currentHour >= 23 || currentHour < 6;
+          },
+          showMessage(msg) {
+            const container = document.querySelector('.msg-container') || this.createContainer();
+            const msgEl = document.createElement('div');
+            msgEl.className = 'message';
+            msgEl.textContent = msg;
+            container.appendChild(msgEl);
+            setTimeout(() => msgEl.classList.add('show'), 10);
+            setTimeout(() => {
+              msgEl.classList.remove('show');
+              setTimeout(() => msgEl.remove(), 300);
+            }, 3000);
+          },
+          createContainer() {
+            const container = document.createElement('div');
+            container.className = 'msg-container';
+            document.body.appendChild(container);
+            return container;
+          }
         },
         async mounted() {
+          if(this.isLateNight()){
+            this.toggleNightMode(1)
+            this.showMessage("夜深了，已切换成夜间模式")
+          }
           this.loadThemeColors()
           // 初始化时检查本地Token
           const storedToken = localStorage.getItem("jwt_token");
