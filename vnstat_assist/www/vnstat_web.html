@@ -21,15 +21,14 @@
     />
     <style>
       :root {
-        --accent-color: #cd6d27;
-        --main-color: #000000;
-        --contrast-color: #ffffff;
+        --accent-color: #3b82f6;
+        --main-color: #0f172a;
+        --contrast-color: #f8fafc;
       }
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           sans-serif;
         padding: 20px;
-        color: #000000;
       }
       /* 添加登录界面样式 */
       .login-container {
@@ -401,7 +400,7 @@
         background: #f8fafc;
       }
       /* API 设置按钮和弹窗样式 */
-      .api-settings-button {
+      .settings-button {
         font-size: 17px;
         position: fixed;
         top: 30px;
@@ -411,13 +410,17 @@
         border: none;
         border-radius: 4px;
         padding: 8px 15px;
+        transition: all 0.3s;
         cursor: pointer;
         z-index: 1000;
       }
-      .api-settings-button:hover {
+      .settings-button:hover {
         color: var(--accent-color);
+        transform: rotate(15deg);
       }
-      .api-settings-modal {
+      .settings-button:nth-last-child(1) { right: 25px; }   /* 设置按钮 */
+      .settings-button:nth-last-child(2) { right: 55px; }  /* 主题按钮 */
+      .settings-modal {
         position: fixed;
         top: 0;
         left: 0;
@@ -430,36 +433,33 @@
         z-index: 2000;
       }
 
-      .api-settings-content {
+      .settings-content {
         background: white;
         border-radius: 8px;
         padding: 20px;
-        width: 400px;
+        width: 600px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
 
-      .api-settings-content h3 {
+      .settings-content h3 {
         margin-top: 0;
         margin-bottom: 20px;
         color: #333;
       }
-
-      .api-input {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-sizing: border-box;
-      }
-
-      .api-settings-buttons {
+      .settings-buttons {
         display: flex;
-        justify-content: flex-end;
-        gap: 10px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
       }
-
-      .api-settings-buttons button {
+      .default-button {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+      }
+      .default-button:hover {
+        background: #f1f5f9;
+      }
+      .settings-buttons button {
         padding: 8px 15px;
         cursor: pointer;
       }
@@ -473,35 +473,90 @@
         background: #f0f0f0;
         color: #333;
       }
+      .preset-themes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .preset-theme {
+        position: relative;
+        height: 80px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      }
+
+      .preset-theme:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      .preset-theme::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 2px solid var(--accent-color);
+        border-radius: 6px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .preset-theme.active::after {
+        opacity: 1;
+      }
+
+      .theme-name {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 0.5rem;
+        font-size: 0.8rem;
+        text-align: center;
+      }
     </style>
   </head>
 
   <body>
     <div id="app">
-      <button class="api-settings-button" @click="showApiSettings">
+      <button class="settings-button" @click="showApiSettings">
         <i class="fas fa-cog"></i>
       </button>
-      <div class="api-settings-modal" v-if="apiSettingsVisible">
-        <div class="api-settings-content">
-          <h3>页面配置</h3>
-          <div class="form-group">
-            <label class="switch-label">API接口：</label>
-            <input
-            type="text"
-            v-model="assistApi"
-            placeholder="请输入API地址"
-          />
+      <button class="settings-button" @click="showThemeSettings">
+        <i class="fas fa-palette"></i>
+      </button>
+      <div class="settings-modal" v-if="themeSettingsVisible">
+        <div class="settings-content">
+          <h3>主题配置</h3>
+          <!-- 预设主题 -->
+          <div class="preset-themes">
+            <div 
+              v-for="(theme, index) in presetThemes" 
+              :key="index"
+              class="preset-theme"
+              :style="getPresetStyle(theme)"
+              @click="applyPresetTheme(theme)"
+            >
+              <div class="theme-name">{{ theme.name }}</div>
+            </div>
           </div>
           <div class="form-group">
             <label>强调色：</label>
             <div class="color-input-container">
               <input 
                 type="color" 
-                v-model="theme.accentColor"
-                @input="updateColorPreview('accentColor', $event.target.value)"
+                v-model="theme.accent"
               >
-              <div class="color-preview" :style="{'--selected-color': theme.accentColor}"></div>
-              <div class="color-value">{{ theme.accentColor }}</div>
+              <div class="color-preview" :style="{'--selected-color': theme.accent}"></div>
+              <div class="color-value">{{ theme.accent }}</div>
             </div>
           </div>
           
@@ -510,11 +565,10 @@
             <div class="color-input-container">
               <input 
                 type="color" 
-                v-model="theme.mainColor"
-                @input="updateColorPreview('mainColor', $event.target.value)"
+                v-model="theme.main"
               >
-              <div class="color-preview" :style="{'--selected-color': theme.mainColor}"></div>
-              <div class="color-value">{{ theme.mainColor }}</div>
+              <div class="color-preview" :style="{'--selected-color': theme.main}"></div>
+              <div class="color-value">{{ theme.main }}</div>
             </div>
           </div>
           
@@ -523,12 +577,55 @@
             <div class="color-input-container">
               <input 
                 type="color" 
-                v-model="theme.contrastColor"
-                @input="updateColorPreview('contrastColor', $event.target.value)"
+                v-model="theme.contrast"
               >
-              <div class="color-preview" :style="{'--selected-color': theme.contrastColor}"></div>
-              <div class="color-value">{{ theme.contrastColor }}</div>
+              <div class="color-preview" :style="{'--selected-color': theme.contrast}"></div>
+              <div class="color-value">{{ theme.contrast}}</div>
             </div>
+          </div>
+          <div class="form-group">
+            <label>上行：</label>
+            <div class="color-input-container">
+              <input 
+                type="color" 
+                v-model="theme.upload"
+              >
+              <div class="color-preview" :style="{'--selected-color': theme.upload}"></div>
+              <div class="color-value">{{ theme.upload }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>下行：</label>
+            <div class="color-input-container">
+              <input 
+                type="color" 
+                v-model="theme.download"
+              >
+              <div class="color-preview" :style="{'--selected-color': theme.download}"></div>
+              <div class="color-value">{{ theme.download }}</div>
+            </div>
+          </div>
+          <div class="settings-buttons">
+            <button class="default-button" @click="resetDefaultTheme">
+              <i class="fas fa-undo"></i> 恢复默认
+            </button>
+            <button class="cancel-button" @click="cancelThemeSettings">
+              取消
+            </button>
+            <button class="save-button" @click="saveThemeSettings">保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="settings-modal" v-if="apiSettingsVisible">
+        <div class="settings-content">
+          <h3>页面配置</h3>
+          <div class="form-group">
+            <label class="switch-label">API接口：</label>
+            <input
+            type="text"
+            v-model="assistApi"
+            placeholder="请输入API地址"
+          />
           </div>
           <!-- 新增备份数据开关 -->
           <div class="form-group">
@@ -539,7 +636,7 @@
             </label>
           </div>
 
-          <div class="api-settings-buttons">
+          <div class="settings-buttons">
             <button class="cancel-button" @click="cancelApiSettings">
               取消
             </button>
@@ -857,6 +954,7 @@
           sortOrder: "asc",
           defaultInterface: "enp3s0",
           apiSettingsVisible: false,
+          themeSettingsVisible: false,
           assistApi: null,
           url: {},
           // 备份数据启用
@@ -867,10 +965,62 @@
           cacheKeys: [],
           pendingBackups: new Set(),
           theme:{
-            // 其他数据...
-            accentColor: '#cd6d27',
-            mainColor: '#000000',
-            contrastColor: '#ffffff',
+            name: '科技蓝',
+            main: '#0f172a',
+            accent: '#3b82f6',
+            contrast: '#f8fafc',
+            upload: '#93c5fd',
+            download: '#60a5fa'
+          },
+          presetThemes: [
+            {
+              name: '科技蓝',
+              main: '#0f172a',
+              accent: '#3b82f6',
+              contrast: '#f8fafc',
+              upload: '#93c5fd',
+              download: '#60a5fa'
+            },
+            {
+              name: '活力橙',
+              main: '#1e293b',
+              accent: '#f59e0b',
+              contrast: '#fff7ed',
+              upload: '#fcd34d',
+              download: '#fb923c'
+            },
+            {
+              name: '清新绿',
+              main: '#1c1917',
+              accent: '#10b981',
+              contrast: '#ecfdf5',
+              upload: '#6ee7b7',
+              download: '#34d399'
+            },
+            {
+              name: '幻影紫',
+              main: '#1a1b26',
+              accent: '#9d7cde',
+              contrast: '#f8f5ff',
+              upload: '#b9a4e6',
+              download: '#7f5fd3',
+            },
+            {
+              name: '玫瑰粉',
+              main: '#2d2d2d',
+              accent: '#ff6b6b',
+              contrast: '#fff0f0',
+              upload: '#ff9d9d',
+              download: '#ff5252',
+            }
+          ],
+          defaultTheme: {
+            name: '科技蓝',
+            main: '#0f172a',
+            accent: '#3b82f6',
+            contrast: '#f8fafc',
+            upload: '#93c5fd',
+            download: '#60a5fa'
           }
         },
         computed: {
@@ -971,8 +1121,11 @@
           latestSelectedInterfaceData() {
             this.updateChart();
           },
-          theme(){
-            this.saveThemeColors()
+          theme: {
+            deep: true,
+            handler(newTheme) {
+              this.saveThemeColors()
+            }
           }
         },
         methods: {
@@ -1166,20 +1319,6 @@
           showApiSettings() {
             this.apiSettingsVisible = !this.apiSettingsVisible;
           },
-          saveApiSettings() {
-            this.assistApi = this.normalizeUrl(this.assistApi);
-            localStorage.setItem("assist_api", this.assistApi);
-            localStorage.setItem("enable_backup", this.enableBackupData);
-            this.saveThemeColors()
-            localStorage.setItem('themeColors', JSON.stringify(this.theme));
-            if (!this.enableBackupData) {
-              localStorage.removeItem("backup_data");
-            }
-            this.apiSettingsVisible = false;
-            if (this.isAuthenticated) {
-              this.loadData();
-            }
-          },
           normalizeUrl(url) {
             const trimmedUrl = url.trim();
             if (/^\/\//.test(trimmedUrl)) {
@@ -1190,8 +1329,69 @@
             }
             return trimmedUrl;
           },
+          saveApiSettings() {
+            this.assistApi = this.normalizeUrl(this.assistApi);
+            localStorage.setItem("assist_api", this.assistApi);
+            localStorage.setItem("enable_backup", this.enableBackupData);
+            if (!this.enableBackupData) {
+              localStorage.removeItem("backup_data");
+            }
+            this.apiSettingsVisible = false;
+            if (this.isAuthenticated) {
+              this.loadData();
+            }
+          },
           cancelApiSettings() {
             this.apiSettingsVisible = false;
+          },
+          showThemeSettings() {
+            console.log(this.presetThemes)
+            this.themeSettingsVisible = !this.themeSettingsVisible;
+          },
+          saveThemeSettings() {
+            // 检查是否是预设主题
+            const isPreset = this.presetThemes.some(preset => 
+              preset.main === this.theme.main &&
+              preset.accent === this.theme.accent &&
+              preset.contrast === this.theme.contrast &&
+              preset.upload === this.theme.upload &&
+              preset.download === this.theme.download
+            )
+            if (!isPreset) {
+              this.theme.name = '自定义'
+              const customTheme = { ...this.theme }
+              const filteredThemes = this.presetThemes.filter(t => t.name !== '自定义')
+              this.presetThemes = [
+                ...filteredThemes,
+                customTheme
+              ]
+            }
+            this.saveThemeColors()
+            localStorage.setItem('themeColors', JSON.stringify(this.theme));
+            this.updateChart();
+            this.cancelThemeSettings()
+          },
+          cancelThemeSettings() {
+            this.themeSettingsVisible = false;
+          },
+          //应用预设
+          applyPresetTheme(preset) {
+            this.theme = {...preset}
+            this.saveThemeColors()
+            localStorage.setItem('themeColors', JSON.stringify(this.theme));
+          },
+          // 恢复默认
+          resetDefaultTheme() {
+            this.theme = {...this.defaultTheme}
+            this.saveThemeColors()
+            localStorage.setItem('themeColors', JSON.stringify(this.theme));
+          },
+          getPresetStyle(theme) {
+            return {
+              '--main-color': theme.main,
+              '--accent-color': theme.accent,
+              'background': `linear-gradient(135deg, ${theme.main} 50%, ${theme.accent} 50%)`
+            }
           },
           handleShowInterfaceData() {
             if (this.interfacesDataMode) {
@@ -1330,8 +1530,8 @@
             const getXValue = (date, time) =>
               this.getXValue(date, time, dataType);
             return [
-              this.generateSeries("上行", "tx", "#E0C3A1", getXValue),
-              this.generateSeries("下行", "rx", "#E37563", getXValue),
+              this.generateSeries("上行", "tx", this.theme.upload, getXValue),
+              this.generateSeries("下行", "rx", this.theme.download, getXValue),
             ];
           },
           processCurrentData(currentDate, dataType) {},
@@ -1521,18 +1721,22 @@
             return date;
           },
           saveThemeColors() {
-            document.documentElement.style.setProperty('--accent-color', this.theme.accentColor);
-            document.documentElement.style.setProperty('--main-color', this.theme.mainColor);
-            document.documentElement.style.setProperty('--contrast-color', this.theme.contrastColor);
+            document.documentElement.style.setProperty('--accent-color', this.theme.accent);
+            document.documentElement.style.setProperty('--main-color', this.theme.main);
+            document.documentElement.style.setProperty('--contrast-color', this.theme.contrast);
           },
           loadThemeColors() {
             const savedColors = localStorage.getItem('themeColors');
             if(savedColors) {
               const theme = JSON.parse(savedColors);
+              if(theme.name=='自定义'){
+                this.presetThemes.push(theme)
+              }
               this.theme = theme;
               this.saveThemeColors();
               localStorage.setItem('themeColors', JSON.stringify(this.theme));
             }
+            localStorage.setItem('themeColors', JSON.stringify(this.theme));
           },
         },
         async mounted() {
