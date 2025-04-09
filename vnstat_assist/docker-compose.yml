@@ -1,17 +1,16 @@
 version: '3'
 services:
   vnstat-dashboard:
-    image: vnstat-dashboard:1.0.0
+    image: vnstat-dashboard:1.1.1
     container_name: vnstat-dashboard
     restart: always
     ports:
       - "19329:80"
     volumes:
         #填写自己宿主机的路径
-      - :backupsPath:/app/backups
-      - :logPath:/app/log
-      - :shellPath:/app/shell
-      - :nginxConfPath:/etc/nginx/nginx.conf
+      - :path/log/shell:/app/log/shell
+      - :path/log/nginx:/app/log/nginx
+      - :path/backups:/app/backups
     environment:
       - TZ=Asia/Shanghai
       - VNSTAT_API_URL=:VNSTAT_API_URL

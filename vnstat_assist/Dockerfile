@@ -24,11 +24,11 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
 
 # 创建目录结构
 RUN mkdir -p /app/shell
-RUN mkdir -p /api
-RUN mkdir -p /www
-RUN mkdir -p /backups
-RUN mkdir -p /log/nginx
-RUN mkdir -p /log/shell
+RUN mkdir -p /app/api
+RUN mkdir -p /app/www
+RUN mkdir -p /app/backups
+RUN mkdir -p /app/log/nginx
+RUN mkdir -p /app/log/shell
 
 # 复制脚本和API文件
 COPY shell /app/shell
@@ -40,6 +40,7 @@ COPY conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chmod +x /app/shell/vnstat_backup.sh \
   && chmod +x /app/api/api_server.py 
 
+RUN sed -i 's/\r$//' /app/shell/vnstat_backup.sh
 RUN pip install --no-cache-dir -r /app/api/requirements.txt
 
 
