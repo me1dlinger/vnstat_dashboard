@@ -10,30 +10,44 @@ import urllib.request
 # 默认配置
 DEFAULT_CONFIG = {
     "secret_key": "secret_key",
+    "auth_enable": 1,
     "expire_seconds": 3600,
     "user": {
         "username": "username",
         "password": "password"
     },
-    "vnstat_api": "$host:$port/vnstat/json.cgi"
 }
+
 def load_config_from_env():
-    """从环境变量加载配置"""
-    # 基础配置
-    config = {
-        "secret_key": os.environ["VNA_SECRET_KEY"],  # 强制要求
-        "expire_seconds": int(os.getenv("VNA_EXPIRE_SECONDS", "3600")),
-        "user": {
-            "username": os.environ["VNA_USERNAME"],
-            "password": os.environ["VNA_PASSWORD"]
-        },
-        "vnstat_api": os.environ["VNSTAT_API_URL"]
-    }
-    # 验证必要字段
-    required_keys = ["secret_key", "user.username", "user.password", "vnstat_api"]
-    for key in required_keys:
-        if not config.get(key.split('.')[0]):
-            raise ValueError(f"环境变量 {key} 必须配置")
+    """从环境变量加载配置，缺失时回退到默认值"""
+    config = DEFAULT_CONFIG.copy()  # 初始化为默认配置
+    # 覆盖环境变量中的配置
+    if "VNA_SECRET_KEY" in os.environ:
+        config["secret_key"] = os.environ["VNA_SECRET_KEY"]
+    if "VNA_EXPIRE_SECONDS" in os.environ:
+        config["expire_seconds"] = int(os.environ["VNA_EXPIRE_SECONDS"])
+    if "VNA_USERNAME" in os.environ:
+        config["user"]["username"] = os.environ["VNA_USERNAME"]
+    if "VNA_PASSWORD" in os.environ:
+        config["user"]["password"] = os.environ["VNA_PASSWORD"]
+    if "VNSTAT_API_URL" in os.environ:
+        config["vnstat_api"] = os.environ["VNSTAT_API_URL"]
+    config["auth_enable"] = int(os.getenv("VNA_AUTH_ENABLE", str(DEFAULT_CONFIG["auth_enable"])))
+
+    # 仅在启用认证时验证必要字段
+    if config["auth_enable"] == 1:
+        required_keys = ["secret_key", "user.username", "user.password"]
+        for key in required_keys:
+            parts = key.split('.')
+            value = config
+            for part in parts:
+                value = value.get(part)
+                if not value:
+                    raise ValueError(f"环境变量 {key} 必须配置（当启用认证时）")
+    
+    # 检查 vnstat_api 是否有效
+    if not config["vnstat_api"].startswith(("http://", "https://")):
+        raise ValueError("VNSTAT_API_URL 必须包含协议（如 http:// 或 https://）")
     return config
 
 PORT = 19328
@@ -44,6 +58,7 @@ SECRET_KEY = CONFIG['secret_key'].encode()  # Convert to bytes for HMAC
 VALID_USER = CONFIG['user']
 VNSTAT_PROXY_URL = CONFIG['vnstat_api']
 EXPIRE_SECONDS = CONFIG['expire_seconds']
+AUTH_ENABLED = CONFIG['auth_enable']
 
 class JWTManager:
     @staticmethod
@@ -99,6 +114,10 @@ class JWTManager:
 class APIHandler(BaseHTTPRequestHandler):
     def handle_verify(self):
         """验证Token有效性"""
+        if not AUTH_ENABLED:
+            # 直接返回验证通过
+            self._send_response(200, {"valid": True, "user": "anonymous"})
+            return
         auth_header = self.headers.get('Authorization', '')
         if not auth_header.startswith('Bearer '):
             self._send_response(401, {"valid": False, "error": "Missing token"})
@@ -113,18 +132,18 @@ class APIHandler(BaseHTTPRequestHandler):
     def _proxy_vnstat_json(self):
         """代理请求到vnstat的json.cgi接口"""
         try:
-            # 验证Token
-            auth_header = self.headers.get('Authorization', '')
-            if not auth_header.startswith('Bearer '):
-                self._send_response(401, {"error": "Missing authorization token"})
-                return
+            if AUTH_ENABLED:
+                # 验证Token
+                auth_header = self.headers.get('Authorization', '')
+                if not auth_header.startswith('Bearer '):
+                    self._send_response(401, {"error": "Missing authorization token"})
+                    return
 
-            token = auth_header.split(' ')[1]
-            verification = JWTManager.verify_token(token)
-
-            if not verification["valid"]:
-                self._send_response(401, {"error": verification["error"]})
-                return
+                token = auth_header.split(' ')[1]
+                verification = JWTManager.verify_token(token)
+                if not verification["valid"]:
+                    self._send_response(401, {"error": verification["error"]})
+                    return
             # 发起代理请求
             req = urllib.request.Request(VNSTAT_PROXY_URL)
             with urllib.request.urlopen(req) as response:
@@ -167,6 +186,11 @@ class APIHandler(BaseHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         if parsed_path.path == '/auth/login':
             try:
+                if not AUTH_ENABLED:
+                    # 直接生成 Token 无需验证用户
+                    token = JWTManager.generate_token(VALID_USER['username'])
+                    self._send_response(200, {"token": token, "expires_in": EXPIRE_SECONDS})
+                    return
                 data = self._parse_body()
                 if data.get('username') == VALID_USER['username'] and data.get('password') == VALID_USER['password']:
                     token = JWTManager.generate_token(VALID_USER['username'])
@@ -190,18 +214,17 @@ class APIHandler(BaseHTTPRequestHandler):
             return self._proxy_vnstat_json()
         elif parsed_path.path.startswith('/backups/'):
             # 验证Token
-            auth_header = self.headers.get('Authorization', '')
-            if not auth_header.startswith('Bearer '):
-                self._send_response(401, {"error": "Missing authorization token"})
-                return
-                
-            token = auth_header.split(' ')[1]
-            verification = JWTManager.verify_token(token)
-            
-            if not verification["valid"]:
-                self._send_response(401, {"error": verification["error"]})
-                return
-                
+            if AUTH_ENABLED:
+                auth_header = self.headers.get('Authorization', '')
+                if not auth_header.startswith('Bearer '):
+                    self._send_response(401, {"error": "Missing authorization token"})
+                    return
+                    
+                token = auth_header.split(' ')[1]
+                verification = JWTManager.verify_token(token)
+                if not verification["valid"]:
+                    self._send_response(401, {"error": verification["error"]})
+                    return
             # 处理文件请求
             try:
                 path_parts = parsed_path.path.split('/')
