@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <title>网络流量统计</title>
+    <title>VNSTAT-DASHBOARD</title>
     <link
       href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD//////////////////////////3I2JLdyNyTnczYjUAAAAAD///////////////////////////////////////////////////////////////9yNiPJdTgl/3g6Jv9yNyTKbzcnIAAAAACcpgBQnKYAiZ2lAJmepQBm////////////////AAAAAAAAAAAAAAAAcjcjdHY5Jf9yNiT/ci4m/3I1JPAAAAAAnqUARAAAAAAAAAAAnqcArZmqAA///////////wAAAAAAAAAAAAAAAHI3Ikp2NyX/dDwj/56nAP93RiH2AAAAAAAAAAAAAAAAAAAAAJ2mAG2dpgBT//////////8AAAAAAAAAAIFAKkNyNiP/bykm/5iaCf98VR//cDIk/gAAAAAAAAAAAAAAAAAAAACcpgCGoKYAK6BSO7agVDrMnlI5eZ5SOFGmVz3/hzwx/4uCEP97UR//cDEl/3Y5Jf8AAAAAAAAAAAAAAAAAAAAAnaYAnv////+hUzvppVY9/6ZXPf+nVz3/olE8/6J3Lf+PdB7/bS0k/3I3JP9zNyT/cjck72YzGQoAAAAAAAAAAJ6mAKD/////n1Q7UqlYPv+hVDv/oVM7/6FYOf+ekhj/pE4//4dELv9vNSL/cjck/3Q4Jf9yNiT3AAAAAJ6nAJ2bogAh/////wAAAACgVDrMpVY8/6JOPf+fjxv/oVI7/6FUO/+kVj3/h0Qu/281Iv9yNyT/dDgl/3I4JOmktgCVAAAAAP//////////nlI0IqFSPPOhaDL4oX8o/6dUP/+iVTv/oVQ7/6RWPf+GRC7/bzUi/3I3JP91OCX/bislpP////////////////////8AAAAAnK0ArQAAAAAAAAAAoVM78aNVPP+hVDv/pFY9/4ZDLv9zNiT/dTgl/3Y5Jf//////////////////////AAAAAJ2mAK4AAAAAAAAAAJZLLRGhVDr4o1U8/6FUO/+oWj3/pM4AYmwqIoR4Oib/cTYkh////////////////56oAGmepwBxAAAAAAAAAAAAAAAAmUwzFKFRO+ylVT3/pVY9/6RPPoeHQy7Fczck/3E2I7v///////////////+cpQCQnKgAQwAAAAAAAAAAAAAAAAAAAACdrQCPn2oxzahWPv+qWD7/qVg+/4lFL/9vNSHU////////////////nKYAap2lAIAAAAAAAAAAAKGoACacpgC/nqgAZgAAAACUUjEfoVQ6laFUO8OhVDv/oVQ7//////////////////////+dpgCvnqYApZ2nAKSdpgCa////////////////////////////////////////////////AYAAAAByAAA8PQAAPD8AADg9AAAwPAAAABwAAIAKAACAAgAAQAAAACwAAAAuEAAAPwAAAB8AAAAu4AAAAAAAAA=="
       rel="icon"
@@ -80,7 +80,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        height: 93vh;
         background: var(--bg-secondary);
       }
 
@@ -112,7 +112,7 @@
       .form-group label {
         font-weight: 500;
         color: var(--text-color);
-        min-width: 60px;
+        min-width: 70px;
         font-size: 0.95rem;
       }
       .form-group input {
@@ -169,7 +169,7 @@
       }
       /* 当前颜色提示 */
       .color-value {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         color: #868e96;
         margin-top: 0.5rem;
         text-align: center;
@@ -619,6 +619,62 @@
         color: #e5e5e5;
         box-shadow: 0 2px 12px 0 rgba(255, 255, 255, 0.1);
       }
+
+
+      .color-preview-row {
+        display: flex;
+        gap: 1.5rem;
+        margin: 1.5rem 0;
+      }
+
+      .color-settings-column {
+        flex: 1;
+        min-width: 160px;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .preview-chart-container {
+        flex: 2;
+        min-width: 300px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.8rem;
+        background: var(--bg-secondary);
+      }
+
+      .form-group.compact {
+        margin-bottom: 0;
+        padding: 0.6rem;
+      }
+
+      .form-group.compact .color-preview {
+        height: 30px;
+      }
+
+      .form-group.compact .color-value {
+        font-size: 0.8em;
+        margin-top: 0.3rem;
+      }
+
+      .color-input-container {
+        width: 100%;
+        flex-grow: 0;
+      }
+
+      /* 响应式处理 */
+      @media (max-width: 768px) {
+        .color-preview-row {
+          flex-direction: column;
+        }
+        .color-settings-column {
+          width: 100%;
+        }
+        .preview-chart-container {
+          min-width: auto;
+        }
+      }
     </style>
   </head>
 
@@ -649,60 +705,59 @@
             </div>
           </div>
           <div class="form-group">
-            <label>强调色：</label>
             <div class="color-input-container">
               <input type="color" v-model="theme.accent" />
               <div
                 class="color-preview"
                 :style="{'--selected-color': theme.accent}"
               ></div>
-              <div class="color-value">{{ theme.accent }}</div>
+              <div class="color-value">强调色：{{ theme.accent }}</div>
             </div>
           </div>
-
           <div class="form-group">
-            <label>主体色：</label>
             <div class="color-input-container">
               <input type="color" v-model="theme.main" />
               <div
                 class="color-preview"
                 :style="{'--selected-color': theme.main}"
               ></div>
-              <div class="color-value">{{ theme.main }}</div>
+              <div class="color-value">主体色：{{ theme.main }}</div>
             </div>
           </div>
 
           <div class="form-group">
-            <label>对比色：</label>
             <div class="color-input-container">
               <input type="color" v-model="theme.contrast" />
               <div
                 class="color-preview"
                 :style="{'--selected-color': theme.contrast}"
               ></div>
-              <div class="color-value">{{ theme.contrast}}</div>
+              <div class="color-value">对比色：{{ theme.contrast}}</div>
             </div>
           </div>
-          <div class="form-group">
-            <label>上行：</label>
-            <div class="color-input-container">
-              <input type="color" v-model="theme.upload" />
-              <div
-                class="color-preview"
-                :style="{'--selected-color': theme.upload}"
-              ></div>
-              <div class="color-value">{{ theme.upload }}</div>
+          <!-- 新增：颜色选择和图表预览行 -->
+          <div class="color-preview-row">
+            <!-- 左侧颜色选择列 -->
+            <div class="color-settings-column">
+              <div class="form-group compact">
+                <div class="color-input-container">
+                  <input type="color" v-model="theme.upload" />
+                  <div class="color-preview" :style="{'--selected-color': theme.upload}"></div>
+                  <div class="color-value">上行：{{ theme.upload }}</div>
+                </div>
+              </div>
+              <div class="form-group compact">
+                <div class="color-input-container">
+                  <input type="color" v-model="theme.download" />
+                  <div class="color-preview" :style="{'--selected-color': theme.download}"></div>
+                  <div class="color-value">下行：{{ theme.download }}</div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label>下行：</label>
-            <div class="color-input-container">
-              <input type="color" v-model="theme.download" />
-              <div
-                class="color-preview"
-                :style="{'--selected-color': theme.download}"
-              ></div>
-              <div class="color-value">{{ theme.download }}</div>
+
+            <!-- 右侧图表预览 -->
+            <div class="preview-chart-container">
+              <div id="themePreviewChart"></div>
             </div>
           </div>
           <div class="settings-buttons">
@@ -747,7 +802,7 @@
       <!-- 登录界面 -->
       <div v-if="!isAuthenticated" class="login-container">
         <div class="login-box">
-          <h2>网络流量统计系统</h2>
+          <h1>VNSTAT-DASHBOARD</h1>
           <form @submit.prevent="handleLogin">
             <div class="form-group">
               <label><i class="fas fa-user"></i> 用户名</label>
@@ -1048,6 +1103,7 @@
           latestInterfacesData: [],
           latestSelectedInterfaceData: null,
           chart: null,
+          previewChart: null,
           timeRangeType: "day",
           currentRange: new Date(),
           currentStats: {},
@@ -1070,6 +1126,16 @@
           //维护键顺序
           cacheKeys: [],
           pendingBackups: new Set(),
+          sampleUpData :[
+              { x: '00:00', y: 20 }, { x: '04:00', y: 80 },
+              { x: '08:00', y: 40 }, { x: '12:00', y: 120 },
+              { x: '16:00', y: 90 }, { x: '20:00', y: 60 }
+          ],
+          sampleDownData: [
+              { x: '00:00', y: 10 }, { x: '04:00', y: 100 },
+              { x: '08:00', y: 30 }, { x: '12:00', y: 150 },
+              { x: '16:00', y: 55 }, { x: '20:00', y: 20 }
+          ],
           theme: {
             name: "科技蓝",
             main: "#0f172a",
@@ -1231,6 +1297,7 @@
             deep: true,
             handler(newTheme) {
               this.saveThemeColors();
+              this.$nextTick(this.updatePreviewColors())
             },
           },
         },
@@ -1451,8 +1518,10 @@
             this.apiSettingsVisible = false;
           },
           showThemeSettings() {
-            console.log(this.presetThemes);
             this.themeSettingsVisible = !this.themeSettingsVisible;
+            this.$nextTick(() => {
+              this.initPreviewChart();
+            });
           },
           saveThemeSettings() {
             // 检查是否是预设主题
@@ -1474,7 +1543,9 @@
             }
             this.saveThemeColors();
             localStorage.setItem("themeColors", JSON.stringify(this.theme));
-            this.updateChart();
+            if(this.chart){
+              this.updateChart();
+            }
             this.cancelThemeSettings();
           },
           cancelThemeSettings() {
@@ -1741,7 +1812,6 @@
           },
           async updateChart() {
             const seriesData = await this.getMergedSeriesData();
-
             const options = {
               chart: { type: "area", height: 400 },
               series: seriesData,
@@ -1853,6 +1923,37 @@
               "--contrast-color",
               this.theme.contrast
             );
+          },
+          initPreviewChart() {
+            this.previewChart = new ApexCharts(document.querySelector("#themePreviewChart"), {
+              chart: {
+                type: 'area',
+                height: 160,
+                toolbar: { show: false },
+                parentHeightOffset: 0
+              },
+              series: [
+                { name: '上行', data: this.sampleUpData, color: this.theme.upload },
+                { name: '下行', data: this.sampleDownData, color: this.theme.download }
+              ],
+              stroke: { curve: 'smooth', width: 2 },
+              markers: { size: 3 },
+              dataLabels: { enabled: false },
+              xaxis: { type: 'category' },
+              yaxis: { labels: { formatter: val => `${val} MB` } },
+              grid: { borderColor: 'rgba(125,125,125,0.1)' },
+            });
+            this.previewChart.render();
+          },
+          updatePreviewColors() {
+            if (this.previewChart) {
+              this.previewChart.updateOptions({
+                series: [
+                  { name: '上行', data: this.sampleUpData, color: this.theme.upload },
+                  { name: '下行', data: this.sampleDownData, color: this.theme.download }
+                ]
+              })
+            }
           },
           loadThemeColors() {
             const savedColors = localStorage.getItem("themeColors");
