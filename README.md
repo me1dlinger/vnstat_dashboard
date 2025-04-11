@@ -10,11 +10,6 @@
 
 ### 安装[vnStat](https://github.com/vergoh/vnstat)
 
-### API 配置要求
-
-```
-替换assistApi为工具容器的接口服务
-```
 
 ### VNSTAT 历史数据备份
 
