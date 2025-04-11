@@ -45,7 +45,36 @@ vnstat-assist ->总目录
   -Dockerfile ->打包配置
   -docker-compose.yml ->docker构建配置,宿主机要先创建对应目录
 ```
-
+### docker-compose配置
+```
+version: '3'
+services:
+  vnstat-dashboard:
+    image: vnstat-dashboard:latest
+    container_name: vnstat-dashboard
+    restart: always
+    ports:
+      - "19329:80"
+    volumes:
+        #填写自己宿主机的路径，可以提前创建
+      - :path/log/python:/app/log/python
+      - :path/log/nginx:/app/log/nginx
+      - :path/backups:/app/backups
+    environment:
+      - TZ=Asia/Shanghai
+      #启用校验
+      - VNA_AUTH_ENABLE=1 
+      #vnstat的json数据api 
+      - VNSTAT_API_URL=http://127.0.0.1:9695/json.cgi
+      #后端校验秘钥
+      - VNA_SECRET_KEY=secret_key
+      #token有效期
+      - VNA_EXPIRE_SECONDS=3600
+      #后端校验账号
+      - VNA_USERNAME=username
+      #后端校验密码
+      - VNA_PASSWORD=password
+```
 
 ## 🧩 界面截图
 
