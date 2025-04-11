@@ -24,28 +24,25 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
 
 # 创建目录结构
 RUN mkdir -p /app/shell
-RUN mkdir -p /app/api
+RUN mkdir -p /app/python
 RUN mkdir -p /app/www
 RUN mkdir -p /app/backups
 RUN mkdir -p /app/log/nginx
-RUN mkdir -p /app/log/shell
+RUN mkdir -p /app/log/python
 
 # 复制脚本和API文件
-COPY shell /app/shell
-COPY api /app/api
+COPY python /app/python
 COPY www /app/www
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN chmod +x /app/shell/vnstat_backup.sh \
-  && chmod +x /app/api/api_server.py 
+RUN chmod +x /app/python/backup/vnstat_backup.py \
+  && chmod +x /app/python/backup/task_scheduler.py \
+  && chmod +x /app/python/api/api_server.py 
 
-RUN sed -i 's/\r$//' /app/shell/vnstat_backup.sh
-RUN pip install --no-cache-dir -r /app/api/requirements.txt
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
-
-# 设置定时任务
-RUN echo "0 1 * * * root /app/shell/vnstat_backup.sh" > /etc/cron.d/vnstat-backup
+RUN pip install --no-cache-dir -r /app/python/requirements.txt
 
 EXPOSE 80
 

@@ -1,14 +1,14 @@
 version: '3'
 services:
   vnstat-dashboard:
-    image: vnstat-dashboard:1.1.1
+    image: vnstat-dashboard:1.2.0
     container_name: vnstat-dashboard
     restart: always
     ports:
       - "19329:80"
     volumes:
         #填写自己宿主机的路径
-      - :path/log/shell:/app/log/shell
+      - :path/log/python:/app/log/python
       - :path/log/nginx:/app/log/nginx
       - :path/backups:/app/backups
     environment:
