@@ -51,7 +51,7 @@
       .night-mode {
         --bg-color: #1a1a1a;
         --bg-secondary: #2d2d2d;
-        --text-color: #e5e5e5;
+        --text-color: #808080;
         --text-secondary: #9e9e9e;
         --border-color: #4d4d4d;
         --shadow-color: rgba(255, 255, 255, 0.1);
@@ -620,7 +620,6 @@
         box-shadow: 0 2px 12px 0 rgba(255, 255, 255, 0.1);
       }
 
-
       .color-preview-row {
         display: flex;
         gap: 1.5rem;
@@ -742,14 +741,20 @@
               <div class="form-group compact">
                 <div class="color-input-container">
                   <input type="color" v-model="theme.upload" />
-                  <div class="color-preview" :style="{'--selected-color': theme.upload}"></div>
+                  <div
+                    class="color-preview"
+                    :style="{'--selected-color': theme.upload}"
+                  ></div>
                   <div class="color-value">上行：{{ theme.upload }}</div>
                 </div>
               </div>
               <div class="form-group compact">
                 <div class="color-input-container">
                   <input type="color" v-model="theme.download" />
-                  <div class="color-preview" :style="{'--selected-color': theme.download}"></div>
+                  <div
+                    class="color-preview"
+                    :style="{'--selected-color': theme.download}"
+                  ></div>
                   <div class="color-value">下行：{{ theme.download }}</div>
                 </div>
               </div>
@@ -1126,15 +1131,21 @@
           //维护键顺序
           cacheKeys: [],
           pendingBackups: new Set(),
-          sampleUpData :[
-              { x: '00:00', y: 20 }, { x: '04:00', y: 80 },
-              { x: '08:00', y: 40 }, { x: '12:00', y: 120 },
-              { x: '16:00', y: 90 }, { x: '20:00', y: 60 }
+          sampleUpData: [
+            { x: "00:00", y: 20 },
+            { x: "04:00", y: 80 },
+            { x: "08:00", y: 40 },
+            { x: "12:00", y: 120 },
+            { x: "16:00", y: 90 },
+            { x: "20:00", y: 60 },
           ],
           sampleDownData: [
-              { x: '00:00', y: 10 }, { x: '04:00', y: 100 },
-              { x: '08:00', y: 30 }, { x: '12:00', y: 150 },
-              { x: '16:00', y: 55 }, { x: '20:00', y: 20 }
+            { x: "00:00", y: 10 },
+            { x: "04:00", y: 100 },
+            { x: "08:00", y: 30 },
+            { x: "12:00", y: 150 },
+            { x: "16:00", y: 55 },
+            { x: "20:00", y: 20 },
           ],
           theme: {
             name: "科技蓝",
@@ -1297,7 +1308,7 @@
             deep: true,
             handler(newTheme) {
               this.saveThemeColors();
-              this.$nextTick(this.updatePreviewColors())
+              this.$nextTick(this.updatePreviewColors());
             },
           },
         },
@@ -1543,7 +1554,7 @@
             }
             this.saveThemeColors();
             localStorage.setItem("themeColors", JSON.stringify(this.theme));
-            if(this.chart){
+            if (this.chart) {
               this.updateChart();
             }
             this.cancelThemeSettings();
@@ -1925,34 +1936,53 @@
             );
           },
           initPreviewChart() {
-            this.previewChart = new ApexCharts(document.querySelector("#themePreviewChart"), {
-              chart: {
-                type: 'area',
-                height: 160,
-                toolbar: { show: false },
-                parentHeightOffset: 0
-              },
-              series: [
-                { name: '上行', data: this.sampleUpData, color: this.theme.upload },
-                { name: '下行', data: this.sampleDownData, color: this.theme.download }
-              ],
-              stroke: { curve: 'smooth', width: 2 },
-              markers: { size: 3 },
-              dataLabels: { enabled: false },
-              xaxis: { type: 'category' },
-              yaxis: { labels: { formatter: val => `${val} MB` } },
-              grid: { borderColor: 'rgba(125,125,125,0.1)' },
-            });
+            this.previewChart = new ApexCharts(
+              document.querySelector("#themePreviewChart"),
+              {
+                chart: {
+                  type: "area",
+                  height: 160,
+                  toolbar: { show: false },
+                  parentHeightOffset: 0,
+                },
+                series: [
+                  {
+                    name: "上行",
+                    data: this.sampleUpData,
+                    color: this.theme.upload,
+                  },
+                  {
+                    name: "下行",
+                    data: this.sampleDownData,
+                    color: this.theme.download,
+                  },
+                ],
+                stroke: { curve: "smooth", width: 2 },
+                markers: { size: 3 },
+                dataLabels: { enabled: false },
+                xaxis: { type: "category" },
+                yaxis: { labels: { formatter: (val) => `${val} MB` } },
+                grid: { borderColor: "rgba(125,125,125,0.1)" },
+              }
+            );
             this.previewChart.render();
           },
           updatePreviewColors() {
             if (this.previewChart) {
               this.previewChart.updateOptions({
                 series: [
-                  { name: '上行', data: this.sampleUpData, color: this.theme.upload },
-                  { name: '下行', data: this.sampleDownData, color: this.theme.download }
-                ]
-              })
+                  {
+                    name: "上行",
+                    data: this.sampleUpData,
+                    color: this.theme.upload,
+                  },
+                  {
+                    name: "下行",
+                    data: this.sampleDownData,
+                    color: this.theme.download,
+                  },
+                ],
+              });
             }
           },
           loadThemeColors() {
