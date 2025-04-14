@@ -10,9 +10,6 @@ RUN echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye main contrib
 RUN apt-get update && apt-get install -y \
   nginx  \
   supervisor  \
-  procps \
-  iproute2 \
-  vim \
   && rm -rf /var/lib/apt/lists/*
 
 # 设置时区
