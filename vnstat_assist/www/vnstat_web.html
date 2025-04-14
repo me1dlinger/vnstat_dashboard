@@ -893,15 +893,23 @@
         <!-- 修改后的控制条结构 -->
         <div class="control-bar">
           <!-- 左侧控件 -->
-          <div class="control-group left" v-show="!interfacesDataMode">
-            <select v-model="timeRangeType">
+          <div class="control-group left">
+            <button
+            class="control-button"
+            title="用量TOP统计"
+            @click="handleShowTopData()"
+          >
+            <i class="fas fa-signal"></i>
+          </button>
+            <select v-model="timeRangeType"  v-show="!(interfacesDataMode||topDataMode)">
               <option value="hour">按时</option>
               <option value="day">按日</option>
               <option value="month">按月</option>
               <option value="year">按年</option>
             </select>
           </div>
-          <div class="control-group center" v-show="!interfacesDataMode">
+          
+          <div class="control-group center" v-show="!(interfacesDataMode||topDataMode)">
             <button class="control-button" @click="adjustTime(-1)">
               <i class="fas fa-chevron-left"></i>
             </button>
@@ -948,7 +956,7 @@
             </button>
           </div>
         </div>
-        <div v-show="!interfacesDataMode">
+        <div v-show="!(interfacesDataMode||topDataMode)">
           <div class="traffic-summary">
             <div class="summary-item" title="上行流量">
               <i class="fas fa-upload text-blue-500"></i>
@@ -1091,6 +1099,47 @@
             </tbody>
           </table>
         </div>
+        <div v-show="topDataMode" class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th @click="sortTable('timestamp')">
+                  时间
+                  <i class="fas" :class="sortIcon('timestamp')"></i>
+                </th>
+                <th @click="sortTable('rx')">
+                  下行
+                  <i class="fas" :class="sortIcon('rx')"></i>
+                </th>
+                <th @click="sortTable('tx')">
+                  上行
+                  <i class="fas" :class="sortIcon('tx')"></i>
+                </th>
+                <th @click="sortTable('total')">
+                  总计
+                  <i class="fas" :class="sortIcon('todayTotal')"></i>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in sortedTopData" :key="item.name">
+                <td>{{ getXValue(item.date, null, 'day') }}</td>
+                <td>
+                  {{ formatBytes(item.rx).value }}{{
+                  formatBytes(item.rx).unit }}
+                </td>
+                <td>
+                  {{ formatBytes(item.tx).value }}{{
+                  formatBytes(item.tx).unit }}
+                </td>
+                <td>
+                  {{ formatBytes(item.total).value }}{{
+                  formatBytes(item.total).unit }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
     <script>
@@ -1106,6 +1155,7 @@
           latestRawData: {},
           latestInterfacesTableData: [],
           latestInterfacesData: [],
+          latestTopData:[],
           latestSelectedInterfaceData: null,
           chart: null,
           previewChart: null,
@@ -1116,6 +1166,7 @@
           filteredData: [],
           isNightMode: false,
           interfacesDataMode: false,
+          topDataMode: false,
           showNextButton: false,
           sortKey: "name",
           sortOrder: "asc",
@@ -1231,7 +1282,7 @@
             );
           },
           summaryData() {
-            const latestInterfacesData =
+            const latestInterfacesData = 
               this.latestSelectedInterfaceData || this.latestInterfacesData[0];
             return {
               本月: this.getMonthData(latestInterfacesData),
@@ -1250,6 +1301,15 @@
           },
           sortedTableData() {
             return [...this.filteredData].sort((a, b) => {
+              let modifier = -1;
+              if (this.sortOrder === "asc") modifier = 1;
+              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+              return 0;
+            });
+          },
+          sortedTopData() {
+            return [...this.latestTopData].sort((a, b) => {
               let modifier = -1;
               if (this.sortOrder === "asc") modifier = 1;
               if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
@@ -1303,6 +1363,7 @@
           },
           latestSelectedInterfaceData() {
             this.updateChart();
+            this.handleLatestTopData();
           },
           theme: {
             deep: true,
@@ -1365,6 +1426,7 @@
               this.latestSelectedInterfaceData =
                 defaultInterface || this.latestInterfacesData[0];
             }
+            
             await this.$nextTick();
           },
           async fetchWithAuth(url, options = {}) {
@@ -1398,6 +1460,7 @@
             return this.formatBytes(total);
           },
           getMonthData(interface) {
+
             const year = new Date().getFullYear();
             const month = new Date().getMonth() + 1;
             return (
@@ -1601,7 +1664,18 @@
               this.updateChart();
             } else {
               this.interfacesDataMode = true;
+              this.topDataMode = false;
               this.handleLatestInterfacesData();
+            }
+          },
+          handleShowTopData() {
+            if (this.topDataMode) {
+              this.topDataMode = false;
+              this.updateChart();
+            } else {
+              this.topDataMode = true;
+              this.interfacesDataMode = false;
+              this.handleLatestTopData();
             }
           },
           sortTable(key) {
@@ -1631,6 +1705,19 @@
                 };
               }
             );
+          },
+          handleLatestTopData() {
+            const currentInterfaceTopData = this.latestSelectedInterfaceData || this.latestInterfacesData[0];
+            this.latestTopData = currentInterfaceTopData.traffic.top.map(
+              (item)=>{
+                return {
+                  timestamp: item.timestamp,
+                  date: item.date,
+                  rx: item.rx,
+                  tx: item.tx,
+                  total: item.rx + item.tx,
+                };
+            })
           },
           async getMergedSeriesData() {
             const dataType = {

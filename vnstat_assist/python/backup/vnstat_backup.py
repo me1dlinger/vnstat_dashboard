@@ -1,13 +1,9 @@
-"""
-vnstat_backup.py - 替代原Shell脚本的Python版本
-功能：从API获取vnstat数据，按日期过滤并保存为JSON文件
-"""
-
 import os
 import sys
 import json
 import logging
 import argparse
+import shutil
 from datetime import datetime, timedelta
 from typing import Dict, Any
 import requests
@@ -111,17 +107,22 @@ def filter_data(data: Dict[str, Any], target_date: datetime) -> Dict[str, Any]:
     
     return filtered
 
+"""
+vnstat_backup.py - 替代原Shell脚本的Python版本
+功能：从API获取vnstat数据，按日期过滤并保存为JSON文件，自动备份旧文件
+"""
+
 # 主逻辑
 def main():
+    # 初始化日志（保持原有代码不变）
     for handler in logging.root.handlers[:]:
         handler.close()
         logging.root.removeHandler(handler)
-    # 初始化日志
     log_dir = "/app/log/python"
     log_file = setup_logging(log_dir)
     logging.info(f"脚本启动，日志文件: {log_file}")
-    
-    # 检查API_URL
+
+    # 检查API_URL（保持原有代码不变）
     api_url = os.getenv("VNSTAT_API_URL")
     if not api_url:
         logging.error("必须通过Docker环境变量配置 VNSTAT_API_URL")
@@ -130,23 +131,42 @@ def main():
     if not api_url.startswith(("http://", "https://")):
         logging.error(f"API_URL 格式无效: {api_url}")
         sys.exit(2)
-    
-    # 处理数据
+
+    # 处理数据（添加备份目录创建）
+    output_dir = "/app/backups/json"
+    backup_root = os.path.join(output_dir, "backup")
+    today =  datetime.now(tz=tz.gettz("Asia/Shanghai"))
     days = parse_args()
     data = fetch_api_data(api_url)
-    output_dir = "/app/backups/json"
+    backup_timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    backup_dir = os.path.join(backup_root, backup_timestamp)
+    # 创建输出目录和备份目录
     os.makedirs(output_dir, exist_ok=True)
-    
+    os.makedirs(backup_dir, exist_ok=True)
+    os.chmod(output_dir, 0o755)
+    os.chmod(backup_dir, 0o755)
+
     for i in range(days):
-        target_date = datetime.now(tz=tz.gettz("Asia/Shanghai")) - timedelta(days=i+1)
-        logging.info(f"处理日期: {target_date.strftime('%Y%m%d')}")
-        
+        target_date = today - timedelta(days=i+1)
+        handle_date =  target_date.strftime('%Y%m%d')
+        logging.info(f"处理日期: {handle_date}")
         filtered_data = filter_data(data, target_date)
         output_file = os.path.join(
             output_dir,
-            f"vnstat_{target_date.strftime('%Y%m%d')}.json"
+            f"vnstat_{handle_date}.json"
         )
-        
+        # 备份已存在的文件
+        if os.path.exists(output_file):
+            try:
+                backup_file = os.path.join(backup_dir, os.path.basename(output_file))
+                shutil.move(output_file, backup_file)
+                logging.info(f"已备份旧文件至: {backup_file}")
+            except Exception as e:
+                logging.error(f"文件备份失败: {str(e)}")
+                logging.error("为避免数据丢失，跳过本次保存")
+                continue  # 跳过当前文件的保存
+
+        # 保存新文件
         with open(output_file, "w") as f:
             json.dump(filtered_data, f, indent=2)
         logging.info(f"数据已保存: {output_file}")

@@ -8,14 +8,11 @@ RUN echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye main contrib
 
 # 安装依赖
 RUN apt-get update && apt-get install -y \
-  curl \
-  jq \
-  cron \
-  tzdata \
   nginx  \
   supervisor  \
   procps \
-  net-tools \
+  iproute2 \
+  vim \
   && rm -rf /var/lib/apt/lists/*
 
 # 设置时区
@@ -23,7 +20,6 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
 
 # 创建目录结构
-RUN mkdir -p /app/shell
 RUN mkdir -p /app/python
 RUN mkdir -p /app/www
 RUN mkdir -p /app/backups
