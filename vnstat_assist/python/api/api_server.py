@@ -162,12 +162,13 @@ class APIHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        self.send_header('Access-Control-Allow-Credentials', 'true')
+        self.send_header('Access-Control-Max-Age', '1728000')  # 缓存20天（单位：秒）
     def _send_response(self, status_code, data=None):
         """统一响应处理"""
         self.send_response(status_code)
         self.send_header('Content-type', 'application/json')
-        self._set_cors_headers()
+        if self.command != 'OPTIONS':
+            self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
         if data is not None:
             self.wfile.write(json.dumps(data).encode())
@@ -204,8 +205,9 @@ class APIHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """处理数据请求"""
+        if self.command == 'OPTIONS':
+            return
         parsed_path = urlparse(self.path)
-
         # 验证接口
         if parsed_path.path == '/auth/verify':
             return self.handle_verify()

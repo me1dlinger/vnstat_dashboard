@@ -591,7 +591,7 @@
 
       .message {
         background: #f4f4f5;
-        color: #606266;
+        color: #282C34;
         padding: 12px 20px;
         border-radius: 4px;
         box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
@@ -939,6 +939,14 @@
                 >
               </div>
             </div>
+            <button
+            class="control-button"
+            title="刷新"
+            :style="{ visibility: showNextButton ? 'hidden' : 'visible' }"
+            @click="loadData(1)"
+          >
+            <i class="fas fa-refresh"></i>
+          </button>
             <select
               v-model="latestSelectedInterfaceData"
               v-show="!interfacesDataMode"
@@ -1422,9 +1430,14 @@
             this.isAuthenticated = false;
             this.authToken = null;
           },
-          async loadData() {
+          async loadData(arg) {
+            console.time("加载数据耗时");
             const response = await this.fetchWithAuth(this.url.loadJson);
             this.latestRawData = await response.json();
+            if(arg == 1 && this.latestRawData){
+              this.showMessage("刷新成功")
+            }
+            console.timeEnd("加载数据耗时");
             this.latestInterfacesData = this.latestRawData.interfaces;
             if (this.latestInterfacesData.length > 0) {
               const defaultInterface = this.latestInterfacesData.find(
@@ -1433,7 +1446,6 @@
               this.latestSelectedInterfaceData =
                 defaultInterface || this.latestInterfacesData[0];
             }
-            
             await this.$nextTick();
           },
           async fetchWithAuth(url, options = {}) {
@@ -1574,6 +1586,8 @@
             this.apiSettingsVisible = !this.apiSettingsVisible;
           },
           normalizeUrl(url) {
+            if(url==null||url=='')
+              return null
             const trimmedUrl = url.trim();
             if (/^\/\//.test(trimmedUrl)) {
               return `http:${trimmedUrl}`;
@@ -1584,13 +1598,18 @@
             return trimmedUrl;
           },
           saveApiSettings() {
+            this.apiSettingsVisible = false;
             this.assistApi = this.normalizeUrl(this.assistApi);
+            if(!this.assistApi){
+              localStorage.removeItem("assist_api");
+              return 
+            }
             localStorage.setItem("assist_api", this.assistApi);
             localStorage.setItem("enable_backup", this.enableBackupData);
             if (!this.enableBackupData) {
               localStorage.removeItem("backup_data");
             }
-            this.apiSettingsVisible = false;
+            
             if (this.isAuthenticated) {
               this.loadData();
             }
@@ -2126,7 +2145,10 @@
               this.showMessage("夜深了，已切换成夜间模式");
             }
           }
+          console.time("加载主题耗时");
           this.loadThemeColors();
+          console.timeEnd("加载主题耗时");
+          console.time("加载变量耗时");
           // 初始化时检查本地Token
           const storedToken = localStorage.getItem("jwt_token");
           // 初始化检查缓存api选项
@@ -2147,14 +2169,17 @@
             };
           }
           if (!this.assistApi) {
-            alert("请先点击右上角设置统一API入口");
+            this.showMessage("请先点击右上角设置统一API入口");
             this.handleLogout();
             return;
           }
+          console.timeEnd("加载变量耗时");
           if (storedToken) {
             // 验证Token有效性
             this.authToken = storedToken;
+            console.time("token验证耗时");
             const response = await this.fetchWithAuth(this.url.verify);
+            console.timeEnd("token验证耗时");
             if (response.ok) {
               this.handleAuthSuccess(storedToken);
             } else {
