@@ -1379,6 +1379,13 @@
             if (!this.assistApi) {
               alert("请先点击右上角设置统一API入口");
               return;
+            }else{
+              this.url = {
+              login: this.assistApi + "/auth/login",
+              verify: this.assistApi + "/auth/verify",
+              loadJson: this.assistApi + "/json.cgi",
+              backups: this.assistApi + "/backups/",
+            };
             }
             this.loggingIn = true;
             this.loginError = "";
@@ -1648,15 +1655,16 @@
             if (arg == 1) {
               this.isNightMode = true;
             } else {
+              localStorage.setItem('nightModeOff', true)
               this.isNightMode = !this.isNightMode;
             }
             const htmlEl = document.documentElement;
             if (this.isNightMode) {
+              localStorage.removeItem('nightModeOff')
               htmlEl.classList.add("night-mode");
             } else {
               htmlEl.classList.remove("night-mode");
             }
-            // localStorage.setItem('nightMode', this.isNightMode)
           },
           handleShowInterfaceData() {
             if (this.interfacesDataMode) {
@@ -2112,8 +2120,11 @@
         },
         async mounted() {
           if (this.isLateNight()) {
-            this.toggleNightMode(1);
-            this.showMessage("夜深了，已切换成夜间模式");
+            const nightModeOff = localStorage.getItem("nightModeOff");
+            if(!nightModeOff){
+              this.toggleNightMode(1);
+              this.showMessage("夜深了，已切换成夜间模式");
+            }
           }
           this.loadThemeColors();
           // 初始化时检查本地Token
