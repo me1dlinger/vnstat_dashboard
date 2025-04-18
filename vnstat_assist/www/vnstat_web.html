@@ -14,10 +14,10 @@
       type="image/x-icon"
     />
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.zhimg.com/vue@2.6.14/dist/vue.min.js"></script>
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      href="https://s4.zstatic.net/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
     <style>
       :root {
@@ -249,16 +249,18 @@
       }
 
       .stat-icon {
-        font-size: 1.4em;
-        margin-right: 15px;
+        font-size: 1em;
+        margin-right: 5px;
         width: 30px;
         text-align: center;
       }
 
       .stat-value {
-        font-size: 1.8em;
+        /* font-size: clamp(1.5rem, 1.5vw, 1.5em); 响应式字体 */
+        font-size: 1.5em;
         font-weight: 500;
         position: relative;
+        white-space: nowrap; /* 防止文字换行 */
       }
 
       .stat-unit {
