@@ -123,8 +123,7 @@ def main():
     logging.info(f"脚本启动，日志文件: {log_file}")
 
     # 检查API_URL（保持原有代码不变）
-    # api_url = os.getenv("VNSTAT_API_URL")
-    api_url = "http://102419.xyz:19327/vnstat/json.cgi"
+    api_url = os.getenv("VNSTAT_API_URL")
     if not api_url:
         logging.error("必须通过Docker环境变量配置 VNSTAT_API_URL")
         sys.exit(1)
@@ -134,7 +133,7 @@ def main():
         sys.exit(2)
 
     # 处理数据（添加备份目录创建）
-    output_dir = "D:\\Code\Tools\\vnstat_dashboard\\vnstat_assist"
+    output_dir = "/app/backups/json"
     backup_root = os.path.join(output_dir, "backup")
     today =  datetime.now(tz=tz.gettz("Asia/Shanghai"))
     days = parse_args()
