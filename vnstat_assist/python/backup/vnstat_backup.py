@@ -123,7 +123,8 @@ def main():
     logging.info(f"脚本启动，日志文件: {log_file}")
 
     # 检查API_URL（保持原有代码不变）
-    api_url = os.getenv("VNSTAT_API_URL")
+    # api_url = os.getenv("VNSTAT_API_URL")
+    api_url = "http://102419.xyz:19327/vnstat/json.cgi"
     if not api_url:
         logging.error("必须通过Docker环境变量配置 VNSTAT_API_URL")
         sys.exit(1)
@@ -133,18 +134,16 @@ def main():
         sys.exit(2)
 
     # 处理数据（添加备份目录创建）
-    output_dir = "/app/backups/json"
+    output_dir = "D:\\Code\Tools\\vnstat_dashboard\\vnstat_assist"
     backup_root = os.path.join(output_dir, "backup")
     today =  datetime.now(tz=tz.gettz("Asia/Shanghai"))
     days = parse_args()
     data = fetch_api_data(api_url)
-    backup_timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    backup_dir = os.path.join(backup_root, backup_timestamp)
     # 创建输出目录和备份目录
     os.makedirs(output_dir, exist_ok=True)
-    os.makedirs(backup_dir, exist_ok=True)
+    os.makedirs(backup_root, exist_ok=True)
     os.chmod(output_dir, 0o755)
-    os.chmod(backup_dir, 0o755)
+    os.chmod(backup_root, 0o755)
 
     for i in range(days):
         target_date = today - timedelta(days=i+1)
@@ -158,6 +157,10 @@ def main():
         # 备份已存在的文件
         if os.path.exists(output_file):
             try:
+                backup_timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                backup_dir = os.path.join(backup_root, backup_timestamp)
+                os.makedirs(backup_dir, exist_ok=True)
+                os.chmod(backup_dir, 0o755)
                 backup_file = os.path.join(backup_dir, os.path.basename(output_file))
                 shutil.move(output_file, backup_file)
                 logging.info(f"已备份旧文件至: {backup_file}")
