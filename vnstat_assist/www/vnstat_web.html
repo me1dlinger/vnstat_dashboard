@@ -110,13 +110,14 @@
       }
       /* 标签样式 */
       .form-group label {
+        width: 30%;
         font-weight: 500;
         color: var(--text-color);
-        min-width: 70px;
+        /* min-width: 70px; */
         font-size: 0.95rem;
       }
-      .form-group input {
-        width: 80%;
+      .form-group:not(.switch-group) input {
+        width: 85%;
         padding: 0.5rem;
         border: 1px solid var(--input-border);
         border-radius: 4px;
@@ -237,6 +238,7 @@
         text-align: center;
         white-space: nowrap;
         z-index: 1;
+        font-weight: 500;
       }
 
       .stat-row {
@@ -274,12 +276,13 @@
         gap: 15px;
         background: var(--main-color);
         border-radius: 8px;
-        margin: 44px 0;
+        /* margin: 44px 0; */
         align-items: center;
         flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
-        padding: 13px 30px;
+        padding: 10px 15px; /* 减少左右内边距 */
+        margin: 44px 0; /* 减少垂直外边距 */
       }
       /* 排除需要保持主题色的元素 */
       .stat-card,
@@ -331,6 +334,8 @@
         border: 1px solid var(--accent-color);
         padding: 8px 15px;
         border-radius: 4px;
+        font-size: 14px;
+        font-weight: 400;
       }
 
       button {
@@ -355,6 +360,9 @@
       }
 
       .time-label {
+        text-align: right;
+        width: 100px;
+        font-weight: 400;
         color: var(--contrast-color);
         white-space: nowrap;
       }
@@ -458,7 +466,7 @@
       /* API 设置按钮和弹窗样式 */
       .settings-button {
         font-size: 17px;
-        position: fixed;
+        position: absolute;
         top: 30px;
         right: 25px;
         background: #ffffff00;
@@ -482,6 +490,9 @@
       }
       .settings-button.night-btn {
         right: 85px;
+      }
+      .settings-button.language-btn {
+        right: 115px;
       }
       .settings-modal {
         position: fixed;
@@ -518,6 +529,9 @@
       .settings-buttons button {
         padding: 8px 15px;
         cursor: pointer;
+      }
+      .settings-checkbox {
+        margin-left: -31px;
       }
       .default-button {
         background: var(--button-bg);
@@ -682,6 +696,9 @@
 
   <body>
     <div id="app">
+      <button class="settings-button language-btn" @click="toggleLanguage">
+        <i :class="currentLang === 'zh' ? 'fas fa-star' : 'fas fa-globe'"></i>
+      </button>
       <button class="settings-button api-btn" @click="showApiSettings">
         <i class="fas fa-cog"></i>
       </button>
@@ -693,7 +710,7 @@
       </button>
       <div class="settings-modal" v-if="themeSettingsVisible">
         <div class="settings-content">
-          <h3>主题配置</h3>
+          <h3>{{language[currentLang]['themeSettings']}}</h3>
           <!-- 预设主题 -->
           <div class="preset-themes">
             <div
@@ -713,7 +730,9 @@
                 class="color-preview"
                 :style="{'--selected-color': theme.accent}"
               ></div>
-              <div class="color-value">强调色：{{ theme.accent }}</div>
+              <div class="color-value">
+                {{language[currentLang]['accent']}}: {{ theme.accent }}
+              </div>
             </div>
           </div>
           <div class="form-group">
@@ -723,7 +742,9 @@
                 class="color-preview"
                 :style="{'--selected-color': theme.main}"
               ></div>
-              <div class="color-value">主体色：{{ theme.main }}</div>
+              <div class="color-value">
+                {{language[currentLang]['main']}}: {{ theme.main }}
+              </div>
             </div>
           </div>
 
@@ -734,7 +755,9 @@
                 class="color-preview"
                 :style="{'--selected-color': theme.contrast}"
               ></div>
-              <div class="color-value">对比色：{{ theme.contrast}}</div>
+              <div class="color-value">
+                {{language[currentLang]['contrast']}}: {{ theme.contrast}}
+              </div>
             </div>
           </div>
           <!-- 新增：颜色选择和图表预览行 -->
@@ -748,7 +771,9 @@
                     class="color-preview"
                     :style="{'--selected-color': theme.upload}"
                   ></div>
-                  <div class="color-value">上行：{{ theme.upload }}</div>
+                  <div class="color-value">
+                    {{language[currentLang]['upload']}}: {{ theme.upload }}
+                  </div>
                 </div>
               </div>
               <div class="form-group compact">
@@ -758,7 +783,9 @@
                     class="color-preview"
                     :style="{'--selected-color': theme.download}"
                   ></div>
-                  <div class="color-value">下行：{{ theme.download }}</div>
+                  <div class="color-value">
+                    {{language[currentLang]['download']}}: {{ theme.download }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -770,48 +797,57 @@
           </div>
           <div class="settings-buttons">
             <button class="default-button" @click="resetDefaultTheme">
-              <i class="fas fa-undo"></i> 恢复默认
+              <i class="fas fa-undo"></i>
+              {{language[currentLang]['restoreDefault']}}
             </button>
             <button class="cancel-button" @click="cancelThemeSettings">
-              取消
+              {{language[currentLang]['cancel']}}
             </button>
-            <button class="save-button" @click="saveThemeSettings">保存</button>
+            <button class="save-button" @click="saveThemeSettings">
+              {{language[currentLang]['save']}}
+            </button>
           </div>
         </div>
       </div>
       <div class="settings-modal" v-if="apiSettingsVisible">
         <div class="settings-content">
-          <h3>页面配置</h3>
+          <h3>{{language[currentLang]['apiSettings']}}</h3>
           <div class="form-group">
-            <label>API接口：</label>
+            <label>{{language[currentLang]['assistApi']}}:</label>
             <input
               type="text"
               v-model="assistApi"
-              placeholder="请输入API地址"
+              :placeholder="language[currentLang]['assistApi']"
             />
           </div>
           <div class="form-group">
-            <label>默认网卡：</label>
+            <label>{{language[currentLang]['defaultInterface']}}:</label>
             <input
               type="text"
               v-model="defaultInterface"
-              placeholder="请输入默认网卡"
+              :placeholder="language[currentLang]['defaultInterfacePlaceholder']"
             />
           </div>
           <!-- 新增备份数据开关 -->
-          <div class="form-group">
-            <label>调用备份数据：</label>
+          <div class="form-group switch-group">
+            <label>{{language[currentLang]['enableBackup']}}:</label>
             <label class="switch">
-              <input type="checkbox" v-model="enableBackupData" />
+              <input
+                type="checkbox"
+                class="settings-checkbox"
+                v-model="enableBackupData"
+              />
               <span class="slider round"></span>
             </label>
           </div>
 
           <div class="settings-buttons">
             <button class="cancel-button" @click="cancelApiSettings">
-              取消
+              {{language[currentLang]['cancel']}}
             </button>
-            <button class="save-button" @click="saveApiSettings">保存</button>
+            <button class="save-button" @click="saveApiSettings">
+              {{language[currentLang]['save']}}
+            </button>
           </div>
         </div>
       </div>
@@ -821,15 +857,22 @@
           <h1>VNSTAT-DASHBOARD</h1>
           <form @submit.prevent="handleLogin">
             <div class="form-group">
-              <label><i class="fas fa-user"></i> 用户名</label>
+              <label
+                ><i class="fas fa-user"></i>
+                {{language[currentLang]['username']}}</label
+              >
               <input type="text" v-model="loginForm.username" required />
             </div>
             <div class="form-group">
-              <label><i class="fas fa-lock"></i> 密码</label>
+              <label
+                ><i class="fas fa-lock"></i>
+                {{language[currentLang]['password']}}</label
+              >
               <input type="password" v-model="loginForm.password" required />
             </div>
             <button type="submit" :disabled="loggingIn">
-              {{ loggingIn ? '登录中...' : '登录' }}
+              {{ loggingIn ? language[currentLang]['loginIn'] :
+              language[currentLang]['login'] }}
             </button>
             <div v-if="loginError" class="error-message">{{ loginError }}</div>
           </form>
@@ -869,7 +912,7 @@
                 >
               </div>
             </div>
-            <div class="stat-label">总计</div>
+            <div class="stat-label">{{language[currentLang]['total']}}</div>
           </div>
           <div
             class="stat-card"
@@ -897,7 +940,7 @@
                 <span class="stat-unit">{{ formatBytes(data.tx).unit }}</span>
               </div>
             </div>
-            <div class="stat-label">{{ title.toUpperCase() }}</div>
+            <div class="stat-label">{{ title }}</div>
           </div>
         </div>
 
@@ -907,7 +950,7 @@
           <div class="control-group left">
             <button
               class="control-button"
-              title="用量TOP统计"
+              :title="language[currentLang]['topStatistics']"
               @click="handleShowTopData()"
             >
               <i class="fas fa-signal"></i>
@@ -916,10 +959,12 @@
               v-model="timeRangeType"
               v-show="!(interfacesDataMode||topDataMode)"
             >
-              <option value="hour">按时</option>
-              <option value="day">按日</option>
-              <option value="month">按月</option>
-              <option value="year">按年</option>
+              <option value="hour">{{language[currentLang]['byHour']}}</option>
+              <option value="day">{{language[currentLang]['byDay']}}</option>
+              <option value="month">
+                {{language[currentLang]['byMonth']}}
+              </option>
+              <option value="year">{{language[currentLang]['byYear']}}</option>
             </select>
           </div>
 
@@ -944,13 +989,17 @@
           <div class="control-group right">
             <div class="time-display" v-if="latestSelectedInterfaceData">
               <div class="time-row">
-                <span class="time-label">统计开始：</span>
+                <span class="time-label"
+                  >{{language[currentLang]['createTime']}}:
+                </span>
                 <span class="time-value"
                   >{{ formatTime(latestSelectedInterfaceData.created) }}</span
                 >
               </div>
               <div class="time-row">
-                <span class="time-label">最后更新：</span>
+                <span class="time-label"
+                  >{{language[currentLang]['updateTime']}}:
+                </span>
                 <span class="time-value"
                   >{{ formatTime(latestSelectedInterfaceData.updated) }}</span
                 >
@@ -1025,18 +1074,18 @@
                 <thead>
                   <tr>
                     <th @click="sortTable('timestamp')">
-                      日期/时间
+                      {{language[currentLang]['timeDate']}}
                       <i class="fas" :class="sortIcon('timestamp')"></i>
                     </th>
                     <th @click="sortTable('tx')">
-                      上行
+                      {{language[currentLang]['upload']}}
                       <i class="fas" :class="sortIcon('tx')"></i>
                     </th>
                     <th @click="sortTable('rx')">
-                      下行
+                      {{language[currentLang]['download']}}
                       <i class="fas" :class="sortIcon('rx')"></i>
                     </th>
-                    <th>总计</th>
+                    <th>{{language[currentLang]['total']}}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1064,31 +1113,31 @@
             <thead>
               <tr>
                 <th @click="sortTable('name')">
-                  网卡名称
+                  {{language[currentLang]['interfaceName']}}
                   <i class="fas" :class="sortIcon('name')"></i>
                 </th>
                 <th @click="sortTable('todayRx')">
-                  今日下行
+                  {{language[currentLang]['todayDownload']}}
                   <i class="fas" :class="sortIcon('todayRx')"></i>
                 </th>
                 <th @click="sortTable('todayTx')">
-                  今日上行
+                  {{language[currentLang]['todayUpload']}}
                   <i class="fas" :class="sortIcon('todayTx')"></i>
                 </th>
                 <th @click="sortTable('todayTotal')">
-                  今日总计
+                  {{language[currentLang]['todayTotal']}}
                   <i class="fas" :class="sortIcon('todayTotal')"></i>
                 </th>
                 <th @click="sortTable('totalRx')">
-                  全部下行
+                  {{language[currentLang]['allDownload']}}
                   <i class="fas" :class="sortIcon('totalRx')"></i>
                 </th>
                 <th @click="sortTable('totalTx')">
-                  全部上行
+                  {{language[currentLang]['allUpload']}}
                   <i class="fas" :class="sortIcon('totalTx')"></i>
                 </th>
                 <th @click="sortTable('totalTotal')">
-                  全部总计
+                  {{language[currentLang]['allTotal']}}
                   <i class="fas" :class="sortIcon('totalTotal')"></i>
                 </th>
               </tr>
@@ -1129,19 +1178,19 @@
             <thead>
               <tr>
                 <th @click="sortTable('timestamp')">
-                  时间
+                  {{language[currentLang]['time']}}
                   <i class="fas" :class="sortIcon('timestamp')"></i>
                 </th>
                 <th @click="sortTable('rx')">
-                  下行
+                  {{language[currentLang]['download']}}
                   <i class="fas" :class="sortIcon('rx')"></i>
                 </th>
                 <th @click="sortTable('tx')">
-                  上行
+                  {{language[currentLang]['upload']}}
                   <i class="fas" :class="sortIcon('tx')"></i>
                 </th>
                 <th @click="sortTable('total')">
-                  总计
+                  {{language[currentLang]['total']}}
                   <i class="fas" :class="sortIcon('todayTotal')"></i>
                 </th>
               </tr>
@@ -1281,6 +1330,117 @@
             upload: "#93c5fd",
             download: "#60a5fa",
           },
+          currentLang: "zh",
+          language: {
+            zh: {
+              loginTitle: "VNSTAT-DASHBOARD",
+              username: "用户名",
+              password: "密码",
+              login: "登录",
+              loginIn: "登录中...",
+              loginError: "登录失败",
+              total: "总计",
+              thisMonth: "本月",
+              today: "今日",
+              yesterday: "昨日",
+              topStatistics: "用量TOP统计",
+              byHour: "按时",
+              byDay: "按日",
+              byMonth: "按月",
+              byYear: "按年",
+              hour: "小时",
+              hour2: "时",
+              date: "日期",
+              month: "月份",
+              timeDate: "时间/日期",
+              time: "时间",
+              themeSettings: "主题配置",
+              createTime: "统计开始",
+              updateTime: "最后更新",
+              traffic: "流量",
+              accent: "强调色",
+              main: "主体色",
+              contrast: "对比色",
+              upload: "上行",
+              download: "下行",
+              allUpload: "全部上行",
+              allDownload: "全部下行",
+              allTotal: "历史总计",
+              todayUpload: "今日上行",
+              todayDownload: "今日下行",
+              todayTotal: "今日总计",
+              restoreDefault: "恢复默认",
+              cancel: "取消",
+              save: "保存",
+              apiSettings: "页面配置",
+              assistApi: "API接口",
+              assistApiPlaceholder: "请输入API地址",
+              defaultInterface: "默认网卡",
+              interfaceName: "网卡名称",
+              defaultInterfacePlaceholder: "请输入默认网卡，比如：enp3s0",
+              enableBackup: "使用备份数据",
+              noAssistApi: "请先点击右上角设置统一API入口",
+              nightMode: "夜深了，已切换成夜间模式",
+              refresh: "刷新成功",
+              total: "总计",
+              switchSuccess: "切换成功",
+              langSwitched: "语言已切换至中文",
+            },
+            en: {
+              loginTitle: "VNSTAT-DASHBOARD",
+              username: "Username",
+              password: "Password",
+              login: "Sign In",
+              loginIn: "Logging In...",
+              loginError: "Login Failure",
+              total: "TOTAL",
+              thisMonth: "THIS MONTH",
+              today: "TODAY",
+              yesterday: "YESTERDAY",
+              topStatistics: "Top Traffic Days",
+              byHour: "By Hour",
+              byDay: "By Day",
+              byMonth: "By Month",
+              byYear: "By Year",
+              themeSettings: "Theme Settings",
+              createTime: "Stats Since",
+              updateTime: "Last Updated",
+              traffic: "traffic",
+              hour: "HOUR",
+              date: "DATE",
+              month: "MONTH",
+              timeDate: "TIME/DATE",
+              time: "TIME",
+              accent: "Accent Color",
+              main: "Main Color",
+              contrast: "Contrast Color",
+              upload: "UPLOAD",
+              download: "DOWNLOAD",
+              allUpload: "TOTAL UPLOAD",
+              allDownload: "TOTAL DOWNLOAD",
+              allTotal: "TOTAL",
+              todayUpload: "TODAY UPLOAD",
+              todayDownload: "TODAY DOWNLOAD",
+              todayTotal: "TODAY TOTAL",
+              restoreDefault: "Restore Default",
+              cancel: "Cancel",
+              save: "Save",
+              apiSettings: "SETTINGS",
+              assistApi: "API",
+              assistApiPlaceholder: "Please input API address",
+              defaultInterface: "Default Interface",
+              interfaceName: "INTERFACE NAME",
+              defaultInterfacePlaceholder:
+                "Please input default interface, e.g. eth0",
+              enableBackup: "Use Backup Data",
+              noAssistApi:
+                "Please set the API endpoint in the top-right settings first",
+              nightMode: "Good Evening",
+              refresh: "Refreshed",
+              switchSuccess: "Toggle Successful",
+              langSwitched: "Language switched to English",
+            },
+          },
         },
         computed: {
           uploadGB() {
@@ -1309,11 +1469,14 @@
           summaryData() {
             const latestInterfacesData =
               this.latestSelectedInterfaceData || this.latestInterfacesData[0];
-            return {
-              本月: this.getMonthData(latestInterfacesData),
-              今日: this.getDayData(latestInterfacesData),
-              昨日: this.getYesterdayData(latestInterfacesData),
-            };
+            const monthKey = this.language[this.currentLang]["thisMonth"];
+            const todayKey = this.language[this.currentLang]["today"];
+            const yesterdayKey = this.language[this.currentLang]["yesterday"];
+            const data = {};
+            data[monthKey] = this.getMonthData(latestInterfacesData);
+            data[todayKey] = this.getDayData(latestInterfacesData);
+            data[yesterdayKey] = this.getYesterdayData(latestInterfacesData);
+            return data;
           },
           sortedInterfaces() {
             return [...this.latestInterfacesTableData].sort((a, b) => {
@@ -1374,7 +1537,7 @@
                 const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
                 return `${format(start)} - ${format(end)}`;
               case "year":
-                return `${d.getFullYear()}年`;
+                return `${d.getFullYear()}`;
             }
           },
         },
@@ -1422,12 +1585,15 @@
               });
               if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || "登录失败");
+                throw new Error(
+                  error.error || this.language[this.currentLang]["loginError"]
+                );
               }
               const { token } = await response.json();
               this.handleAuthSuccess(token);
             } catch (err) {
-              this.loginError = err.message || "登录请求失败";
+              this.loginError =
+                err.message || this.language[this.currentLang]["loginError"];
             } finally {
               this.loggingIn = false;
             }
@@ -1448,13 +1614,11 @@
             this.authToken = null;
           },
           async loadData(arg) {
-            console.time("加载数据耗时");
             const response = await this.fetchWithAuth(this.url.loadJson);
             this.latestRawData = await response.json();
             if (arg == 1 && this.latestRawData) {
-              this.showMessage("刷新成功");
+              this.showMessage("refresh");
             }
-            console.timeEnd("加载数据耗时");
             this.latestInterfacesData = this.latestRawData.interfaces;
             if (this.latestInterfacesData.length > 0) {
               const defaultInterface = this.latestInterfacesData.find(
@@ -1615,7 +1779,7 @@
           saveApiSettings() {
             this.apiSettingsVisible = false;
             this.assistApi = this.normalizeUrl(this.assistApi);
-            if (!this.assistApi) {
+            if (!this.assistApi || this.assistApi == "") {
               localStorage.removeItem("assist_api");
               return;
             }
@@ -1686,6 +1850,16 @@
               background: `linear-gradient(135deg, ${theme.main} 50%, ${theme.accent} 50%)`,
             };
           },
+          toggleLanguage(arg) {
+            if (this.currentLang == "zh") {
+              this.currentLang = "en";
+            } else {
+              this.currentLang = "zh";
+            }
+            this.showMessage("langSwitched");
+            localStorage.setItem("current_lang", this.currentLang);
+            this.updateChart(1);
+          },
           toggleNightMode(arg) {
             if (arg == 1) {
               this.isNightMode = true;
@@ -1700,6 +1874,7 @@
             } else {
               htmlEl.classList.remove("night-mode");
             }
+            this.showMessage("switchSuccess");
           },
           handleShowInterfaceData() {
             if (this.interfacesDataMode) {
@@ -1864,8 +2039,18 @@
             const getXValue = (date, time) =>
               this.getXValue(date, time, dataType);
             return [
-              this.generateSeries("上行", "tx", this.theme.upload, getXValue),
-              this.generateSeries("下行", "rx", this.theme.download, getXValue),
+              this.generateSeries(
+                this.language[this.currentLang]["upload"],
+                "tx",
+                this.theme.upload,
+                getXValue
+              ),
+              this.generateSeries(
+                this.language[this.currentLang]["download"],
+                "rx",
+                this.theme.download,
+                getXValue
+              ),
             ];
           },
           processCurrentData(currentDate, dataType) {},
@@ -1942,13 +2127,17 @@
               itemHour = String(time.hour).padStart(2, "0");
               itemMinute = String(time.minute).padStart(2, "0");
             }
+            const hour2 =
+              this.language[this.currentLang]["hour2"] != undefined
+                ? this.language[this.currentLang]["hour2"]
+                : "";
             switch (dataKey) {
               case "fiveminute":
-                return `${itemYear}-${itemMonth}-${itemDay} ${itemHour}:${itemMinute}`;
+                return `${itemHour}:${itemMinute}`;
               case "hour":
-                return `${itemYear}-${itemMonth}-${itemDay} ${itemHour}时`;
+                return `${itemHour}` + hour2;
               case "day":
-                return `${itemYear}-${itemMonth}-${itemDay}`;
+                return `${itemMonth}-${itemDay}`;
               case "month":
                 return `${itemYear}-${itemMonth}`;
             }
@@ -1977,7 +2166,9 @@
                 title: { text: this.getXAxisTitle() },
               },
               yaxis: {
-                title: { text: "流量 (MB)" },
+                title: {
+                  text: this.language[this.currentLang]["traffic"] + " (MB)",
+                },
                 labels: {
                   formatter: function (value) {
                     return value % 1 === 0
@@ -2029,9 +2220,9 @@
           },
           getXAxisTitle() {
             return {
-              day: "小时",
-              month: "日期",
-              year: "月份",
+              day: this.language[this.currentLang]["hour"],
+              month: this.language[this.currentLang]["date"],
+              year: this.language[this.currentLang]["month"],
             }[this.timeRangeType];
           },
           formatTime(timeObj) {
@@ -2079,12 +2270,12 @@
                 },
                 series: [
                   {
-                    name: "上行",
+                    name: this.language[this.currentLang]["upload"],
                     data: this.sampleUpData,
                     color: this.theme.upload,
                   },
                   {
-                    name: "下行",
+                    name: this.language[this.currentLang]["download"],
                     data: this.sampleDownData,
                     color: this.theme.download,
                   },
@@ -2104,12 +2295,12 @@
               this.previewChart.updateOptions({
                 series: [
                   {
-                    name: "上行",
+                    name: this.language[this.currentLang]["upload"],
                     data: this.sampleUpData,
                     color: this.theme.upload,
                   },
                   {
-                    name: "下行",
+                    name: this.language[this.currentLang]["download"],
                     data: this.sampleDownData,
                     color: this.theme.download,
                   },
@@ -2134,7 +2325,8 @@
             const currentHour = new Date().getHours();
             return currentHour >= 23 || currentHour < 6;
           },
-          showMessage(msg) {
+          showMessage(msgKey) {
+            const msg = this.language[this.currentLang][msgKey];
             const container =
               document.querySelector(".msg-container") ||
               this.createContainer();
@@ -2160,19 +2352,19 @@
             const nightModeOff = localStorage.getItem("nightModeOff");
             if (!nightModeOff) {
               this.toggleNightMode(1);
-              this.showMessage("夜深了，已切换成夜间模式");
+              this.showMessage("nightMode");
             }
           }
-          console.time("加载主题耗时");
           this.loadThemeColors();
-          console.timeEnd("加载主题耗时");
-          console.time("加载变量耗时");
           // 初始化时检查本地Token
           const storedToken = localStorage.getItem("jwt_token");
           // 初始化检查缓存api选项
           const assistApi = localStorage.getItem("assist_api");
           const defaultInterface = localStorage.getItem("default_interface");
           const savedEnable = localStorage.getItem("enable_backup");
+          const currentLang = localStorage.getItem("current_lang");
+          this.currentLang =
+            currentLang != null && currentLang != "" ? currentLang : "zh";
           this.enableBackupData =
             savedEnable !== null ? savedEnable === "true" : true;
           if (!this.enableBackupData) {
@@ -2186,20 +2378,17 @@
               loadJson: this.assistApi + "/json.cgi",
               backups: this.assistApi + "/backups/",
             };
-            this.defaultInterface = defaultInterface
+            this.defaultInterface = defaultInterface;
           }
           if (!this.assistApi) {
-            this.showMessage("请先点击右上角设置统一API入口");
+            this.showMessage("noAssistApi");
             this.handleLogout();
             return;
           }
-          console.timeEnd("加载变量耗时");
           if (storedToken) {
             // 验证Token有效性
             this.authToken = storedToken;
-            console.time("token验证耗时");
             const response = await this.fetchWithAuth(this.url.verify);
-            console.timeEnd("token验证耗时");
             if (response.ok) {
               this.handleAuthSuccess(storedToken);
             } else {
