@@ -192,7 +192,7 @@
       .stat-container {
         display: flex;
         justify-content: space-between;
-        padding: 0 10%;
+        padding: 0.5% 10%;
         /* 两侧间距 */
         margin: 20px 0;
       }
@@ -465,10 +465,10 @@
       }
       /* API 设置按钮和弹窗样式 */
       .settings-button {
-        font-size: 17px;
+        font-size: 18px;
         position: absolute;
-        top: 30px;
-        right: 25px;
+        top: 25px;
+        right: 30px;
         background: #ffffff00;
         color: color-mix(in srgb, var(--accent-color) 50%, transparent);
         border: none;
@@ -483,16 +483,16 @@
         transform: rotate(15deg);
       }
       .settings-button.api-btn {
-        right: 25px;
+        right: 15px;
       }
       .settings-button.theme-btn {
         right: 55px;
       }
       .settings-button.night-btn {
-        right: 85px;
+        right: 95px;
       }
       .settings-button.language-btn {
-        right: 115px;
+        right: 135px;
       }
       .settings-modal {
         position: fixed;
@@ -696,13 +696,28 @@
 
   <body>
     <div id="app">
-      <button class="settings-button language-btn" @click="toggleLanguage">
-        <i :class="currentLang === 'zh' ? 'fas fa-star' : 'fas fa-globe'"></i>
+      <button
+        :title="language[currentLang]['languageTip']"
+        class="settings-button language-btn"
+        @click="toggleLanguage"
+      >
+        <span
+          ><i class="fas fa-language"></i> {{ currentLang === 'zh' ? 'ZH' : 'EN'
+          }}</span
+        >
       </button>
-      <button class="settings-button api-btn" @click="showApiSettings">
+      <button
+        :title="language[currentLang]['apiSettings']"
+        class="settings-button api-btn"
+        @click="showApiSettings"
+      >
         <i class="fas fa-cog"></i>
       </button>
-      <button class="settings-button theme-btn" @click="showThemeSettings">
+      <button
+        :title="language[currentLang]['themeSettings']"
+        class="settings-button theme-btn"
+        @click="showThemeSettings"
+      >
         <i class="fas fa-palette"></i>
       </button>
       <button class="settings-button night-btn" @click="toggleNightMode">
@@ -1007,7 +1022,7 @@
             </div>
             <button
               class="control-button"
-              title="刷新"
+              :title="language[currentLang]['refresh']"
               :style="{ visibility: showNextButton ? 'hidden' : 'visible' }"
               @click="loadData(1)"
             >
@@ -1023,7 +1038,7 @@
             </select>
             <button
               class="control-button"
-              title="按网卡统计"
+              :title="language[currentLang]['StatsByInterface']"
               @click="handleShowInterfaceData()"
             >
               <i class="fas fa-network-wired"></i>
@@ -1032,15 +1047,18 @@
         </div>
         <div v-show="!(interfacesDataMode||topDataMode)">
           <div class="traffic-summary">
-            <div class="summary-item" title="上行流量">
+            <div class="summary-item" :title="language[currentLang]['upload']">
               <i class="fas fa-upload text-blue-500"></i>
               <span>{{ uploadGB }}</span>
             </div>
-            <div class="summary-item" title="总流量">
+            <div class="summary-item" :title="language[currentLang]['total']">
               <i class="fas fa-exchange-alt text-purple-500"></i>
               <span>{{ totalGB }}</span>
             </div>
-            <div class="summary-item" title="下行流量">
+            <div
+              class="summary-item"
+              :title="language[currentLang]['download']"
+            >
               <i class="fas fa-download text-green-500"></i>
               <span>{{ downloadGB }}</span>
             </div>
@@ -1052,7 +1070,7 @@
                 @click="currentView = 'chart'"
                 class="view-switch"
                 :class="{active: currentView === 'chart'} "
-                title="图表视图"
+                :title="language[currentLang]['chartView']"
               >
                 <i class="fas fa-chart-line"></i>
               </button>
@@ -1060,7 +1078,7 @@
                 @click="currentView = 'table'"
                 class="view-switch"
                 :class="{active: currentView === 'table'}"
-                title="表格视图"
+                :title="language[currentLang]['tableView']"
               >
                 <i class="fas fa-table"></i>
               </button>
@@ -1334,6 +1352,7 @@
           language: {
             zh: {
               loginTitle: "VNSTAT-DASHBOARD",
+              languageTip: "Switch to English",
               username: "用户名",
               password: "密码",
               login: "登录",
@@ -1349,7 +1368,6 @@
               byMonth: "按月",
               byYear: "按年",
               hour: "小时",
-              hour2: "时",
               date: "日期",
               month: "月份",
               timeDate: "时间/日期",
@@ -1372,22 +1390,27 @@
               restoreDefault: "恢复默认",
               cancel: "取消",
               save: "保存",
+              chartView: "图表视图",
+              tableview: "表格视图",
               apiSettings: "页面配置",
               assistApi: "API接口",
               assistApiPlaceholder: "请输入API地址",
               defaultInterface: "默认网卡",
               interfaceName: "网卡名称",
+              StatsByInterface: "按网卡统计",
               defaultInterfacePlaceholder: "请输入默认网卡，比如：enp3s0",
               enableBackup: "使用备份数据",
               noAssistApi: "请先点击右上角设置统一API入口",
               nightMode: "夜深了，已切换成夜间模式",
-              refresh: "刷新成功",
+              refreshed: "刷新成功",
+              refresh: "刷新",
               total: "总计",
               switchSuccess: "切换成功",
               langSwitched: "语言已切换至中文",
             },
             en: {
               loginTitle: "VNSTAT-DASHBOARD",
+              languageTip: "切换成中文",
               username: "Username",
               password: "Password",
               login: "Sign In",
@@ -1398,10 +1421,10 @@
               today: "TODAY",
               yesterday: "YESTERDAY",
               topStatistics: "Top Traffic Days",
-              byHour: "By Hour",
-              byDay: "By Day",
-              byMonth: "By Month",
-              byYear: "By Year",
+              byHour: "Hour",
+              byDay: "Day",
+              byMonth: "Month",
+              byYear: "Year",
               themeSettings: "Theme Settings",
               createTime: "Stats Since",
               updateTime: "Last Updated",
@@ -1425,18 +1448,22 @@
               restoreDefault: "Restore Default",
               cancel: "Cancel",
               save: "Save",
+              chartView: "Chart View",
+              tableview: "Table View",
               apiSettings: "SETTINGS",
               assistApi: "API",
               assistApiPlaceholder: "Please input API address",
               defaultInterface: "Default Interface",
               interfaceName: "INTERFACE NAME",
+              StatsByInterface: "Stats By Interface",
               defaultInterfacePlaceholder:
                 "Please input default interface, e.g. eth0",
               enableBackup: "Use Backup Data",
               noAssistApi:
                 "Please set the API endpoint in the top-right settings first",
               nightMode: "Good Evening",
-              refresh: "Refreshed",
+              refreshed: "Refreshed",
+              refresh: "refresh",
               switchSuccess: "Toggle Successful",
               langSwitched: "Language switched to English",
             },
@@ -1617,7 +1644,7 @@
             const response = await this.fetchWithAuth(this.url.loadJson);
             this.latestRawData = await response.json();
             if (arg == 1 && this.latestRawData) {
-              this.showMessage("refresh");
+              this.showMessage("refreshed");
             }
             this.latestInterfacesData = this.latestRawData.interfaces;
             if (this.latestInterfacesData.length > 0) {
@@ -2127,15 +2154,11 @@
               itemHour = String(time.hour).padStart(2, "0");
               itemMinute = String(time.minute).padStart(2, "0");
             }
-            const hour2 =
-              this.language[this.currentLang]["hour2"] != undefined
-                ? this.language[this.currentLang]["hour2"]
-                : "";
             switch (dataKey) {
               case "fiveminute":
                 return `${itemHour}:${itemMinute}`;
               case "hour":
-                return `${itemHour}` + hour2;
+                return `${itemHour}` + ":00";
               case "day":
                 return `${itemMonth}-${itemDay}`;
               case "month":
