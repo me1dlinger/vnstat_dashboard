@@ -24,9 +24,9 @@ RUN mkdir -p /app/log/nginx
 RUN mkdir -p /app/log/python
 
 # 复制脚本和API文件
-COPY python /app/python
-COPY www /app/www
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY /python /app/python
+COPY /www /app/www
+COPY conf/nginx.conf /etc/nginx/nginx.conf
 COPY conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN chmod +x /app/python/backup/vnstat_backup.py \
