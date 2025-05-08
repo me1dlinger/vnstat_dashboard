@@ -1,7 +1,15 @@
+# vnstat_dashboard
+
+<div align="center">
+
 [![English](https://img.shields.io/badge/English-README-blue)](README_EN.md)
 [![中文](https://img.shields.io/badge/中文-README-red)](README.md)
+<br>
+[![Docker](https://img.shields.io/badge/-Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/meidlinger1024/vnstat-dashboard)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-4CAF50?style=flat-square)](LICENSE)
+</div>
 
-# vnstat_dashboard
+
 
 基于 vnStat Api 的实时流量监控统计面板
 
