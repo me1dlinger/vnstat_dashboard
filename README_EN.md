@@ -44,20 +44,27 @@ Enable authentication for public network access
 
 ```
 vnstat-assist
-  -www
-    -vnstat_web.html -> dashboard page
-  -python
-    -api
-      -api_server.py ->API service
-    -backup
-      -task_scheduler.py ->Timed executor to invoke backup service
-      -vnstat_backup.py ->Backup service implementation
-  -conf
-    -nginx.conf ->Nginx configuration for page and API proxy
-    -supervisord.conf ->Process configuration
-  -Dockerfile ->Docker build configuration
-  -docker-compose.yml ->Docker compose config, ensure host directories exist
-  
+├── python
+│   ├── api
+│   │   ├── api_server.py               ➔ API service
+│   │   ├── templates
+│   │   │   └── index.html              ➔ vnstat dashboard panel
+│   │   └── static                      ➔ Static files directory
+│   │       ├── css
+│   │       │   ├── all.min.css         ➔ Font-awesome styles
+│   │       │   └── styles.css          ➔ Custom CSS styles
+│   │       ├── js
+│   │       │   ├── apexcharts.js
+│   │       │   └── vue.js
+│   │       └── webfonts
+│   │           └── fa-solid-900.woff2  ➔ Font-awesome webfont
+│   └── backup
+│       ├── task_scheduler.py           ➔ Timed backup executor
+│       └── vnstat_backup.py            ➔ vnstat data backup implementation
+├── conf
+│   └── supervisord.conf                ➔ Process management configuration
+├── Dockerfile                          ➔ Docker build configuration
+└── docker-compose.yml                  ➔ Docker compose config (requires pre-existing host directories)
 ```
 
 ## 🔧 Deployment
@@ -77,9 +84,8 @@ docker pull meidlinger1024/vnstat-dashboard:latest
 
 docker run -d \
   --name vnstat-dashboard \
-  -p 19329:80 \
+  -p 19328:19328 \
   -v ${path-on-host}/log/python:/app/log/python \
-  -v ${path-on-host}/log/nginx:/app/log/nginx \
   -v ${path-on-host}/backups:/app/backups \
   -e VNA_AUTH_ENABLE=1 \
   -e VNSTAT_API_URL=http://${host}:${port}/json.cgi \
@@ -99,11 +105,10 @@ services:
     container_name: vnstat-dashboard
     restart: always
     ports:
-      - "19329:80"
+      - "19328:19328"
     volumes:
         # Specify host machine paths (create them first if needed)
       - ${path-on-host}/log/python:/app/log/python
-      - ${path-on-host}/log/nginx:/app/log/nginx
       - ${path-on-host}/backups:/app/backups
     environment:
       # Enable authentication

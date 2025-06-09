@@ -42,19 +42,27 @@
 
 ```
 vnstat-assist
-  -www
-    -vnstat_web.html -> vnstat面板
-  -python
-    -api
-      -api_server.py api服务
-    -backup
-      -task_scheduler.py ->定时执行器，调用备份服务
-      -vnstat_backup.py ->vnstat数据备份具体业务
-  -conf
-    -nginx.conf ->nginx配置，页面和api代理
-    -supervisord.conf ->supervisord进程配置
-  -Dockerfile ->打包配置
-  -docker-compose.yml ->docker构建配置，宿主机要先创建对应目录
+├── python
+│   ├── api
+│   │   ├── api_server.py               ➔ API服务
+│   │   ├── templates
+│   │   │   └── index.html              ➔ vnstat面板
+│   │   └── static                      ➔ 静态文件目录
+│   │       ├── css
+│   │       │   ├── all.min.css         ➔ font-awesome样式
+│   │       │   └── styles.css          ➔ 自定义样式
+│   │       ├── js
+│   │       │   ├── apexcharts.js
+│   │       │   └── vue.js
+│   │       └── webfonts
+│   │           └── fa-solid-900.woff2  ➔ font-awesome字体文件
+│   └── backup
+│       ├── task_scheduler.py           ➔ 定时执行器，调用备份服务
+│       └── vnstat_backup.py            ➔ vnstat数据备份具体业务
+├── conf
+│   └── supervisord.conf                ➔ supervisord进程配置
+├── Dockerfile                          ➔ 打包配置
+└── docker-compose.yml                  ➔ docker构建配置，宿主机要先创建对应目录
   
 ```
 
@@ -75,9 +83,8 @@ docker pull meidlinger1024/vnstat-dashboard:latest
 
 docker run -d \
   --name vnstat-dashboard \
-  -p 19329:80 \
+  -p 19328:19328 \
   -v ${path-on-host}/log/python:/app/log/python \
-  -v ${path-on-host}/log/nginx:/app/log/nginx \
   -v ${path-on-host}/backups:/app/backups \
   -e VNA_AUTH_ENABLE=1 \
   -e VNSTAT_API_URL=http://${host}:${port}/json.cgi \
@@ -97,11 +104,10 @@ services:
     container_name: vnstat-dashboard
     restart: always
     ports:
-      - "19329:80"
+      - "19328:19328"
     volumes:
         #填写自己宿主机的路径，可以提前创建
       - ${path-on-host}/log/python:/app/log/python
-      - ${path-on-host}/log/nginx:/app/log/nginx
       - ${path-on-host}/backups:/app/backups
     environment:
       #启用校验
