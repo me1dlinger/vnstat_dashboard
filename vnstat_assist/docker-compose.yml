@@ -5,11 +5,10 @@ services:
     container_name: vnstat-dashboard
     restart: always
     ports:
-      - "19329:80"
+      - "19328:19328"
     volumes:
         #填写自己宿主机的路径，可以提前创建
       - :path/log/python:/app/log/python
-      - :path/log/nginx:/app/log/nginx
       - :path/backups:/app/backups
     environment:
       - TZ=Asia/Shanghai

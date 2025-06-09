@@ -1,12 +1,17 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from flask import Flask, jsonify, request, make_response,render_template
 import json
 import os
 import base64
 import hmac
 import time
 from hashlib import sha256
-from urllib.parse import urlparse
 import urllib.request
+import logging
+
+# 设置日志
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # 默认配置
 DEFAULT_CONFIG = {
     "secret_key": "secret_key",
@@ -16,6 +21,7 @@ DEFAULT_CONFIG = {
         "username": "username",
         "password": "password"
     },
+    "vnstat_api": "http://localhost:8685/json.cgi"
 }
 
 def load_config_from_env():
@@ -50,15 +56,25 @@ def load_config_from_env():
         raise ValueError("VNSTAT_API_URL 必须包含协议（如 http:// 或 https://）")
     return config
 
-PORT = 19328
-JSON_DIR = "/app/backups/json"
+# 加载配置
+try:
+    CONFIG = load_config_from_env()
+    SECRET_KEY = CONFIG['secret_key'].encode()  # Convert to bytes for HMAC
+    VALID_USER = CONFIG['user']
+    VNSTAT_PROXY_URL = CONFIG['vnstat_api']
+    EXPIRE_SECONDS = CONFIG['expire_seconds']
+    AUTH_ENABLED = CONFIG['auth_enable']
+    JSON_DIR = "/app/backups/json"  # 备份文件目录
+    
+    logger.info("配置加载成功")
+    logger.info(f"VNSTAT API地址: {VNSTAT_PROXY_URL}")
+    logger.info(f"认证启用: {AUTH_ENABLED}")
+except Exception as e:
+    logger.error(f"配置加载失败: {str(e)}")
+    raise
 
-CONFIG = load_config_from_env()
-SECRET_KEY = CONFIG['secret_key'].encode()  # Convert to bytes for HMAC
-VALID_USER = CONFIG['user']
-VNSTAT_PROXY_URL = CONFIG['vnstat_api']
-EXPIRE_SECONDS = CONFIG['expire_seconds']
-AUTH_ENABLED = CONFIG['auth_enable']
+# 创建Flask应用
+app = Flask(__name__)
 
 class JWTManager:
     @staticmethod
@@ -111,151 +127,136 @@ class JWTManager:
         except Exception as e:
             return {"valid": False, "error": str(e)}
 
-class APIHandler(BaseHTTPRequestHandler):
-    def handle_verify(self):
-        """验证Token有效性"""
-        if not AUTH_ENABLED:
-            # 直接返回验证通过
-            self._send_response(200, {"valid": True, "user": "anonymous"})
-            return
-        auth_header = self.headers.get('Authorization', '')
+def set_cors_headers(response):
+    """设置CORS头"""
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    response.headers['Access-Control-Max-Age'] = '1728000'  
+    return response
+
+# 登录路由
+@app.route('/auth/login', methods=['POST', 'OPTIONS'])
+def login():
+    """处理登录请求"""
+    if request.method == 'OPTIONS':
+        response = make_response()
+        return set_cors_headers(response)
+    
+    if not AUTH_ENABLED:
+        # 直接生成Token无需验证用户
+        token = JWTManager.generate_token(VALID_USER['username'])
+        response = jsonify({"token": token, "expires_in": EXPIRE_SECONDS})
+        return set_cors_headers(response)
+    
+    try:
+        data = request.get_json()
+        if data.get('username') == VALID_USER['username'] and data.get('password') == VALID_USER['password']:
+            token = JWTManager.generate_token(VALID_USER['username'])
+            response = jsonify({"token": token, "expires_in": EXPIRE_SECONDS})
+            return set_cors_headers(response)
+        else:
+            return jsonify({"error": "Invalid credentials"}), 401
+    except Exception as e:
+        logger.error(f"登录失败: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+# 验证路由
+@app.route('/auth/verify', methods=['GET', 'OPTIONS'])
+def verify():
+    """验证Token有效性"""
+    if request.method == 'OPTIONS':
+        response = make_response()
+        return set_cors_headers(response)
+    
+    if not AUTH_ENABLED:
+        # 直接返回验证通过
+        response = jsonify({"valid": True, "user": "anonymous"})
+        return set_cors_headers(response)
+    
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return jsonify({"valid": False, "error": "Missing token"}), 401
+    
+    token = auth_header.split(' ')[1]
+    verification = JWTManager.verify_token(token)
+    
+    if verification["valid"]:
+        response = jsonify({"valid": True, "user": verification["payload"]["sub"]})
+    else:
+        response = jsonify(verification)
+    
+    return set_cors_headers(response)
+
+# 代理路由
+@app.route('/json.cgi', methods=['GET'])
+def proxy_vnstat_json():
+    """代理请求到vnstat的json.cgi接口"""
+    if AUTH_ENABLED:
+        # 验证Token
+        auth_header = request.headers.get('Authorization', '')
         if not auth_header.startswith('Bearer '):
-            self._send_response(401, {"valid": False, "error": "Missing token"})
-            return
+            return jsonify({"error": "Missing authorization token"}), 401
+
         token = auth_header.split(' ')[1]
         verification = JWTManager.verify_token(token)
+        if not verification["valid"]:
+            return jsonify({"error": verification["error"]}), 401
+    # 发起代理请求
+    try:
+        req = urllib.request.Request(VNSTAT_PROXY_URL)
+        with urllib.request.urlopen(req) as response:
+            data = response.read().decode('utf-8')
+            json_data = json.loads(data)
+            response = jsonify(json_data)
+            return set_cors_headers(response)
+    except urllib.error.URLError as e:
+        logger.error(f"代理请求失败: {str(e)}")
+        return jsonify({"error": f"Failed to proxy request: {str(e)}"}), 502
+    except json.JSONDecodeError:
+        logger.error("无效的JSON响应")
+        return jsonify({"error": "Invalid JSON response from upstream"}), 502
+    except Exception as e:
+        logger.error(f"代理请求异常: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+# 备份文件路由
+@app.route('/backups/<day>', methods=['GET'])
+def get_backup(day):
+    """获取备份文件"""
+    if AUTH_ENABLED:
+        # 验证Token
+        auth_header = request.headers.get('Authorization', '')
+        if not auth_header.startswith('Bearer '):
+            return jsonify({"error": "Missing authorization token"}), 401
+            
+        token = auth_header.split(' ')[1]
+        verification = JWTManager.verify_token(token)
+        if not verification["valid"]:
+            return jsonify({"error": verification["error"]}), 401
+    
+    # 处理文件请求
+    try:
+        file_path = os.path.join(JSON_DIR, f"vnstat_{day}.json")
         
-        if verification["valid"]:
-            self._send_response(200, {"valid": True, "user": verification["payload"]["sub"]})
+        if os.path.isfile(file_path):
+            with open(file_path, 'r') as f:
+                content = json.load(f)
+            return jsonify(content), 200
         else:
-            self._send_response(401, verification)
-    def _proxy_vnstat_json(self):
-        """代理请求到vnstat的json.cgi接口"""
-        try:
-            if AUTH_ENABLED:
-                # 验证Token
-                auth_header = self.headers.get('Authorization', '')
-                if not auth_header.startswith('Bearer '):
-                    self._send_response(401, {"error": "Missing authorization token"})
-                    return
+            return jsonify({"error": "File not found"}), 404
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON file"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-                token = auth_header.split(' ')[1]
-                verification = JWTManager.verify_token(token)
-                if not verification["valid"]:
-                    self._send_response(401, {"error": verification["error"]})
-                    return
-            # 发起代理请求
-            req = urllib.request.Request(VNSTAT_PROXY_URL)
-            with urllib.request.urlopen(req) as response:
-                data = response.read().decode('utf-8')
-                json_data = json.loads(data)
-                self._send_response(200, json_data)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-        except urllib.error.URLError as e:
-            self._send_response(502, {"error": f"Failed to proxy request: {str(e)}"})
-        except json.JSONDecodeError:
-            self._send_response(502, {"error": "Invalid JSON response from upstream"})
-        except Exception as e:
-            self._send_response(500, {"error": str(e)})
-    def _set_cors_headers(self):
-        """设置CORS头"""
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        self.send_header('Access-Control-Max-Age', '1728000')  # 缓存20天（单位：秒）
-    def _send_response(self, status_code, data=None):
-        """统一响应处理"""
-        self.send_response(status_code)
-        self.send_header('Content-type', 'application/json')
-        if self.command != 'OPTIONS':
-            self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        if data is not None:
-            self.wfile.write(json.dumps(data).encode())
-
-    def _parse_body(self):
-        """解析请求体"""
-        content_length = int(self.headers.get('Content-Length', 0))
-        return json.loads(self.rfile.read(content_length)) if content_length else {}
-    def do_OPTIONS(self):
-        """处理 OPTIONS 预检请求"""
-        self.send_response(204)  # 直接返回 204
-        self._set_cors_headers()
-        self.end_headers()
-    def do_POST(self):
-        """处理登录请求"""
-        parsed_path = urlparse(self.path)
-        if parsed_path.path == '/auth/login':
-            try:
-                if not AUTH_ENABLED:
-                    # 直接生成 Token 无需验证用户
-                    token = JWTManager.generate_token(VALID_USER['username'])
-                    self._send_response(200, {"token": token, "expires_in": EXPIRE_SECONDS})
-                    return
-                data = self._parse_body()
-                if data.get('username') == VALID_USER['username'] and data.get('password') == VALID_USER['password']:
-                    token = JWTManager.generate_token(VALID_USER['username'])
-                    self._send_response(200, {"token": token, "expires_in": EXPIRE_SECONDS})
-                else:
-                    self._send_response(401, {"error": "Invalid credentials"})
-            except Exception as e:
-                self._send_response(500, {"error": str(e)})
-        else:
-            self._send_response(404)
-
-    def do_GET(self):
-        """处理数据请求"""
-        if self.command == 'OPTIONS':
-            return
-        parsed_path = urlparse(self.path)
-        # 验证接口
-        if parsed_path.path == '/auth/verify':
-            return self.handle_verify()
-        # 代理vnstat json接口
-        elif parsed_path.path == '/json.cgi':
-            return self._proxy_vnstat_json()
-        elif parsed_path.path.startswith('/backups/'):
-            # 验证Token
-            if AUTH_ENABLED:
-                auth_header = self.headers.get('Authorization', '')
-                if not auth_header.startswith('Bearer '):
-                    self._send_response(401, {"error": "Missing authorization token"})
-                    return
-                    
-                token = auth_header.split(' ')[1]
-                verification = JWTManager.verify_token(token)
-                if not verification["valid"]:
-                    self._send_response(401, {"error": verification["error"]})
-                    return
-            # 处理文件请求
-            try:
-                path_parts = parsed_path.path.split('/')
-                if len(path_parts) != 3 or path_parts[1] != 'backups':
-                    self._send_response(404)
-                    return
-                    
-                day = path_parts[2]
-                file_path = os.path.join(JSON_DIR, f"vnstat_{day}.json")
-                
-                if os.path.isfile(file_path):
-                    with open(file_path, 'r') as f:
-                        content = json.load(f)
-                    self._send_response(200, content)
-                else:
-                    self._send_response(404, {"error": "File not found"})
-                    
-            except json.JSONDecodeError:
-                self._send_response(500, {"error": "Invalid JSON file"})
-            except Exception as e:
-                self._send_response(500, {"error": str(e)})
-        else:
-            self._send_response(404)
 
 if __name__ == "__main__":
-    server = HTTPServer(('0.0.0.0', PORT), APIHandler)
-    print(f"Server started on port {PORT}")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        server.server_close()
-    print("Server stopped")
+    # 从环境变量获取端口号，默认为19328
+    port = int(os.environ.get('PORT', 19328))
+    logger.info(f"服务器启动于 0.0.0.0:{port}")
+    app.run(host='0.0.0.0', port=port)

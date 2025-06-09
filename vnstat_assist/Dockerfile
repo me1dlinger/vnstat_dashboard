@@ -8,7 +8,6 @@ RUN echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye main contrib
 
 # 安装依赖
 RUN apt-get update && apt-get install -y \
-  nginx  \
   supervisor  \
   && rm -rf /var/lib/apt/lists/*
 
@@ -18,15 +17,11 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
 
 # 创建目录结构
 RUN mkdir -p /app/python
-RUN mkdir -p /app/www
 RUN mkdir -p /app/backups
-RUN mkdir -p /app/log/nginx
 RUN mkdir -p /app/log/python
 
 # 复制脚本和API文件
 COPY /python /app/python
-COPY /www /app/www
-COPY conf/nginx.conf /etc/nginx/nginx.conf
 COPY conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN chmod +x /app/python/backup/vnstat_backup.py \
