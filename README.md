@@ -92,7 +92,7 @@ docker run -d \
   -e VNA_EXPIRE_SECONDS=3600 \
   -e VNA_USERNAME=${username} \
   -e VNA_PASSWORD=${password} \
-  vnstat-dashboard:latest
+  meidlinger1024/vnstat-dashboard:latest
 ```
 
 ### docker-compose配置
@@ -100,7 +100,7 @@ docker run -d \
 version: '3'
 services:
   vnstat-dashboard:
-    image: vnstat-dashboard:latest
+    image: meidlinger1024/vnstat-dashboard:latest
     container_name: vnstat-dashboard
     restart: always
     ports:
