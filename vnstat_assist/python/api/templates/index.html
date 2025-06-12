@@ -1745,7 +1745,8 @@
             // 验证Token有效性
             this.authToken = storedToken;
             const response = await this.fetchWithAuth(this.url.verify);
-            if (response.ok) {
+            const data = await response.json();
+            if (response.ok && data.valid) {
               this.handleAuthSuccess(storedToken);
             } else {
               this.handleLogout();
