@@ -32,7 +32,7 @@ RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 RUN pip install --no-cache-dir -r /app/python/requirements.txt
 
-EXPOSE 80
+EXPOSE 19328
 
 # 启动命令
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
