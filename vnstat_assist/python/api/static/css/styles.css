@@ -714,3 +714,158 @@ tr:nth-child(even) {
     min-width: auto;
   }
 }
+/* 自定义时间选择器样式 */
+.settings-modal .form-group input[type="date"],
+.settings-modal .form-group input[type="month"],
+.settings-modal .form-group input[type="number"] {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: var(--contrast-color);
+  color: var(--main-color);
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.settings-modal .form-group input[type="date"]:focus,
+.settings-modal .form-group input[type="month"]:focus,
+.settings-modal .form-group input[type="number"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 时间范围类型选择器样式 */
+.settings-modal .form-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: var(--contrast-color);
+  color: var(--main-color);
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* 自定义时间按钮样式 */
+.control-button .fa-calendar-alt {
+  font-size: 14px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .settings-modal .settings-content {
+    width: 95%;
+    max-width: 95%;
+    margin: 20px auto;
+    padding: 15px;
+  }
+  
+  .settings-modal h3 {
+    font-size: 18px;
+    margin-top: 0;
+  }
+  
+  .settings-modal .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .settings-modal .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  .settings-modal .form-group input[type="date"],
+  .settings-modal .form-group input[type="month"],
+  .settings-modal .form-group input[type="number"],
+  .settings-modal .form-group select {
+    font-size: 16px; /* 防止iOS缩放 */
+    padding: 10px;
+  }
+  
+  .settings-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .settings-buttons button {
+    width: 100%;
+    margin: 0;
+  }
+  
+  /* 控制按钮在移动端的样式 */
+  .control-group.center {
+    flex: 1;
+    justify-content: center;
+    gap: 5px;
+  }
+  
+  .date-range {
+    font-size: 14px;
+    padding: 0 5px;
+    max-width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .control-button {
+    padding: 8px;
+  }
+  
+  .control-button .fa-calendar-alt {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-modal .settings-content {
+    width: 98%;
+    padding: 12px;
+  }
+  
+  .settings-modal .form-group input[type="date"],
+  .settings-modal .form-group input[type="month"],
+  .settings-modal .form-group input[type="number"],
+  .settings-modal .form-group select {
+    padding: 8px;
+    font-size: 15px;
+  }
+  
+  .settings-modal h3 {
+    font-size: 16px;
+  }
+  
+  .date-range {
+    max-width: 30%;
+    font-size: 12px;
+  }
+}
+
+/* 深色模式适配 */
+.night-mode .settings-modal .form-group input[type="date"],
+.night-mode .settings-modal .form-group input[type="month"],
+.night-mode .settings-modal .form-group input[type="number"],
+.night-mode .settings-modal .form-group select {
+  background-color: #2d3748;
+  color: #f8fafc;
+  border-color: #4a5568;
+}
+
+.night-mode .settings-modal .form-group input[type="date"]:focus,
+.night-mode .settings-modal .form-group input[type="month"]:focus,
+.night-mode .settings-modal .form-group input[type="number"]:focus,
+.night-mode .settings-modal .form-group select:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* 确保日期输入框在所有浏览器中的一致性 */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+}
+
+.night-mode input[type="date"]::-webkit-calendar-picker-indicator,
+.night-mode input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

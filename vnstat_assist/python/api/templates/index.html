@@ -252,8 +252,47 @@
             @click="adjustTime(1)">
             <i class="fas fa-chevron-right"></i>
           </button>
+          <button class="control-button" :title="language[currentLang]['customTime']" @click="showCustomTimePicker">
+            <i class="fas fa-calendar-alt"></i>
+          </button>
         </div>
+        <div class="settings-modal" v-if="customTimePickerVisible">
+          <div class="settings-content">
+            <h3>[[language[currentLang]['customTime'] ]]</h3>
 
+            <div class="form-group">
+              <label>[[language[currentLang]['timeRangeType'] ]]</label>
+              <select v-model="customTimeRangeType">
+                <option value="day">[[language[currentLang]['byDay'] ]]</option>
+                <option value="month">[[language[currentLang]['byMonth'] ]]</option>
+                <option value="year">[[language[currentLang]['byYear'] ]]</option>
+              </select>
+            </div>
+
+            <div class="form-group" v-if="customTimeRangeType === 'day'">
+              <label>[[language[currentLang]['selectDate'] ]]</label>
+              <input type="date" v-model="customSelectedDate" />
+            </div>
+
+            <div class="form-group" v-if="customTimeRangeType === 'month'">
+              <label>[[language[currentLang]['selectMonth'] ]]</label>
+              <input type="month" v-model="customSelectedMonth" />
+            </div>
+
+            <div class="form-group" v-if="customTimeRangeType === 'year'">
+              <label>[[language[currentLang]['selectYear'] ]]</label>
+              <input type="number" v-model="customSelectedYear" min="2000" :max="new Date().getFullYear()" />
+            </div>
+            <div class="settings-buttons">
+              <button class="cancel-button" @click="cancelCustomTime">
+                [[language[currentLang]['cancel'] ]]
+              </button>
+              <button class="save-button" @click="applyCustomTime">
+                [[language[currentLang]['apply'] ]]
+              </button>
+            </div>
+          </div>
+        </div>
         <!-- 右侧网卡选择 -->
         <div class="control-group right">
           <div class="time-display" v-if="latestSelectedInterfaceData">
@@ -488,6 +527,13 @@
         currentRange: new Date(),
         currentStats: {},
         currentView: "chart",
+        customTimePickerVisible: false,
+        customTimeRangeType: "day",
+        customSelectedDate: null,
+        customSelectedMonth: null,
+        customSelectedYear: null,
+        customStartDate: null,
+        customEndDate: null,
         filteredData: [],
         isNightMode: false,
         interfacesDataMode: false,
@@ -640,6 +686,14 @@
             total: "总计",
             switchSuccess: "切换成功",
             langSwitched: "语言已切换至中文",
+            customTime: "自定义时间",
+            timeRangeType: "时间范围类型",
+            selectDate: "选择日期",
+            selectMonth: "选择月份",
+            selectYear: "选择年份",
+            startDate: "开始日期",
+            endDate: "结束日期",
+            apply: "应用",
           },
           en: {
             loginTitle: "VNSTAT-DASHBOARD",
@@ -699,6 +753,14 @@
             refresh: "refresh",
             switchSuccess: "Toggle Successful",
             langSwitched: "Language switched to English",
+            customTime: "Custom Time",
+            timeRangeType: "Time Range Type",
+            selectDate: "Select Date",
+            selectMonth: "Select Month",
+            selectYear: "Select Year",
+            startDate: "Start Date",
+            endDate: "End Date",
+            apply: "Apply",
           },
         },
       },
@@ -803,7 +865,7 @@
       watch: {
         timeRangeType() {
           this.showNextButton = false;
-          (this.currentRange = new Date()), this.updateChart();
+          this.updateChart();
         },
         currentDate() {
           this.updateChart();
@@ -1021,6 +1083,45 @@
             date1.getDate() === date2.getDate()
           );
         },
+        showCustomTimePicker() {
+          this.customTimePickerVisible = true;
+          // 初始化默认值
+          const today = new Date();
+          this.customSelectedDate = today.toISOString().split('T')[0];
+          this.customSelectedMonth = today.toISOString().slice(0, 7);
+          this.customSelectedYear = today.getFullYear().toString();
+          this.customStartDate = today.toISOString().split('T')[0];
+          this.customEndDate = today.toISOString().split('T')[0];
+        },
+        cancelCustomTime() {
+          this.customTimePickerVisible = false;
+        },
+        applyCustomTime() {
+          this.showNextButton = false;
+          this.customTimePickerVisible = false;
+
+          // 根据选择的时间类型设置时间范围
+          switch (this.customTimeRangeType) {
+            case "day":
+              this.timeRangeType = "day";
+              this.currentRange = new Date(this.customSelectedDate);
+              break;
+            case "month":
+              this.timeRangeType = "month";
+              this.currentRange = new Date(this.customSelectedMonth + "-01");
+              break;
+            case "year":
+              this.timeRangeType = "year";
+              this.currentRange = new Date(parseInt(this.customSelectedYear), 0, 1);
+              break;
+            case "range":
+              this.timeRangeType = "day";
+              this.currentRange = new Date(this.customStartDate);
+              break;
+          }
+
+          this.updateChart();
+        },
         showApiSettings() {
           this.apiSettingsVisible = !this.apiSettingsVisible;
         },
@@ -1205,6 +1306,7 @@
             month: "day",
             year: "month",
           }[this.timeRangeType];
+
           const currentDate = new Date(this.currentRange);
           const isPastDate = this.isPastDate(currentDate);
           // 判断是否需要使用备份数据
@@ -1212,8 +1314,10 @@
             this.enableBackupData &&
             isPastDate &&
             (this.timeRangeType === "hour" || this.timeRangeType === "day");
+
           if (useBackup) {
             const dateStr = this.getDateString(currentDate);
+
             const backupData = await this.getBackupData(dateStr);
             if (backupData) {
               return this.processBackupData(
@@ -1223,10 +1327,12 @@
               );
             }
           }
-          //原有处理逻辑
-          const latestRawData =
-            this.latestSelectedInterfaceData.traffic[dataType];
-          return this.processData(currentDate, latestRawData, dataType);
+          if (this.latestSelectedInterfaceData && this.latestSelectedInterfaceData.traffic) {
+            const latestRawData = this.latestSelectedInterfaceData.traffic[dataType];
+
+            return this.processData(currentDate, latestRawData, dataType);
+          }
+          return [];
         },
         //判断是否是过去日期，保险起见昨天之前的数据都从备份中获取
         isPastDate(date) {
@@ -1276,7 +1382,6 @@
               case "month":
                 var itemYear = item.date.year;
                 var itemMonth = item.date.month;
-                var itemDay = item.date.day;
                 match = itemYear === rangeYear && itemMonth === rangeMonth;
                 break;
               case "year":
@@ -1284,10 +1389,12 @@
                 match = itemYear === rangeYear;
                 break;
             }
+
             if (match) {
               totalRx += item.rx || 0;
               totalTx += item.tx || 0;
             }
+
             return match;
           });
           this.currentStats = {
@@ -1295,6 +1402,7 @@
             tx: totalTx,
             total: totalRx + totalTx,
           };
+
           const getXValue = (date, time) =>
             this.getXValue(date, time, dataType);
           return [
@@ -1429,6 +1537,7 @@
         },
         async updateChart() {
           const seriesData = await this.getMergedSeriesData();
+
           const options = {
             chart: { type: "area", height: 400 },
             series: seriesData,
@@ -1471,9 +1580,11 @@
               },
             },
           };
+
           if (this.chart) {
             this.chart.updateOptions(options);
           } else {
+
             this.chart = new ApexCharts(
               document.querySelector("#trafficChart"),
               options
