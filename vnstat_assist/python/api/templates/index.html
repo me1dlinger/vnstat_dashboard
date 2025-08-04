@@ -1,1761 +1,1706 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <title>VNSTAT-DASHBOARD</title>
-    <link
-      href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD//////////////////////////3I2JLdyNyTnczYjUAAAAAD///////////////////////////////////////////////////////////////9yNiPJdTgl/3g6Jv9yNyTKbzcnIAAAAACcpgBQnKYAiZ2lAJmepQBm////////////////AAAAAAAAAAAAAAAAcjcjdHY5Jf9yNiT/ci4m/3I1JPAAAAAAnqUARAAAAAAAAAAAnqcArZmqAA///////////wAAAAAAAAAAAAAAAHI3Ikp2NyX/dDwj/56nAP93RiH2AAAAAAAAAAAAAAAAAAAAAJ2mAG2dpgBT//////////8AAAAAAAAAAIFAKkNyNiP/bykm/5iaCf98VR//cDIk/gAAAAAAAAAAAAAAAAAAAACcpgCGoKYAK6BSO7agVDrMnlI5eZ5SOFGmVz3/hzwx/4uCEP97UR//cDEl/3Y5Jf8AAAAAAAAAAAAAAAAAAAAAnaYAnv////+hUzvppVY9/6ZXPf+nVz3/olE8/6J3Lf+PdB7/bS0k/3I3JP9zNyT/cjck72YzGQoAAAAAAAAAAJ6mAKD/////n1Q7UqlYPv+hVDv/oVM7/6FYOf+ekhj/pE4//4dELv9vNSL/cjck/3Q4Jf9yNiT3AAAAAJ6nAJ2bogAh/////wAAAACgVDrMpVY8/6JOPf+fjxv/oVI7/6FUO/+kVj3/h0Qu/281Iv9yNyT/dDgl/3I4JOmktgCVAAAAAP//////////nlI0IqFSPPOhaDL4oX8o/6dUP/+iVTv/oVQ7/6RWPf+GRC7/bzUi/3I3JP91OCX/bislpP////////////////////8AAAAAnK0ArQAAAAAAAAAAoVM78aNVPP+hVDv/pFY9/4ZDLv9zNiT/dTgl/3Y5Jf//////////////////////AAAAAJ2mAK4AAAAAAAAAAJZLLRGhVDr4o1U8/6FUO/+oWj3/pM4AYmwqIoR4Oib/cTYkh////////////////56oAGmepwBxAAAAAAAAAAAAAAAAmUwzFKFRO+ylVT3/pVY9/6RPPoeHQy7Fczck/3E2I7v///////////////+cpQCQnKgAQwAAAAAAAAAAAAAAAAAAAACdrQCPn2oxzahWPv+qWD7/qVg+/4lFL/9vNSHU////////////////nKYAap2lAIAAAAAAAAAAAKGoACacpgC/nqgAZgAAAACUUjEfoVQ6laFUO8OhVDv/oVQ7//////////////////////+dpgCvnqYApZ2nAKSdpgCa////////////////////////////////////////////////AYAAAAByAAA8PQAAPD8AADg9AAAwPAAAABwAAIAKAACAAgAAQAAAACwAAAAuEAAAPwAAAB8AAAAu4AAAAAAAAA=="
-      rel="icon"
-      type="image/x-icon"
-    />
-    <link
-      rel="shortcut icon"
-      href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD//////////////////////////3I2JLdyNyTnczYjUAAAAAD///////////////////////////////////////////////////////////////9yNiPJdTgl/3g6Jv9yNyTKbzcnIAAAAACcpgBQnKYAiZ2lAJmepQBm////////////////AAAAAAAAAAAAAAAAcjcjdHY5Jf9yNiT/ci4m/3I1JPAAAAAAnqUARAAAAAAAAAAAnqcArZmqAA///////////wAAAAAAAAAAAAAAAHI3Ikp2NyX/dDwj/56nAP93RiH2AAAAAAAAAAAAAAAAAAAAAJ2mAG2dpgBT//////////8AAAAAAAAAAIFAKkNyNiP/bykm/5iaCf98VR//cDIk/gAAAAAAAAAAAAAAAAAAAACcpgCGoKYAK6BSO7agVDrMnlI5eZ5SOFGmVz3/hzwx/4uCEP97UR//cDEl/3Y5Jf8AAAAAAAAAAAAAAAAAAAAAnaYAnv////+hUzvppVY9/6ZXPf+nVz3/olE8/6J3Lf+PdB7/bS0k/3I3JP9zNyT/cjck72YzGQoAAAAAAAAAAJ6mAKD/////n1Q7UqlYPv+hVDv/oVM7/6FYOf+ekhj/pE4//4dELv9vNSL/cjck/3Q4Jf9yNiT3AAAAAJ6nAJ2bogAh/////wAAAACgVDrMpVY8/6JOPf+fjxv/oVI7/6FUO/+kVj3/h0Qu/281Iv9yNyT/dDgl/3I4JOmktgCVAAAAAP//////////nlI0IqFSPPOhaDL4oX8o/6dUP/+iVTv/oVQ7/6RWPf+GRC7/bzUi/3I3JP91OCX/bislpP////////////////////8AAAAAnK0ArQAAAAAAAAAAoVM78aNVPP+hVDv/pFY9/4ZDLv9zNiT/dTgl/3Y5Jf//////////////////////AAAAAJ2mAK4AAAAAAAAAAJZLLRGhVDr4o1U8/6FUO/+oWj3/pM4AYmwqIoR4Oib/cTYkh////////////////56oAGmepwBxAAAAAAAAAAAAAAAAmUwzFKFRO+ylVT3/pVY9/6RPPoeHQy7Fczck/3E2I7v///////////////+cpQCQnKgAQwAAAAAAAAAAAAAAAAAAAACdrQCPn2oxzahWPv+qWD7/qVg+/4lFL/9vNSHU////////////////nKYAap2lAIAAAAAAAAAAAKGoACacpgC/nqgAZgAAAACUUjEfoVQ6laFUO8OhVDv/oVQ7//////////////////////+dpgCvnqYApZ2nAKSdpgCa////////////////////////////////////////////////AYAAAAByAAA8PQAAPD8AADg9AAAwPAAAABwAAIAKAACAAgAAQAAAACwAAAAuEAAAPwAAAB8AAAAu4AAAAAAAAA=="
-      type="image/x-icon"
-    />
-    <script src="{{ url_for('static', filename='js/apexcharts.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/vue.js') }}"></script>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/all.min.css') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/styles.css') }}"
-    />
-  </head>
 
-  <body>
-    <div id="app">
-      <button
-        :title="language[currentLang]['languageTip']"
-        class="settings-button language-btn"
-        @click="toggleLanguage"
-      >
-        <span
-          ><i class="fas fa-language"></i> [[ currentLang === 'zh' ? 'ZH' : 'EN'
-          ]]</span
-        >
-      </button>
-      <button
-        :title="language[currentLang]['apiSettings']"
-        class="settings-button api-btn"
-        @click="showApiSettings"
-      >
-        <i class="fas fa-cog"></i>
-      </button>
-      <button
-        :title="language[currentLang]['themeSettings']"
-        class="settings-button theme-btn"
-        @click="showThemeSettings"
-      >
-        <i class="fas fa-palette"></i>
-      </button>
-      <button class="settings-button night-btn" @click="toggleNightMode">
-        <i :class="isNightMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
-      </button>
-      <div class="settings-modal" v-if="themeSettingsVisible">
-        <div class="settings-content">
-          <h3>[[language[currentLang]['themeSettings'] ]]</h3>
-          <!-- 预设主题 -->
-          <div class="preset-themes">
-            <div
-              v-for="(theme, index) in presetThemes"
-              :key="index"
-              class="preset-theme"
-              :style="getPresetStyle(theme)"
-              @click="applyPresetTheme(theme)"
-            >
-              <div class="theme-name">[[ theme.name ]]</div>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="color-input-container">
-              <input type="color" v-model="theme.accent" />
-              <div
-                class="color-preview"
-                :style="{'--selected-color': theme.accent}"
-              ></div>
-              <div class="color-value">
-                [[language[currentLang]['accent'] ]]: [[ theme.accent ]]
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="color-input-container">
-              <input type="color" v-model="theme.main" />
-              <div
-                class="color-preview"
-                :style="{'--selected-color': theme.main}"
-              ></div>
-              <div class="color-value">
-                [[language[currentLang]['main'] ]]: [[ theme.main ]]
-              </div>
-            </div>
-          </div>
+<head>
+  <meta charset="UTF-8" />
+  <title>VNSTAT-DASHBOARD</title>
+  <link
+    href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD//////////////////////////3I2JLdyNyTnczYjUAAAAAD///////////////////////////////////////////////////////////////9yNiPJdTgl/3g6Jv9yNyTKbzcnIAAAAACcpgBQnKYAiZ2lAJmepQBm////////////////AAAAAAAAAAAAAAAAcjcjdHY5Jf9yNiT/ci4m/3I1JPAAAAAAnqUARAAAAAAAAAAAnqcArZmqAA///////////wAAAAAAAAAAAAAAAHI3Ikp2NyX/dDwj/56nAP93RiH2AAAAAAAAAAAAAAAAAAAAAJ2mAG2dpgBT//////////8AAAAAAAAAAIFAKkNyNiP/bykm/5iaCf98VR//cDIk/gAAAAAAAAAAAAAAAAAAAACcpgCGoKYAK6BSO7agVDrMnlI5eZ5SOFGmVz3/hzwx/4uCEP97UR//cDEl/3Y5Jf8AAAAAAAAAAAAAAAAAAAAAnaYAnv////+hUzvppVY9/6ZXPf+nVz3/olE8/6J3Lf+PdB7/bS0k/3I3JP9zNyT/cjck72YzGQoAAAAAAAAAAJ6mAKD/////n1Q7UqlYPv+hVDv/oVM7/6FYOf+ekhj/pE4//4dELv9vNSL/cjck/3Q4Jf9yNiT3AAAAAJ6nAJ2bogAh/////wAAAACgVDrMpVY8/6JOPf+fjxv/oVI7/6FUO/+kVj3/h0Qu/281Iv9yNyT/dDgl/3I4JOmktgCVAAAAAP//////////nlI0IqFSPPOhaDL4oX8o/6dUP/+iVTv/oVQ7/6RWPf+GRC7/bzUi/3I3JP91OCX/bislpP////////////////////8AAAAAnK0ArQAAAAAAAAAAoVM78aNVPP+hVDv/pFY9/4ZDLv9zNiT/dTgl/3Y5Jf//////////////////////AAAAAJ2mAK4AAAAAAAAAAJZLLRGhVDr4o1U8/6FUO/+oWj3/pM4AYmwqIoR4Oib/cTYkh////////////////56oAGmepwBxAAAAAAAAAAAAAAAAmUwzFKFRO+ylVT3/pVY9/6RPPoeHQy7Fczck/3E2I7v///////////////+cpQCQnKgAQwAAAAAAAAAAAAAAAAAAAACdrQCPn2oxzahWPv+qWD7/qVg+/4lFL/9vNSHU////////////////nKYAap2lAIAAAAAAAAAAAKGoACacpgC/nqgAZgAAAACUUjEfoVQ6laFUO8OhVDv/oVQ7//////////////////////+dpgCvnqYApZ2nAKSdpgCa////////////////////////////////////////////////AYAAAAByAAA8PQAAPD8AADg9AAAwPAAAABwAAIAKAACAAgAAQAAAACwAAAAuEAAAPwAAAB8AAAAu4AAAAAAAAA=="
+    rel="icon" type="image/x-icon" />
+  <link rel="shortcut icon"
+    href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD//////////////////////////3I2JLdyNyTnczYjUAAAAAD///////////////////////////////////////////////////////////////9yNiPJdTgl/3g6Jv9yNyTKbzcnIAAAAACcpgBQnKYAiZ2lAJmepQBm////////////////AAAAAAAAAAAAAAAAcjcjdHY5Jf9yNiT/ci4m/3I1JPAAAAAAnqUARAAAAAAAAAAAnqcArZmqAA///////////wAAAAAAAAAAAAAAAHI3Ikp2NyX/dDwj/56nAP93RiH2AAAAAAAAAAAAAAAAAAAAAJ2mAG2dpgBT//////////8AAAAAAAAAAIFAKkNyNiP/bykm/5iaCf98VR//cDIk/gAAAAAAAAAAAAAAAAAAAACcpgCGoKYAK6BSO7agVDrMnlI5eZ5SOFGmVz3/hzwx/4uCEP97UR//cDEl/3Y5Jf8AAAAAAAAAAAAAAAAAAAAAnaYAnv////+hUzvppVY9/6ZXPf+nVz3/olE8/6J3Lf+PdB7/bS0k/3I3JP9zNyT/cjck72YzGQoAAAAAAAAAAJ6mAKD/////n1Q7UqlYPv+hVDv/oVM7/6FYOf+ekhj/pE4//4dELv9vNSL/cjck/3Q4Jf9yNiT3AAAAAJ6nAJ2bogAh/////wAAAACgVDrMpVY8/6JOPf+fjxv/oVI7/6FUO/+kVj3/h0Qu/281Iv9yNyT/dDgl/3I4JOmktgCVAAAAAP//////////nlI0IqFSPPOhaDL4oX8o/6dUP/+iVTv/oVQ7/6RWPf+GRC7/bzUi/3I3JP91OCX/bislpP////////////////////8AAAAAnK0ArQAAAAAAAAAAoVM78aNVPP+hVDv/pFY9/4ZDLv9zNiT/dTgl/3Y5Jf//////////////////////AAAAAJ2mAK4AAAAAAAAAAJZLLRGhVDr4o1U8/6FUO/+oWj3/pM4AYmwqIoR4Oib/cTYkh////////////////56oAGmepwBxAAAAAAAAAAAAAAAAmUwzFKFRO+ylVT3/pVY9/6RPPoeHQy7Fczck/3E2I7v///////////////+cpQCQnKgAQwAAAAAAAAAAAAAAAAAAAACdrQCPn2oxzahWPv+qWD7/qVg+/4lFL/9vNSHU////////////////nKYAap2lAIAAAAAAAAAAAKGoACacpgC/nqgAZgAAAACUUjEfoVQ6laFUO8OhVDv/oVQ7//////////////////////+dpgCvnqYApZ2nAKSdpgCa////////////////////////////////////////////////AYAAAAByAAA8PQAAPD8AADg9AAAwPAAAABwAAIAKAACAAgAAQAAAACwAAAAuEAAAPwAAAB8AAAAu4AAAAAAAAA=="
+    type="image/x-icon" />
+  <script src="{{ url_for('static', filename='js/apexcharts.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/vue.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+</head>
 
-          <div class="form-group">
-            <div class="color-input-container">
-              <input type="color" v-model="theme.contrast" />
-              <div
-                class="color-preview"
-                :style="{'--selected-color': theme.contrast}"
-              ></div>
-              <div class="color-value">
-                [[language[currentLang]['contrast'] ]]: [[ theme.contrast ]]
-              </div>
+<body>
+  <div id="app">
+    <button :title="language[currentLang]['languageTip']" class="settings-button language-btn" @click="toggleLanguage">
+      <span><i class="fas fa-language"></i> [[ currentLang === 'zh' ? 'ZH' : 'EN'
+        ]]</span>
+    </button>
+    <button :title="language[currentLang]['apiSettings']" class="settings-button api-btn" @click="showApiSettings">
+      <i class="fas fa-cog"></i>
+    </button>
+    <button :title="language[currentLang]['themeSettings']" class="settings-button theme-btn"
+      @click="showThemeSettings">
+      <i class="fas fa-palette"></i>
+    </button>
+    <button class="settings-button night-btn" @click="toggleNightMode">
+      <i :class="isNightMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+    </button>
+    <div class="settings-modal" v-if="themeSettingsVisible">
+      <div class="settings-content">
+        <h3>[[language[currentLang]['themeSettings'] ]]</h3>
+        <!-- 预设主题 -->
+        <div class="preset-themes">
+          <div v-for="(theme, index) in presetThemes" :key="index" class="preset-theme" :style="getPresetStyle(theme)"
+            @click="applyPresetTheme(theme)">
+            <div class="theme-name">[[ theme.name ]]</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="color-input-container">
+            <input type="color" v-model="theme.accent" />
+            <div class="color-preview" :style="{'--selected-color': theme.accent}"></div>
+            <div class="color-value">
+              [[language[currentLang]['accent'] ]]: [[ theme.accent ]]
             </div>
           </div>
-          <!-- 新增：颜色选择和图表预览行 -->
-          <div class="color-preview-row">
-            <!-- 左侧颜色选择列 -->
-            <div class="color-settings-column">
-              <div class="form-group compact">
-                <div class="color-input-container">
-                  <input type="color" v-model="theme.upload" />
-                  <div
-                    class="color-preview"
-                    :style="{'--selected-color': theme.upload}"
-                  ></div>
-                  <div class="color-value">
-                    [[language[currentLang]['upload'] ]]: [[ theme.upload ]]
-                  </div>
-                </div>
-              </div>
-              <div class="form-group compact">
-                <div class="color-input-container">
-                  <input type="color" v-model="theme.download" />
-                  <div
-                    class="color-preview"
-                    :style="{'--selected-color': theme.download}"
-                  ></div>
-                  <div class="color-value">
-                    [[language[currentLang]['download'] ]]: [[ theme.download ]]
-                  </div>
+        </div>
+        <div class="form-group">
+          <div class="color-input-container">
+            <input type="color" v-model="theme.main" />
+            <div class="color-preview" :style="{'--selected-color': theme.main}"></div>
+            <div class="color-value">
+              [[language[currentLang]['main'] ]]: [[ theme.main ]]
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="color-input-container">
+            <input type="color" v-model="theme.contrast" />
+            <div class="color-preview" :style="{'--selected-color': theme.contrast}"></div>
+            <div class="color-value">
+              [[language[currentLang]['contrast'] ]]: [[ theme.contrast ]]
+            </div>
+          </div>
+        </div>
+        <!-- 新增：颜色选择和图表预览行 -->
+        <div class="color-preview-row">
+          <!-- 左侧颜色选择列 -->
+          <div class="color-settings-column">
+            <div class="form-group compact">
+              <div class="color-input-container">
+                <input type="color" v-model="theme.upload" />
+                <div class="color-preview" :style="{'--selected-color': theme.upload}"></div>
+                <div class="color-value">
+                  [[language[currentLang]['upload'] ]]: [[ theme.upload ]]
                 </div>
               </div>
             </div>
-
-            <!-- 右侧图表预览 -->
-            <div class="preview-chart-container">
-              <div id="themePreviewChart"></div>
+            <div class="form-group compact">
+              <div class="color-input-container">
+                <input type="color" v-model="theme.download" />
+                <div class="color-preview" :style="{'--selected-color': theme.download}"></div>
+                <div class="color-value">
+                  [[language[currentLang]['download'] ]]: [[ theme.download ]]
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="settings-buttons">
-            <button class="default-button" @click="resetDefaultTheme">
-              <i class="fas fa-undo"></i>
-              [[language[currentLang]['restoreDefault'] ]]
-            </button>
-            <button class="cancel-button" @click="cancelThemeSettings">
-              [[language[currentLang]['cancel'] ]]
-            </button>
-            <button class="save-button" @click="saveThemeSettings">
-              [[language[currentLang]['save'] ]]
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="settings-modal" v-if="apiSettingsVisible">
-        <div class="settings-content">
-          <h3>[[language[currentLang]['apiSettings'] ]]</h3>
-          <div class="form-group">
-            <label> [[language[currentLang]['assistApi'] ]]:</label>
-            <input
-              type="text"
-              v-model="assistApi"
-              :placeholder="language[currentLang]['assistApi']"
-            />
-          </div>
-          <div class="form-group">
-            <label> [[language[currentLang]['defaultInterface'] ]]:</label>
-            <input
-              type="text"
-              v-model="defaultInterface"
-              :placeholder="language[currentLang]['defaultInterfacePlaceholder']"
-            />
-          </div>
-          <!-- 新增备份数据开关 -->
-          <div class="form-group switch-group">
-            <label> [[language[currentLang]['enableBackup'] ]]:</label>
-            <label class="switch">
-              <input
-                type="checkbox"
-                class="settings-checkbox"
-                v-model="enableBackupData"
-              />
-              <span class="slider round"></span>
-            </label>
           </div>
 
-          <div class="settings-buttons">
-            <button class="cancel-button" @click="cancelApiSettings">
-              [[language[currentLang]['cancel'] ]]
-            </button>
-            <button class="save-button" @click="saveApiSettings">
-              [[language[currentLang]['save'] ]]
-            </button>
+          <!-- 右侧图表预览 -->
+          <div class="preview-chart-container">
+            <div id="themePreviewChart"></div>
           </div>
         </div>
-      </div>
-      <!-- 登录界面 -->
-      <div v-if="!isAuthenticated" class="login-container">
-        <div class="login-box">
-          <h1>VNSTAT-DASHBOARD</h1>
-          <form @submit.prevent="handleLogin">
-            <div class="form-group">
-              <label
-                ><i class="fas fa-user"></i> [[language[currentLang]['username']
-                ]]</label
-              >
-              <input type="text" v-model="loginForm.username" required />
-            </div>
-            <div class="form-group">
-              <label
-                ><i class="fas fa-lock"></i> [[language[currentLang]['password']
-                ]]</label
-              >
-              <input type="password" v-model="loginForm.password" required />
-            </div>
-            <button type="submit" :disabled="loggingIn">
-              [[ loggingIn ? language[currentLang]['loginIn'] :
-              language[currentLang]['login'] ]]
-            </button>
-            <div v-if="loginError" class="error-message">[[ loginError ]]</div>
-          </form>
-        </div>
-      </div>
-      <div v-else>
-        <!-- 统计卡片 -->
-        <div class="stat-container" v-if="currentInterface">
-          <!-- 总统计 -->
-          <div class="stat-card">
-            <div class="stat-row">
-              <i class="fas fa-tachometer-alt stat-icon"></i>
-              <div class="stat-value">
-                [[ formatSum(currentInterface.traffic.total).value ]]
-                <span class="stat-unit">
-                  [[ formatSum(currentInterface.traffic.total).unit ]]</span
-                >
-              </div>
-            </div>
-            <div class="stat-row">
-              <i class="fas fa-arrow-down stat-icon"></i>
-              <div class="stat-value">
-                [[ formatBytes(currentInterface.traffic.total.rx).value ]]
-                <span class="stat-unit">
-                  [[ formatBytes(currentInterface.traffic.total.rx).unit
-                  ]]</span
-                >
-              </div>
-            </div>
-            <div class="stat-row">
-              <i class="fas fa-arrow-up stat-icon"></i>
-              <div class="stat-value">
-                [[ formatBytes(currentInterface.traffic.total.tx).value ]]
-                <span class="stat-unit">
-                  [[ formatBytes(currentInterface.traffic.total.tx).unit
-                  ]]</span
-                >
-              </div>
-            </div>
-            <div class="stat-label">[[language[currentLang]['total'] ]]</div>
-          </div>
-          <div
-            class="stat-card"
-            v-for="(data, title) in summaryData"
-            :key="title"
-          >
-            <div class="stat-row">
-              <i class="fas fa-chart-bar stat-icon"></i>
-              <div class="stat-value">
-                [[ formatSum(data).value ]]
-                <span class="stat-unit"> [[ formatSum(data).unit ]]</span>
-              </div>
-            </div>
-            <div class="stat-row">
-              <i class="fas fa-arrow-down stat-icon"></i>
-              <div class="stat-value">
-                [[ formatBytes(data.rx).value ]]
-                <span class="stat-unit"> [[ formatBytes(data.rx).unit ]]</span>
-              </div>
-            </div>
-            <div class="stat-row">
-              <i class="fas fa-arrow-up stat-icon"></i>
-              <div class="stat-value">
-                [[ formatBytes(data.tx).value ]]
-                <span class="stat-unit"> [[ formatBytes(data.tx).unit ]]</span>
-              </div>
-            </div>
-            <div class="stat-label">[[ title ]]</div>
-          </div>
-        </div>
-
-        <!-- 修改后的控制条结构 -->
-        <div class="control-bar">
-          <!-- 左侧控件 -->
-          <div class="control-group left">
-            <button
-              class="control-button"
-              :title="language[currentLang]['topStatistics']"
-              @click="handleShowTopData()"
-            >
-              <i class="fas fa-signal"></i>
-            </button>
-            <select
-              v-model="timeRangeType"
-              v-show="!(interfacesDataMode||topDataMode)"
-            >
-              <option value="hour">[[language[currentLang]['byHour'] ]]</option>
-              <option value="day">[[language[currentLang]['byDay'] ]]</option>
-              <option value="month">
-                [[language[currentLang]['byMonth'] ]]
-              </option>
-              <option value="year">[[language[currentLang]['byYear'] ]]</option>
-            </select>
-          </div>
-
-          <div
-            class="control-group center"
-            v-show="!(interfacesDataMode||topDataMode)"
-          >
-            <button class="control-button" @click="adjustTime(-1)">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <span class="date-range"> [[ dateRange ]]</span>
-            <button
-              class="control-button"
-              :style="{ visibility: showNextButton ? 'visible' : 'hidden' }"
-              @click="adjustTime(1)"
-            >
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
-
-          <!-- 右侧网卡选择 -->
-          <div class="control-group right">
-            <div class="time-display" v-if="latestSelectedInterfaceData">
-              <div class="time-row">
-                <span class="time-label">
-                  [[language[currentLang]['createTime'] ]]:
-                </span>
-                <span class="time-value">
-                  [[ formatTime(latestSelectedInterfaceData.created) ]]</span
-                >
-              </div>
-              <div class="time-row">
-                <span class="time-label">
-                  [[language[currentLang]['updateTime'] ]]:
-                </span>
-                <span class="time-value">
-                  [[ formatTime(latestSelectedInterfaceData.updated) ]]</span
-                >
-              </div>
-            </div>
-            <button
-              class="control-button"
-              :title="language[currentLang]['refresh']"
-              :style="{ visibility: showNextButton ? 'hidden' : 'visible' }"
-              @click="loadData(1)"
-            >
-              <i class="fas fa-refresh"></i>
-            </button>
-            <select
-              v-model="latestSelectedInterfaceData"
-              v-show="!interfacesDataMode"
-            >
-              <option v-for="iface in latestInterfacesData" :value="iface">
-                [[ iface.name ]]
-              </option>
-            </select>
-            <button
-              class="control-button"
-              :title="language[currentLang]['StatsByInterface']"
-              @click="handleShowInterfaceData()"
-            >
-              <i class="fas fa-network-wired"></i>
-            </button>
-          </div>
-        </div>
-        <div v-show="!(interfacesDataMode||topDataMode)">
-          <div class="traffic-summary">
-            <div class="summary-item" :title="language[currentLang]['upload']">
-              <i class="fas fa-upload text-blue-500"></i>
-              <span> [[ uploadGB ]]</span>
-            </div>
-            <div class="summary-item" :title="language[currentLang]['total']">
-              <i class="fas fa-exchange-alt text-purple-500"></i>
-              <span> [[ totalGB ]]</span>
-            </div>
-            <div
-              class="summary-item"
-              :title="language[currentLang]['download']"
-            >
-              <i class="fas fa-download text-green-500"></i>
-              <span> [[ downloadGB ]]</span>
-            </div>
-          </div>
-          <!-- 在图表容器上方添加 -->
-          <div class="view-switcher right">
-            <div class="switch-container">
-              <button
-                @click="currentView = 'chart'"
-                class="view-switch"
-                :class="{active: currentView === 'chart'} "
-                :title="language[currentLang]['chartView']"
-              >
-                <i class="fas fa-chart-line"></i>
-              </button>
-              <button
-                @click="currentView = 'table'"
-                class="view-switch"
-                :class="{active: currentView === 'table'}"
-                :title="language[currentLang]['tableView']"
-              >
-                <i class="fas fa-table"></i>
-              </button>
-            </div>
-          </div>
-          <!-- 图表容器 -->
-          <div class="chart-container">
-            <div v-show="currentView === 'chart'" id="trafficChart"></div>
-            <div v-show="currentView === 'table'" class="data-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th @click="sortTable('timestamp')">
-                      [[language[currentLang]['timeDate'] ]]
-                      <i class="fas" :class="sortIcon('timestamp')"></i>
-                    </th>
-                    <th @click="sortTable('tx')">
-                      [[language[currentLang]['upload'] ]]
-                      <i class="fas" :class="sortIcon('tx')"></i>
-                    </th>
-                    <th @click="sortTable('rx')">
-                      [[language[currentLang]['download'] ]]
-                      <i class="fas" :class="sortIcon('rx')"></i>
-                    </th>
-                    <th>[[language[currentLang]['total'] ]]</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="item in sortedTableData" :key="item.timestamp">
-                    <td>[[ getformatTableTime(item.date,item.time) ]]</td>
-                    <td>
-                      [[ formatBytes(item.tx).value+formatBytes(item.tx).unit ]]
-                    </td>
-                    <td>
-                      [[ formatBytes(item.rx).value +formatBytes(item.rx).unit
-                      ]]
-                    </td>
-                    <td>
-                      [[ formatBytes(item.tx +
-                      item.rx).value+formatBytes(item.tx + item.rx).unit ]]
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <!-- 网卡统计表格 -->
-        <div v-show="interfacesDataMode" class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th @click="sortTable('name')">
-                  [[language[currentLang]['interfaceName'] ]]
-                  <i class="fas" :class="sortIcon('name')"></i>
-                </th>
-                <th @click="sortTable('todayRx')">
-                  [[language[currentLang]['todayDownload'] ]]
-                  <i class="fas" :class="sortIcon('todayRx')"></i>
-                </th>
-                <th @click="sortTable('todayTx')">
-                  [[language[currentLang]['todayUpload'] ]]
-                  <i class="fas" :class="sortIcon('todayTx')"></i>
-                </th>
-                <th @click="sortTable('todayTotal')">
-                  [[language[currentLang]['todayTotal'] ]]
-                  <i class="fas" :class="sortIcon('todayTotal')"></i>
-                </th>
-                <th @click="sortTable('totalRx')">
-                  [[language[currentLang]['allDownload'] ]]
-                  <i class="fas" :class="sortIcon('totalRx')"></i>
-                </th>
-                <th @click="sortTable('totalTx')">
-                  [[language[currentLang]['allUpload'] ]]
-                  <i class="fas" :class="sortIcon('totalTx')"></i>
-                </th>
-                <th @click="sortTable('totalTotal')">
-                  [[language[currentLang]['allTotal'] ]]
-                  <i class="fas" :class="sortIcon('totalTotal')"></i>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in sortedInterfaces" :key="item.name">
-                <td>[[ item.name ]]</td>
-                <td>
-                  [[ formatBytes(item.todayRx).value ]] [[
-                  formatBytes(item.todayRx).unit ]]
-                </td>
-                <td>
-                  [[ formatBytes(item.todayTx).value ]] [[
-                  formatBytes(item.todayTx).unit ]]
-                </td>
-                <td>
-                  [[ formatBytes(item.todayTotal).value ]] [[
-                  formatBytes(item.todayTotal).unit ]]
-                </td>
-                <td>
-                  [[ formatBytes(item.totalRx).value ]] [[
-                  formatBytes(item.totalRx).unit ]]
-                </td>
-                <td>
-                  [[ formatBytes(item.totalTx).value ]] [[
-                  formatBytes(item.totalTx).unit ]]
-                </td>
-                <td>
-                  [[ formatBytes(item.totalTotal).value ]] [[
-                  formatBytes(item.totalTotal).unit ]]
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div v-show="topDataMode" class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th @click="sortTable('timestamp')">
-                  [[language[currentLang]['time'] ]]
-                  <i class="fas" :class="sortIcon('timestamp')"></i>
-                </th>
-                <th @click="sortTable('rx')">
-                  [[language[currentLang]['download'] ]]
-                  <i class="fas" :class="sortIcon('rx')"></i>
-                </th>
-                <th @click="sortTable('tx')">
-                  [[language[currentLang]['upload'] ]]
-                  <i class="fas" :class="sortIcon('tx')"></i>
-                </th>
-                <th @click="sortTable('total')">
-                  [[language[currentLang]['total'] ]]
-                  <i class="fas" :class="sortIcon('todayTotal')"></i>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in sortedTopData" :key="item.name">
-                <td>[[ getXValue(item.date, null, 'day') ]]</td>
-                <td>
-                  [[ formatBytes(item.rx).value ]] [[ formatBytes(item.rx).unit
-                  ]]
-                </td>
-                <td>
-                  [[ formatBytes(item.tx).value ]] [[ formatBytes(item.tx).unit
-                  ]]
-                </td>
-                <td>
-                  [[ formatBytes(item.total).value ]] [[
-                  formatBytes(item.total).unit ]]
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="settings-buttons">
+          <button class="default-button" @click="resetDefaultTheme">
+            <i class="fas fa-undo"></i>
+            [[language[currentLang]['restoreDefault'] ]]
+          </button>
+          <button class="cancel-button" @click="cancelThemeSettings">
+            [[language[currentLang]['cancel'] ]]
+          </button>
+          <button class="save-button" @click="saveThemeSettings">
+            [[language[currentLang]['save'] ]]
+          </button>
         </div>
       </div>
     </div>
-    <script>
-      new Vue({
-        delimiters: ["[[", "]]"],
-        el: "#app",
-        data: {
-          // 认证相关数据
-          isAuthenticated: true,
-          loginForm: { username: "", password: "" },
-          loggingIn: false,
-          loginError: "",
-          authToken: null,
-          latestRawData: {},
-          latestInterfacesTableData: [],
-          latestInterfacesData: [],
-          latestTopData: [],
-          latestSelectedInterfaceData: null,
-          chart: null,
-          previewChart: null,
-          timeRangeType: "day",
-          currentRange: new Date(),
-          currentStats: {},
-          currentView: "chart",
-          filteredData: [],
-          isNightMode: false,
-          interfacesDataMode: false,
-          topDataMode: false,
-          showNextButton: false,
-          sortKey: "name",
-          sortOrder: "asc",
-          defaultInterface: "enp3s0",
-          apiSettingsVisible: false,
-          themeSettingsVisible: false,
-          assistApi: null,
-          url: {},
-          // 备份数据启用
-          enableBackupData: null,
-          // 内存缓存 {dateStr: data}
-          backupCache: {},
-          //维护键顺序
-          cacheKeys: [],
-          pendingBackups: new Set(),
-          sampleUpData: [
-            { x: "00:00", y: 20 },
-            { x: "04:00", y: 80 },
-            { x: "08:00", y: 40 },
-            { x: "12:00", y: 120 },
-            { x: "16:00", y: 90 },
-            { x: "20:00", y: 60 },
-          ],
-          sampleDownData: [
-            { x: "00:00", y: 10 },
-            { x: "04:00", y: 100 },
-            { x: "08:00", y: 30 },
-            { x: "12:00", y: 150 },
-            { x: "16:00", y: 55 },
-            { x: "20:00", y: 20 },
-          ],
-          theme: {
-            name: "科技蓝",
-            main: "#0f172a",
-            accent: "#3b82f6",
-            contrast: "#f8fafc",
-            upload: "#93c5fd",
-            download: "#60a5fa",
-          },
-          presetThemes: [
-            {
-              name: "科技蓝",
-              main: "#0f172a",
-              accent: "#3b82f6",
-              contrast: "#f8fafc",
-              upload: "#93c5fd",
-              download: "#60a5fa",
-            },
-            {
-              name: "活力橙",
-              main: "#1e293b",
-              accent: "#f59e0b",
-              contrast: "#fff7ed",
-              upload: "#fcd34d",
-              download: "#fb923c",
-            },
-            {
-              name: "清新绿",
-              main: "#1c1917",
-              accent: "#10b981",
-              contrast: "#ecfdf5",
-              upload: "#6ee7b7",
-              download: "#34d399",
-            },
-            {
-              name: "幻影紫",
-              main: "#1a1b26",
-              accent: "#9d7cde",
-              contrast: "#f8f5ff",
-              upload: "#b9a4e6",
-              download: "#7f5fd3",
-            },
-            {
-              name: "玫瑰粉",
-              main: "#2d2d2d",
-              accent: "#ff6b6b",
-              contrast: "#fff0f0",
-              upload: "#ff9d9d",
-              download: "#ff5252",
-            },
-          ],
-          defaultTheme: {
-            name: "科技蓝",
-            main: "#0f172a",
-            accent: "#3b82f6",
-            contrast: "#f8fafc",
-            upload: "#93c5fd",
-            download: "#60a5fa",
-          },
-          currentLang: "zh",
-          language: {
-            zh: {
-              loginTitle: "VNSTAT-DASHBOARD",
-              languageTip: "Switch to English",
-              username: "用户名",
-              password: "密码",
-              login: "登录",
-              loginIn: "登录中...",
-              loginError: "登录失败",
-              total: "总计",
-              thisMonth: "本月",
-              today: "今日",
-              yesterday: "昨日",
-              topStatistics: "用量TOP统计",
-              byHour: "按时",
-              byDay: "按日",
-              byMonth: "按月",
-              byYear: "按年",
-              hour: "小时",
-              date: "日期",
-              month: "月份",
-              timeDate: "时间/日期",
-              time: "时间",
-              themeSettings: "主题配置",
-              createTime: "统计开始",
-              updateTime: "最后更新",
-              traffic: "流量",
-              accent: "强调色",
-              main: "主体色",
-              contrast: "对比色",
-              upload: "上行",
-              download: "下行",
-              allUpload: "全部上行",
-              allDownload: "全部下行",
-              allTotal: "历史总计",
-              todayUpload: "今日上行",
-              todayDownload: "今日下行",
-              todayTotal: "今日总计",
-              restoreDefault: "恢复默认",
-              cancel: "取消",
-              save: "保存",
-              chartView: "图表视图",
-              tableview: "表格视图",
-              apiSettings: "页面配置",
-              assistApi: "API接口",
-              assistApiPlaceholder: "请输入API地址",
-              defaultInterface: "默认网卡",
-              interfaceName: "网卡名称",
-              StatsByInterface: "按网卡统计",
-              defaultInterfacePlaceholder: "请输入默认网卡，比如：enp3s0",
-              enableBackup: "使用备份数据",
-              noAssistApi: "请先点击右上角设置统一API入口",
-              nightMode: "夜深了，已切换成夜间模式",
-              refreshed: "刷新成功",
-              refresh: "刷新",
-              total: "总计",
-              switchSuccess: "切换成功",
-              langSwitched: "语言已切换至中文",
-            },
-            en: {
-              loginTitle: "VNSTAT-DASHBOARD",
-              languageTip: "切换成中文",
-              username: "Username",
-              password: "Password",
-              login: "Sign In",
-              loginIn: "Logging In...",
-              loginError: "Login Failure",
-              total: "TOTAL",
-              thisMonth: "THIS MONTH",
-              today: "TODAY",
-              yesterday: "YESTERDAY",
-              topStatistics: "Top Traffic Days",
-              byHour: "Hour",
-              byDay: "Day",
-              byMonth: "Month",
-              byYear: "Year",
-              themeSettings: "Theme Settings",
-              createTime: "Stats Since",
-              updateTime: "Last Updated",
-              traffic: "traffic",
-              hour: "HOUR",
-              date: "DATE",
-              month: "MONTH",
-              timeDate: "TIME/DATE",
-              time: "TIME",
-              accent: "Accent Color",
-              main: "Main Color",
-              contrast: "Contrast Color",
-              upload: "UPLOAD",
-              download: "DOWNLOAD",
-              allUpload: "TOTAL UPLOAD",
-              allDownload: "TOTAL DOWNLOAD",
-              allTotal: "TOTAL",
-              todayUpload: "TODAY UPLOAD",
-              todayDownload: "TODAY DOWNLOAD",
-              todayTotal: "TODAY TOTAL",
-              restoreDefault: "Restore Default",
-              cancel: "Cancel",
-              save: "Save",
-              chartView: "Chart View",
-              tableview: "Table View",
-              apiSettings: "SETTINGS",
-              assistApi: "API",
-              assistApiPlaceholder: "Please input API address",
-              defaultInterface: "Default Interface",
-              interfaceName: "INTERFACE NAME",
-              StatsByInterface: "Stats By Interface",
-              defaultInterfacePlaceholder:
-                "Please input default interface, e.g. eth0",
-              enableBackup: "Use Backup Data",
-              noAssistApi:
-                "Please set the API endpoint in the top-right settings first",
-              nightMode: "Good Evening",
-              refreshed: "Refreshed",
-              refresh: "refresh",
-              switchSuccess: "Toggle Successful",
-              langSwitched: "Language switched to English",
-            },
-          },
-        },
-        computed: {
-          uploadGB() {
-            return (
-              this.formatBytes(this.currentStats.tx).value +
-              this.formatBytes(this.currentStats.tx).unit
-            );
-          },
-          downloadGB() {
-            return (
-              this.formatBytes(this.currentStats.rx).value +
-              this.formatBytes(this.currentStats.rx).unit
-            );
-          },
-          totalGB() {
-            return (
-              this.formatBytes(this.currentStats.total).value +
-              this.formatBytes(this.currentStats.total).unit
-            );
-          },
-          currentInterface() {
-            return (
-              this.latestSelectedInterfaceData || this.latestInterfacesData[0]
-            );
-          },
-          summaryData() {
-            const latestInterfacesData =
-              this.latestSelectedInterfaceData || this.latestInterfacesData[0];
-            const monthKey = this.language[this.currentLang]["thisMonth"];
-            const todayKey = this.language[this.currentLang]["today"];
-            const yesterdayKey = this.language[this.currentLang]["yesterday"];
-            const data = {};
-            data[monthKey] = this.getMonthData(latestInterfacesData);
-            data[todayKey] = this.getDayData(latestInterfacesData);
-            data[yesterdayKey] = this.getYesterdayData(latestInterfacesData);
-            return data;
-          },
-          sortedInterfaces() {
-            return [...this.latestInterfacesTableData].sort((a, b) => {
-              let modifier = -1;
-              if (this.sortOrder === "asc") modifier = 1;
-              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
-              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
-              return 0;
-            });
-          },
-          sortedTableData() {
-            return [...this.filteredData].sort((a, b) => {
-              let modifier = -1;
-              if (this.sortOrder === "asc") modifier = 1;
-              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
-              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
-              return 0;
-            });
-          },
-          sortedTopData() {
-            return [...this.latestTopData].sort((a, b) => {
-              let modifier = -1;
-              if (this.sortOrder === "asc") modifier = 1;
-              if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
-              if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
-              return 0;
-            });
-          },
-          dateRange() {
-            const d = new Date(this.currentRange);
-            const format = (date, withDay = true, withTime = false) => {
-              let result = `${date.getFullYear()}-${String(
-                date.getMonth() + 1
-              ).padStart(2, "0")}${
-                withDay ? `-${String(date.getDate()).padStart(2, "0")}` : ""
-              }`;
-              if (withTime) {
-                result += ` ${String(date.getHours()).padStart(2, "0")}:00`;
-              }
-              return result;
-            };
-            switch (this.timeRangeType) {
-              case "hour":
-                const hourStart = new Date(d);
-                hourStart.setMinutes(0, 0, 0);
-                const hourEnd = new Date(hourStart);
-                hourEnd.setHours(hourStart.getHours() + 1);
-                return `${format(hourStart, true, true)} - ${format(
-                  hourEnd,
-                  true,
-                  true
-                )}`;
-              case "day":
-                const day = new Date(d);
-                return `${format(day)}`;
-              case "month":
-                const start = new Date(d.getFullYear(), d.getMonth(), 1);
-                const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-                return `${format(start)} - ${format(end)}`;
-              case "year":
-                return `${d.getFullYear()}`;
-            }
-          },
-        },
-        watch: {
-          timeRangeType() {
-            this.showNextButton = false;
-            (this.currentRange = new Date()), this.updateChart();
-          },
-          currentDate() {
-            this.updateChart();
-          },
-          latestSelectedInterfaceData() {
-            this.updateChart();
-            this.handleLatestTopData();
-          },
-          theme: {
-            deep: true,
-            handler(newTheme) {
-              this.saveThemeColors();
-              this.$nextTick(this.updatePreviewColors());
-            },
-          },
-        },
-        methods: {
-          // 登录逻辑
-          async handleLogin() {
-            if (!this.assistApi) {
-              alert("请先点击右上角设置统一API入口");
-              return;
-            } else {
-              this.url = {
-                login: this.assistApi + "/auth/login",
-                verify: this.assistApi + "/auth/verify",
-                loadJson: this.assistApi + "/json.cgi",
-                backups: this.assistApi + "/backups/",
-              };
-            }
-            this.loggingIn = true;
-            this.loginError = "";
-            try {
-              const response = await fetch(this.url.login, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(this.loginForm),
-              });
-              if (!response.ok) {
-                const error = await response.json();
-                throw new Error(
-                  error.error || this.language[this.currentLang]["loginError"]
-                );
-              }
-              const { token } = await response.json();
-              this.handleAuthSuccess(token);
-            } catch (err) {
-              this.loginError =
-                err.message || this.language[this.currentLang]["loginError"];
-            } finally {
-              this.loggingIn = false;
-            }
-          },
-          // 认证成功处理
-          handleAuthSuccess(token) {
-            // 存储Token
-            localStorage.setItem("jwt_token", token);
-            this.authToken = token;
-            this.isAuthenticated = true;
-            // 加载数据
-            this.loadData();
-          },
-          // 注销处理
-          handleLogout() {
-            localStorage.removeItem("jwt_token");
-            this.isAuthenticated = false;
-            this.authToken = null;
-          },
-          async loadData(arg) {
-            const response = await this.fetchWithAuth(this.url.loadJson);
-            this.latestRawData = await response.json();
-            if (arg == 1 && this.latestRawData) {
-              this.showMessage("refreshed");
-            }
-            this.latestInterfacesData = this.latestRawData.interfaces;
-            if (this.latestInterfacesData.length > 0) {
-              const defaultInterface = this.latestInterfacesData.find(
-                (intf) => intf.name === this.defaultInterface
-              );
-              this.latestSelectedInterfaceData =
-                defaultInterface || this.latestInterfacesData[0];
-            }
-            await this.$nextTick();
-          },
-          async fetchWithAuth(url, options = {}) {
-            const response = await fetch(url, {
-              ...options,
-              headers: {
-                Authorization: `Bearer ${this.authToken}`,
-                ...options.headers,
-              },
-            });
-            if (response.status === 401) {
-              this.handleLogout();
-            }
-            return response;
-          },
-          formatBytes(bytes) {
-            const units = ["B", "KB", "MB", "GB", "TB"];
-            let i = 0;
-            bytes = Number(bytes);
-            while (bytes >= 1024 && i < units.length - 1) {
-              bytes /= 1024;
-              i++;
-            }
-            return {
-              value: bytes.toFixed(2),
-              unit: units[i],
-            };
-          },
-          formatSum(data) {
-            const total = data.rx + data.tx;
-            return this.formatBytes(total);
-          },
-          getMonthData(interface) {
-            const year = new Date().getFullYear();
-            const month = new Date().getMonth() + 1;
-            return (
-              interface.traffic.month.find(
-                (d) => d.date.year === year && d.date.month === month
-              ) || { rx: 0, tx: 0 }
-            );
-          },
-          getDayData(interface) {
-            const year = new Date().getFullYear();
-            const month = new Date().getMonth() + 1;
-            const day = new Date().getDate();
-            return (
-              interface.traffic.day.find(
-                (d) =>
-                  d.date.year === year &&
-                  d.date.month === month &&
-                  d.date.day === day
-              ) || { rx: 0, tx: 0 }
-            );
-          },
-          getYesterdayData(interface) {
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-            const year = yesterday.getFullYear();
-            const month = yesterday.getMonth() + 1;
-            const day = yesterday.getDate();
-            return (
-              interface.traffic.day.find(
-                (d) =>
-                  d.date.year === year &&
-                  d.date.month === month &&
-                  d.date.day === day
-              ) || { rx: 0, tx: 0 }
-            );
-          },
-          adjustTime(offset) {
-            const d = new Date(this.currentRange);
-            const now = new Date();
-            let isLimitReached = false;
-            // 保存原始日期（用于闰年处理）
-            const originalDate = d.getDate();
-            const originalMonth = d.getMonth();
-            switch (this.timeRangeType) {
-              case "hour":
-                // 自动处理跨日/月/年
-                d.setTime(d.getTime() + offset * 60 * 60 * 1000);
-                // 精确比较到小时级别
-                isLimitReached =
-                  d.getFullYear() === now.getFullYear() &&
-                  d.getMonth() === now.getMonth() &&
-                  d.getDate() === now.getDate() &&
-                  d.getHours() === now.getHours();
-                break;
-              case "day":
-                d.setDate(d.getDate() + offset);
-                // 比较日期部分
-                isLimitReached = this.isSameDay(d, now);
-                break;
-              case "month":
-                // 先设置为当月第一天，避免跨月时的日期溢出问题
-                d.setDate(1);
-                d.setMonth(d.getMonth() + offset);
-                // 处理跨月调整后的日期有效性（如1月31日→2月28/29日）
-                const maxDays = new Date(
-                  d.getFullYear(),
-                  d.getMonth() + 1,
-                  0
-                ).getDate();
-                d.setDate(Math.min(originalDate, maxDays));
-                isLimitReached =
-                  d.getFullYear() === now.getFullYear() &&
-                  d.getMonth() === now.getMonth();
-                break;
-              case "year":
-                const targetYear = d.getFullYear() + offset;
-                d.setFullYear(targetYear);
-                // 处理闰年2月29日的情况
-                if (originalMonth === 1 && originalDate === 29) {
-                  const isLeapYear = (year) =>
-                    (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-                  if (!isLeapYear(targetYear)) {
-                    d.setMonth(1); // February
-                    d.setDate(28);
-                  }
-                }
-                isLimitReached = d.getFullYear() === now.getFullYear();
-                break;
-            }
-            this.showNextButton = !isLimitReached;
-            this.currentRange = d;
-            this.updateChart();
-          },
-          //比较两个日期是否是同一天
-          isSameDay(date1, date2) {
-            return (
-              date1.getFullYear() === date2.getFullYear() &&
-              date1.getMonth() === date2.getMonth() &&
-              date1.getDate() === date2.getDate()
-            );
-          },
-          showApiSettings() {
-            this.apiSettingsVisible = !this.apiSettingsVisible;
-          },
-          normalizeUrl(url) {
-            if (url == null || url == "") return null;
-            const trimmedUrl = url.trim();
-            if (/^\/\//.test(trimmedUrl)) {
-              return `http:${trimmedUrl}`;
-            }
-            if (!/^https?:\/\//i.test(trimmedUrl)) {
-              return `http://${trimmedUrl}`;
-            }
-            return trimmedUrl;
-          },
-          saveApiSettings() {
-            this.apiSettingsVisible = false;
-            this.assistApi = this.normalizeUrl(this.assistApi);
-            if (!this.assistApi || this.assistApi == "") {
-              localStorage.removeItem("assist_api");
-              return;
-            }
-            localStorage.setItem("default_interface", this.defaultInterface);
-            localStorage.setItem("assist_api", this.assistApi);
-            localStorage.setItem("enable_backup", this.enableBackupData);
-            if (!this.enableBackupData) {
-              localStorage.removeItem("backup_data");
-            }
+    <div class="settings-modal" v-if="apiSettingsVisible">
+      <div class="settings-content">
+        <h3>[[language[currentLang]['apiSettings'] ]]</h3>
+        <div class="form-group">
+          <label> [[language[currentLang]['assistApi'] ]]:</label>
+          <input type="text" v-model="assistApi" :placeholder="language[currentLang]['assistApi']" />
+        </div>
+        <div class="form-group">
+          <label> [[language[currentLang]['defaultInterface'] ]]:</label>
+          <input type="text" v-model="defaultInterface"
+            :placeholder="language[currentLang]['defaultInterfacePlaceholder']" />
+        </div>
+        <!-- 新增备份数据开关 -->
+        <div class="form-group switch-group">
+          <label> [[language[currentLang]['enableBackup'] ]]:</label>
+          <label class="switch">
+            <input type="checkbox" class="settings-checkbox" v-model="enableBackupData" />
+            <span class="slider round"></span>
+          </label>
+        </div>
 
-            if (this.isAuthenticated) {
-              this.loadData();
-            }
+        <div class="settings-buttons">
+          <button class="cancel-button" @click="cancelApiSettings">
+            [[language[currentLang]['cancel'] ]]
+          </button>
+          <button class="save-button" @click="saveApiSettings">
+            [[language[currentLang]['save'] ]]
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- 登录界面 -->
+    <div v-if="!isAuthenticated" class="login-container">
+      <div class="login-box">
+        <h1>VNSTAT-DASHBOARD</h1>
+        <form @submit.prevent="handleLogin">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> [[language[currentLang]['username']
+              ]]</label>
+            <input type="text" v-model="loginForm.username" required />
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-lock"></i> [[language[currentLang]['password']
+              ]]</label>
+            <input type="password" v-model="loginForm.password" required />
+          </div>
+          <button type="submit" :disabled="loggingIn">
+            [[ loggingIn ? language[currentLang]['loginIn'] :
+            language[currentLang]['login'] ]]
+          </button>
+          <div v-if="loginError" class="error-message">[[ loginError ]]</div>
+        </form>
+      </div>
+    </div>
+    <div v-else>
+      <!-- 统计卡片 -->
+      <div class="stat-container" v-if="currentInterface">
+        <!-- 总统计 -->
+        <div class="stat-card">
+          <div class="stat-row">
+            <i class="fas fa-tachometer-alt stat-icon"></i>
+            <div class="stat-value">
+              [[ formatSum(currentInterface.traffic.total).value ]]
+              <span class="stat-unit">
+                [[ formatSum(currentInterface.traffic.total).unit ]]</span>
+            </div>
+          </div>
+          <div class="stat-row">
+            <i class="fas fa-arrow-down stat-icon"></i>
+            <div class="stat-value">
+              [[ formatBytes(currentInterface.traffic.total.rx).value ]]
+              <span class="stat-unit">
+                [[ formatBytes(currentInterface.traffic.total.rx).unit
+                ]]</span>
+            </div>
+          </div>
+          <div class="stat-row">
+            <i class="fas fa-arrow-up stat-icon"></i>
+            <div class="stat-value">
+              [[ formatBytes(currentInterface.traffic.total.tx).value ]]
+              <span class="stat-unit">
+                [[ formatBytes(currentInterface.traffic.total.tx).unit
+                ]]</span>
+            </div>
+          </div>
+          <div class="stat-label">[[language[currentLang]['total'] ]]</div>
+        </div>
+        <div class="stat-card" v-for="(data, title) in summaryData" :key="title">
+          <div class="stat-row">
+            <i class="fas fa-chart-bar stat-icon"></i>
+            <div class="stat-value">
+              [[ formatSum(data).value ]]
+              <span class="stat-unit"> [[ formatSum(data).unit ]]</span>
+            </div>
+          </div>
+          <div class="stat-row">
+            <i class="fas fa-arrow-down stat-icon"></i>
+            <div class="stat-value">
+              [[ formatBytes(data.rx).value ]]
+              <span class="stat-unit"> [[ formatBytes(data.rx).unit ]]</span>
+            </div>
+          </div>
+          <div class="stat-row">
+            <i class="fas fa-arrow-up stat-icon"></i>
+            <div class="stat-value">
+              [[ formatBytes(data.tx).value ]]
+              <span class="stat-unit"> [[ formatBytes(data.tx).unit ]]</span>
+            </div>
+          </div>
+          <div class="stat-label">[[ title ]]</div>
+        </div>
+      </div>
+
+      <!-- 修改后的控制条结构 -->
+      <div class="control-bar">
+        <!-- 左侧控件 -->
+        <div class="control-group left">
+          <button class="control-button" :title="language[currentLang]['topStatistics']" @click="handleShowTopData()">
+            <i class="fas fa-signal"></i>
+          </button>
+          <select v-model="timeRangeType" v-show="!(interfacesDataMode||topDataMode)">
+            <option value="hour">[[language[currentLang]['byHour'] ]]</option>
+            <option value="day">[[language[currentLang]['byDay'] ]]</option>
+            <option value="month">
+              [[language[currentLang]['byMonth'] ]]
+            </option>
+            <option value="year">[[language[currentLang]['byYear'] ]]</option>
+          </select>
+        </div>
+
+        <div class="control-group center" v-show="!(interfacesDataMode||topDataMode)">
+          <button class="control-button" @click="adjustTime(-1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="date-range"> [[ dateRange ]]</span>
+          <button class="control-button" :style="{ visibility: showNextButton ? 'visible' : 'hidden' }"
+            @click="adjustTime(1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- 右侧网卡选择 -->
+        <div class="control-group right">
+          <div class="time-display" v-if="latestSelectedInterfaceData">
+            <div class="time-row">
+              <span class="time-label">
+                [[language[currentLang]['createTime'] ]]:
+              </span>
+              <span class="time-value">
+                [[ formatTime(latestSelectedInterfaceData.created) ]]</span>
+            </div>
+            <div class="time-row">
+              <span class="time-label">
+                [[language[currentLang]['updateTime'] ]]:
+              </span>
+              <span class="time-value">
+                [[ formatTime(latestSelectedInterfaceData.updated) ]]</span>
+            </div>
+          </div>
+          <button class="control-button" :title="language[currentLang]['refresh']"
+            :style="{ visibility: showNextButton ? 'hidden' : 'visible' }" @click="loadData(1)">
+            <i class="fas fa-refresh"></i>
+          </button>
+          <select v-model="latestSelectedInterfaceData" v-show="!interfacesDataMode">
+            <option v-for="iface in latestInterfacesData" :value="iface">
+              [[ iface.name ]]
+            </option>
+          </select>
+          <button class="control-button" :title="language[currentLang]['StatsByInterface']"
+            @click="handleShowInterfaceData()">
+            <i class="fas fa-network-wired"></i>
+          </button>
+        </div>
+      </div>
+      <div v-show="!(interfacesDataMode||topDataMode)">
+        <div class="traffic-summary">
+          <div class="summary-item" :title="language[currentLang]['upload']">
+            <i class="fas fa-upload text-blue-500"></i>
+            <span> [[ uploadGB ]]</span>
+          </div>
+          <div class="summary-item" :title="language[currentLang]['total']">
+            <i class="fas fa-exchange-alt text-purple-500"></i>
+            <span> [[ totalGB ]]</span>
+          </div>
+          <div class="summary-item" :title="language[currentLang]['download']">
+            <i class="fas fa-download text-green-500"></i>
+            <span> [[ downloadGB ]]</span>
+          </div>
+        </div>
+        <!-- 在图表容器上方添加 -->
+        <div class="view-switcher right">
+          <div class="switch-container">
+            <button @click="currentView = 'chart'" class="view-switch" :class="{active: currentView === 'chart'} "
+              :title="language[currentLang]['chartView']">
+              <i class="fas fa-chart-line"></i>
+            </button>
+            <button @click="currentView = 'table'" class="view-switch" :class="{active: currentView === 'table'}"
+              :title="language[currentLang]['tableView']">
+              <i class="fas fa-table"></i>
+            </button>
+          </div>
+        </div>
+        <!-- 图表容器 -->
+        <div class="chart-container">
+          <div v-show="currentView === 'chart'" id="trafficChart"></div>
+          <div v-show="currentView === 'table'" class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th @click="sortTable('timestamp')">
+                    [[language[currentLang]['timeDate'] ]]
+                    <i class="fas" :class="sortIcon('timestamp')"></i>
+                  </th>
+                  <th @click="sortTable('tx')">
+                    [[language[currentLang]['upload'] ]]
+                    <i class="fas" :class="sortIcon('tx')"></i>
+                  </th>
+                  <th @click="sortTable('rx')">
+                    [[language[currentLang]['download'] ]]
+                    <i class="fas" :class="sortIcon('rx')"></i>
+                  </th>
+                  <th>[[language[currentLang]['total'] ]]</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in sortedTableData" :key="item.timestamp">
+                  <td>[[ getformatTableTime(item.date,item.time) ]]</td>
+                  <td>
+                    [[ formatBytes(item.tx).value+formatBytes(item.tx).unit ]]
+                  </td>
+                  <td>
+                    [[ formatBytes(item.rx).value +formatBytes(item.rx).unit
+                    ]]
+                  </td>
+                  <td>
+                    [[ formatBytes(item.tx +
+                    item.rx).value+formatBytes(item.tx + item.rx).unit ]]
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- 网卡统计表格 -->
+      <div v-show="interfacesDataMode" class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th @click="sortTable('name')">
+                [[language[currentLang]['interfaceName'] ]]
+                <i class="fas" :class="sortIcon('name')"></i>
+              </th>
+              <th @click="sortTable('todayRx')">
+                [[language[currentLang]['todayDownload'] ]]
+                <i class="fas" :class="sortIcon('todayRx')"></i>
+              </th>
+              <th @click="sortTable('todayTx')">
+                [[language[currentLang]['todayUpload'] ]]
+                <i class="fas" :class="sortIcon('todayTx')"></i>
+              </th>
+              <th @click="sortTable('todayTotal')">
+                [[language[currentLang]['todayTotal'] ]]
+                <i class="fas" :class="sortIcon('todayTotal')"></i>
+              </th>
+              <th @click="sortTable('totalRx')">
+                [[language[currentLang]['allDownload'] ]]
+                <i class="fas" :class="sortIcon('totalRx')"></i>
+              </th>
+              <th @click="sortTable('totalTx')">
+                [[language[currentLang]['allUpload'] ]]
+                <i class="fas" :class="sortIcon('totalTx')"></i>
+              </th>
+              <th @click="sortTable('totalTotal')">
+                [[language[currentLang]['allTotal'] ]]
+                <i class="fas" :class="sortIcon('totalTotal')"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in sortedInterfaces" :key="item.name">
+              <td>[[ item.name ]]</td>
+              <td>
+                [[ formatBytes(item.todayRx).value ]] [[
+                formatBytes(item.todayRx).unit ]]
+              </td>
+              <td>
+                [[ formatBytes(item.todayTx).value ]] [[
+                formatBytes(item.todayTx).unit ]]
+              </td>
+              <td>
+                [[ formatBytes(item.todayTotal).value ]] [[
+                formatBytes(item.todayTotal).unit ]]
+              </td>
+              <td>
+                [[ formatBytes(item.totalRx).value ]] [[
+                formatBytes(item.totalRx).unit ]]
+              </td>
+              <td>
+                [[ formatBytes(item.totalTx).value ]] [[
+                formatBytes(item.totalTx).unit ]]
+              </td>
+              <td>
+                [[ formatBytes(item.totalTotal).value ]] [[
+                formatBytes(item.totalTotal).unit ]]
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div v-show="topDataMode" class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th @click="sortTable('timestamp')">
+                [[language[currentLang]['time'] ]]
+                <i class="fas" :class="sortIcon('timestamp')"></i>
+              </th>
+              <th @click="sortTable('rx')">
+                [[language[currentLang]['download'] ]]
+                <i class="fas" :class="sortIcon('rx')"></i>
+              </th>
+              <th @click="sortTable('tx')">
+                [[language[currentLang]['upload'] ]]
+                <i class="fas" :class="sortIcon('tx')"></i>
+              </th>
+              <th @click="sortTable('total')">
+                [[language[currentLang]['total'] ]]
+                <i class="fas" :class="sortIcon('todayTotal')"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in sortedTopData" :key="item.name">
+              <td>[[ getXValue(item.date, null, 'day') ]]</td>
+              <td>
+                [[ formatBytes(item.rx).value ]] [[ formatBytes(item.rx).unit
+                ]]
+              </td>
+              <td>
+                [[ formatBytes(item.tx).value ]] [[ formatBytes(item.tx).unit
+                ]]
+              </td>
+              <td>
+                [[ formatBytes(item.total).value ]] [[
+                formatBytes(item.total).unit ]]
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      delimiters: ["[[", "]]"],
+      el: "#app",
+      data: {
+        // 认证相关数据
+        isAuthenticated: true,
+        loginForm: { username: "", password: "" },
+        loggingIn: false,
+        loginError: "",
+        authToken: null,
+        latestRawData: {},
+        latestInterfacesTableData: [],
+        latestInterfacesData: [],
+        latestTopData: [],
+        latestSelectedInterfaceData: null,
+        chart: null,
+        previewChart: null,
+        timeRangeType: "day",
+        currentRange: new Date(),
+        currentStats: {},
+        currentView: "chart",
+        filteredData: [],
+        isNightMode: false,
+        interfacesDataMode: false,
+        topDataMode: false,
+        showNextButton: false,
+        sortKey: "name",
+        sortOrder: "asc",
+        defaultInterface: "enp3s0",
+        apiSettingsVisible: false,
+        themeSettingsVisible: false,
+        assistApi: null,
+        url: {},
+        // 备份数据启用
+        enableBackupData: null,
+        // 内存缓存 {dateStr: data}
+        backupCache: {},
+        //维护键顺序
+        cacheKeys: [],
+        pendingBackups: new Set(),
+        sampleUpData: [
+          { x: "00:00", y: 20 },
+          { x: "04:00", y: 80 },
+          { x: "08:00", y: 40 },
+          { x: "12:00", y: 120 },
+          { x: "16:00", y: 90 },
+          { x: "20:00", y: 60 },
+        ],
+        sampleDownData: [
+          { x: "00:00", y: 10 },
+          { x: "04:00", y: 100 },
+          { x: "08:00", y: 30 },
+          { x: "12:00", y: 150 },
+          { x: "16:00", y: 55 },
+          { x: "20:00", y: 20 },
+        ],
+        theme: {
+          name: "科技蓝",
+          main: "#0f172a",
+          accent: "#3b82f6",
+          contrast: "#f8fafc",
+          upload: "#93c5fd",
+          download: "#60a5fa",
+        },
+        presetThemes: [
+          {
+            name: "科技蓝",
+            main: "#0f172a",
+            accent: "#3b82f6",
+            contrast: "#f8fafc",
+            upload: "#93c5fd",
+            download: "#60a5fa",
           },
-          cancelApiSettings() {
-            this.apiSettingsVisible = false;
+          {
+            name: "活力橙",
+            main: "#1e293b",
+            accent: "#f59e0b",
+            contrast: "#fff7ed",
+            upload: "#fcd34d",
+            download: "#fb923c",
           },
-          showThemeSettings() {
-            this.themeSettingsVisible = !this.themeSettingsVisible;
-            this.$nextTick(() => {
-              this.initPreviewChart();
-            });
+          {
+            name: "清新绿",
+            main: "#1c1917",
+            accent: "#10b981",
+            contrast: "#ecfdf5",
+            upload: "#6ee7b7",
+            download: "#34d399",
           },
-          saveThemeSettings() {
-            // 检查是否是预设主题
-            const isPreset = this.presetThemes.some(
-              (preset) =>
-                preset.main === this.theme.main &&
-                preset.accent === this.theme.accent &&
-                preset.contrast === this.theme.contrast &&
-                preset.upload === this.theme.upload &&
-                preset.download === this.theme.download
-            );
-            if (!isPreset) {
-              this.theme.name = "自定义";
-              const customTheme = { ...this.theme };
-              const filteredThemes = this.presetThemes.filter(
-                (t) => t.name !== "自定义"
-              );
-              this.presetThemes = [...filteredThemes, customTheme];
-            }
-            this.saveThemeColors();
-            localStorage.setItem("themeColors", JSON.stringify(this.theme));
-            if (this.chart) {
-              this.updateChart();
-            }
-            this.cancelThemeSettings();
+          {
+            name: "幻影紫",
+            main: "#1a1b26",
+            accent: "#9d7cde",
+            contrast: "#f8f5ff",
+            upload: "#b9a4e6",
+            download: "#7f5fd3",
           },
-          cancelThemeSettings() {
-            this.themeSettingsVisible = false;
+          {
+            name: "玫瑰粉",
+            main: "#2d2d2d",
+            accent: "#ff6b6b",
+            contrast: "#fff0f0",
+            upload: "#ff9d9d",
+            download: "#ff5252",
           },
-          //应用预设
-          applyPresetTheme(preset) {
-            this.theme = { ...preset };
-            this.saveThemeColors();
-            localStorage.setItem("themeColors", JSON.stringify(this.theme));
+        ],
+        defaultTheme: {
+          name: "科技蓝",
+          main: "#0f172a",
+          accent: "#3b82f6",
+          contrast: "#f8fafc",
+          upload: "#93c5fd",
+          download: "#60a5fa",
+        },
+        currentLang: "zh",
+        language: {
+          zh: {
+            loginTitle: "VNSTAT-DASHBOARD",
+            languageTip: "Switch to English",
+            username: "用户名",
+            password: "密码",
+            login: "登录",
+            loginIn: "登录中...",
+            loginError: "登录失败",
+            total: "总计",
+            thisMonth: "本月",
+            today: "今日",
+            yesterday: "昨日",
+            topStatistics: "用量TOP统计",
+            byHour: "按时",
+            byDay: "按日",
+            byMonth: "按月",
+            byYear: "按年",
+            hour: "小时",
+            date: "日期",
+            month: "月份",
+            timeDate: "时间/日期",
+            time: "时间",
+            themeSettings: "主题配置",
+            createTime: "统计开始",
+            updateTime: "最后更新",
+            traffic: "流量",
+            accent: "强调色",
+            main: "主体色",
+            contrast: "对比色",
+            upload: "上行",
+            download: "下行",
+            allUpload: "全部上行",
+            allDownload: "全部下行",
+            allTotal: "历史总计",
+            todayUpload: "今日上行",
+            todayDownload: "今日下行",
+            todayTotal: "今日总计",
+            restoreDefault: "恢复默认",
+            cancel: "取消",
+            save: "保存",
+            chartView: "图表视图",
+            tableview: "表格视图",
+            apiSettings: "页面配置",
+            assistApi: "API接口",
+            assistApiPlaceholder: "请输入API地址",
+            defaultInterface: "默认网卡",
+            interfaceName: "网卡名称",
+            StatsByInterface: "按网卡统计",
+            defaultInterfacePlaceholder: "请输入默认网卡，比如：enp3s0",
+            enableBackup: "使用备份数据",
+            noAssistApi: "请先点击右上角设置统一API入口",
+            nightMode: "夜深了，已切换成夜间模式",
+            refreshed: "刷新成功",
+            refresh: "刷新",
+            total: "总计",
+            switchSuccess: "切换成功",
+            langSwitched: "语言已切换至中文",
           },
-          // 恢复默认
-          resetDefaultTheme() {
-            this.theme = { ...this.defaultTheme };
-            this.saveThemeColors();
-            localStorage.setItem("themeColors", JSON.stringify(this.theme));
-          },
-          getPresetStyle(theme) {
-            return {
-              "--main-color": theme.main,
-              "--accent-color": theme.accent,
-              background: `linear-gradient(135deg, ${theme.main} 50%, ${theme.accent} 50%)`,
-            };
-          },
-          toggleLanguage(arg) {
-            if (this.currentLang == "zh") {
-              this.currentLang = "en";
-            } else {
-              this.currentLang = "zh";
-            }
-            this.showMessage("langSwitched");
-            localStorage.setItem("current_lang", this.currentLang);
-            this.updateChart(1);
-          },
-          toggleNightMode(arg) {
-            if (arg == 1) {
-              this.isNightMode = true;
-            } else {
-              localStorage.setItem("nightModeOff", true);
-              this.isNightMode = !this.isNightMode;
-            }
-            const htmlEl = document.documentElement;
-            if (this.isNightMode) {
-              localStorage.removeItem("nightModeOff");
-              htmlEl.classList.add("night-mode");
-            } else {
-              htmlEl.classList.remove("night-mode");
-            }
-            this.showMessage("switchSuccess");
-          },
-          handleShowInterfaceData() {
-            if (this.interfacesDataMode) {
-              this.interfacesDataMode = false;
-              this.updateChart();
-            } else {
-              this.interfacesDataMode = true;
-              this.topDataMode = false;
-              this.handleLatestInterfacesData();
-            }
-          },
-          handleShowTopData() {
-            if (this.topDataMode) {
-              this.topDataMode = false;
-              this.updateChart();
-            } else {
-              this.topDataMode = true;
-              this.interfacesDataMode = false;
-              this.handleLatestTopData();
-            }
-          },
-          sortTable(key) {
-            if (this.sortKey === key) {
-              this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
-            } else {
-              this.sortKey = key;
-              this.sortOrder = "desc";
-            }
-          },
-          sortIcon(key) {
-            if (this.sortKey !== key) return "fa-sort";
-            return this.sortOrder === "asc" ? "fa-sort-up" : "fa-sort-down";
-          },
-          handleLatestInterfacesData() {
-            this.latestInterfacesTableData = this.latestInterfacesData.map(
-              (item) => {
-                const todayData = this.getDayData(item);
-                return {
-                  name: item.name,
-                  todayRx: todayData.rx,
-                  todayTx: todayData.tx,
-                  todayTotal: todayData.rx + todayData.tx,
-                  totalRx: item.traffic.total.rx,
-                  totalTx: item.traffic.total.tx,
-                  totalTotal: item.traffic.total.rx + item.traffic.total.tx,
-                };
-              }
-            );
-          },
-          handleLatestTopData() {
-            const currentInterfaceTopData =
-              this.latestSelectedInterfaceData || this.latestInterfacesData[0];
-            this.latestTopData = currentInterfaceTopData.traffic.top.map(
-              (item) => {
-                return {
-                  timestamp: item.timestamp,
-                  date: item.date,
-                  rx: item.rx,
-                  tx: item.tx,
-                  total: item.rx + item.tx,
-                };
-              }
-            );
-          },
-          async getMergedSeriesData() {
-            const dataType = {
-              hour: "fiveminute",
-              day: "hour",
-              month: "day",
-              year: "month",
-            }[this.timeRangeType];
-            const currentDate = new Date(this.currentRange);
-            const isPastDate = this.isPastDate(currentDate);
-            // 判断是否需要使用备份数据
-            let useBackup =
-              this.enableBackupData &&
-              isPastDate &&
-              (this.timeRangeType === "hour" || this.timeRangeType === "day");
-            if (useBackup) {
-              const dateStr = this.getDateString(currentDate);
-              const backupData = await this.getBackupData(dateStr);
-              if (backupData) {
-                return this.processBackupData(
-                  currentDate,
-                  backupData,
-                  dataType
-                );
-              }
-            }
-            //原有处理逻辑
-            const latestRawData =
-              this.latestSelectedInterfaceData.traffic[dataType];
-            return this.processData(currentDate, latestRawData, dataType);
-          },
-          //判断是否是过去日期，保险起见昨天之前的数据都从备份中获取
-          isPastDate(date) {
-            const now = new Date();
-            const compareDate = new Date(date);
-            compareDate.setHours(23, 59, 59, 999);
-            return compareDate < now;
-          },
-          //获取日期字符串
-          getDateString(date) {
-            return [
-              date.getFullYear(),
-              String(date.getMonth() + 1).padStart(2, "0"),
-              String(date.getDate()).padStart(2, "0"),
-            ].join("");
-          },
-          processData(currentDate, rawData, dataType) {
-            let totalRx = 0,
-              totalTx = 0;
-            const rangeYear = currentDate.getFullYear();
-            const rangeMonth = currentDate.getMonth() + 1;
-            const rangeDay = currentDate.getDate();
-            const rangeHour = currentDate.getHours();
-            this.filteredData = rawData.filter((item) => {
-              let match = false;
-              switch (this.timeRangeType) {
-                case "hour":
-                  var itemYear = item.date.year;
-                  var itemMonth = item.date.month;
-                  var itemDay = item.date.day;
-                  var itemHour = item.time ? item.time.hour : 0;
-                  match =
-                    itemYear === rangeYear &&
-                    itemMonth === rangeMonth &&
-                    itemDay === rangeDay &&
-                    itemHour === rangeHour;
-                  break;
-                case "day":
-                  var itemYear = item.date.year;
-                  var itemMonth = item.date.month;
-                  var itemDay = item.date.day;
-                  match =
-                    itemYear === rangeYear &&
-                    itemMonth === rangeMonth &&
-                    itemDay === rangeDay;
-                  break;
-                case "month":
-                  var itemYear = item.date.year;
-                  var itemMonth = item.date.month;
-                  var itemDay = item.date.day;
-                  match = itemYear === rangeYear && itemMonth === rangeMonth;
-                  break;
-                case "year":
-                  var itemYear = item.date.year;
-                  match = itemYear === rangeYear;
-                  break;
-              }
-              if (match) {
-                totalRx += item.rx || 0;
-                totalTx += item.tx || 0;
-              }
-              return match;
-            });
-            this.currentStats = {
-              rx: totalRx,
-              tx: totalTx,
-              total: totalRx + totalTx,
-            };
-            const getXValue = (date, time) =>
-              this.getXValue(date, time, dataType);
-            return [
-              this.generateSeries(
-                this.language[this.currentLang]["upload"],
-                "tx",
-                this.theme.upload,
-                getXValue
-              ),
-              this.generateSeries(
-                this.language[this.currentLang]["download"],
-                "rx",
-                this.theme.download,
-                getXValue
-              ),
-            ];
-          },
-          processCurrentData(currentDate, dataType) {},
-          //获取备份数据（带缓存）
-          async getBackupData(dateStr) {
-            // 初始化 backupCache 为 Map（若尚未初始化）
-            if (!(this.backupCache instanceof Map)) {
-              this.backupCache = new Map();
-            }
-            //先检查内存缓存
-            if (this.backupCache[dateStr]) {
-              return this.backupCache[dateStr];
-            }
-            //再检查localStorage
-            const cachedData = localStorage.getItem(`backup_data`);
-            if (cachedData) {
-              this.backupCache = JSON.parse(cachedData);
-              if (this.backupCache[dateStr]) {
-                return this.backupCache[dateStr];
-              }
-            }
-            try {
-              const url = `${this.url.backups}${dateStr}`;
-              const response = await this.fetchWithAuth(url);
-              const data = await response.json();
-              if (data && !data.error) {
-                // 插入新数据
-                this.backupCache[dateStr] = data;
-                this.cacheKeys.push(dateStr);
-                // 如果长度超过5，删除最旧的键
-                if (this.cacheKeys.length > 5) {
-                  const oldestKey = this.cacheKeys.shift();
-                  delete this.backupCache[oldestKey];
-                }
-                localStorage.setItem(
-                  `backup_data`,
-                  JSON.stringify(this.backupCache)
-                );
-                return data;
-              } else {
-                return null;
-              }
-            } catch (e) {
-              console.error("备份数据获取失败:", e);
-              return null;
-            }
-          },
-          //处理备份数据
-          processBackupData(currentDate, backupData, dataType) {
-            const selectedInterfaceData = backupData.interfaces.find(
-              (item) => item.name === this.latestSelectedInterfaceData.name
-            );
-            // 筛选逻辑（示例处理小时粒度）
-            const rawData = selectedInterfaceData.traffic[dataType] || [];
-            return this.processData(currentDate, rawData, dataType);
-          },
-          generateSeries(name, field, color, getX) {
-            return {
-              name,
-              data: this.filteredData.map((d) => ({
-                x: getX(d.date, d.time),
-                y: d[field] / (1024 * 1024), // 统一单位转换
-              })),
-              color,
-            };
-          },
-          getXValue(date, time, dataKey) {
-            const itemYear = date.year;
-            const itemMonth = String(date.month).padStart(2, "0");
-            const itemDay = String(date.day).padStart(2, "0");
-            var itemHour = "";
-            var itemMinute = "";
-            if (time) {
-              itemHour = String(time.hour).padStart(2, "0");
-              itemMinute = String(time.minute).padStart(2, "0");
-            }
-            switch (dataKey) {
-              case "fiveminute":
-                return `${itemHour}:${itemMinute}`;
-              case "hour":
-                return `${itemHour}` + ":00";
-              case "day":
-                return `${itemMonth}-${itemDay}`;
-              case "month":
-                return `${itemYear}-${itemMonth}`;
-            }
-          },
-          async updateChart() {
-            const seriesData = await this.getMergedSeriesData();
-            const options = {
-              chart: { type: "area", height: 400 },
-              series: seriesData,
-              fill: {
-                type: "solid",
-              },
-              dataLabels: {
-                enabled: false,
-              },
-              stroke: {
-                curve: "smooth",
-                width: 2,
-              },
-              markers: {
-                size: 3,
-                hover: { size: 5 },
-              },
-              xaxis: {
-                type: "category",
-                title: { text: this.getXAxisTitle() },
-              },
-              yaxis: {
-                title: {
-                  text: this.language[this.currentLang]["traffic"] + " (MB)",
-                },
-                labels: {
-                  formatter: function (value) {
-                    return value % 1 === 0
-                      ? value.toFixed(0) // 整数显示
-                      : value.toFixed(2); // 小数保留两位
-                  },
-                },
-              },
-              tooltip: {
-                y: {
-                  formatter: (value) => {
-                    const formatResult = this.formatFromMB(value);
-                    return formatResult.value + formatResult.unit;
-                  },
-                },
-              },
-            };
-            if (this.chart) {
-              this.chart.updateOptions(options);
-            } else {
-              this.chart = new ApexCharts(
-                document.querySelector("#trafficChart"),
-                options
-              );
-              this.chart.render();
-            }
-          },
-          formatFromMB(mb) {
-            const units = ["MB", "GB", "TB"];
-            let value = Number(mb);
-            let i = 0;
-            while (value >= 1024 && i < units.length - 1) {
-              value /= 1024;
-              i++;
-            }
-            return {
-              value: value.toFixed(2),
-              unit: units[i],
-            };
-          },
-          getformatTableTime(date, time) {
-            const dataType = {
-              hour: "fiveminute",
-              day: "hour",
-              month: "day",
-              year: "month",
-            }[this.timeRangeType];
-            return this.getXValue(date, time, dataType);
-          },
-          getXAxisTitle() {
-            return {
-              day: this.language[this.currentLang]["hour"],
-              month: this.language[this.currentLang]["date"],
-              year: this.language[this.currentLang]["month"],
-            }[this.timeRangeType];
-          },
-          formatTime(timeObj) {
-            if (!timeObj?.timestamp) return "N/A";
-            const date = this.getBeijingTime(timeObj.timestamp);
-            return `${date.getUTCFullYear()}-${this.pad(
-              date.getUTCMonth() + 1
-            )}-${this.pad(date.getUTCDate())}
-                ${this.pad(date.getUTCHours())}:${this.pad(
-              date.getUTCMinutes()
-            )}`;
-          },
-          // 补零函数
-          pad(num) {
-            return num.toString().padStart(2, "0");
-          },
-          getBeijingTime(timestamp) {
-            const date = new Date(timestamp * 1000);
-            date.setMinutes(date.getMinutes() + date.getTimezoneOffset() + 480); // UTC+8
-            return date;
-          },
-          saveThemeColors() {
-            document.documentElement.style.setProperty(
-              "--accent-color",
-              this.theme.accent
-            );
-            document.documentElement.style.setProperty(
-              "--main-color",
-              this.theme.main
-            );
-            document.documentElement.style.setProperty(
-              "--contrast-color",
-              this.theme.contrast
-            );
-          },
-          initPreviewChart() {
-            this.previewChart = new ApexCharts(
-              document.querySelector("#themePreviewChart"),
-              {
-                chart: {
-                  type: "area",
-                  height: 160,
-                  toolbar: { show: false },
-                  parentHeightOffset: 0,
-                },
-                series: [
-                  {
-                    name: this.language[this.currentLang]["upload"],
-                    data: this.sampleUpData,
-                    color: this.theme.upload,
-                  },
-                  {
-                    name: this.language[this.currentLang]["download"],
-                    data: this.sampleDownData,
-                    color: this.theme.download,
-                  },
-                ],
-                stroke: { curve: "smooth", width: 2 },
-                markers: { size: 3 },
-                dataLabels: { enabled: false },
-                xaxis: { type: "category" },
-                yaxis: { labels: { formatter: (val) => `${val} MB` } },
-                grid: { borderColor: "rgba(125,125,125,0.1)" },
-              }
-            );
-            this.previewChart.render();
-          },
-          updatePreviewColors() {
-            if (this.previewChart) {
-              this.previewChart.updateOptions({
-                series: [
-                  {
-                    name: this.language[this.currentLang]["upload"],
-                    data: this.sampleUpData,
-                    color: this.theme.upload,
-                  },
-                  {
-                    name: this.language[this.currentLang]["download"],
-                    data: this.sampleDownData,
-                    color: this.theme.download,
-                  },
-                ],
-              });
-            }
-          },
-          loadThemeColors() {
-            const savedColors = localStorage.getItem("themeColors");
-            if (savedColors) {
-              const theme = JSON.parse(savedColors);
-              if (theme.name == "自定义") {
-                this.presetThemes.push(theme);
-              }
-              this.theme = theme;
-              this.saveThemeColors();
-              localStorage.setItem("themeColors", JSON.stringify(this.theme));
-            }
-            localStorage.setItem("themeColors", JSON.stringify(this.theme));
-          },
-          isLateNight() {
-            const currentHour = new Date().getHours();
-            return currentHour >= 23 || currentHour < 6;
-          },
-          showMessage(msgKey) {
-            const msg = this.language[this.currentLang][msgKey];
-            const container =
-              document.querySelector(".msg-container") ||
-              this.createContainer();
-            const msgEl = document.createElement("div");
-            msgEl.className = "message";
-            msgEl.textContent = msg;
-            container.appendChild(msgEl);
-            setTimeout(() => msgEl.classList.add("show"), 10);
-            setTimeout(() => {
-              msgEl.classList.remove("show");
-              setTimeout(() => msgEl.remove(), 300);
-            }, 3000);
-          },
-          createContainer() {
-            const container = document.createElement("div");
-            container.className = "msg-container";
-            document.body.appendChild(container);
-            return container;
+          en: {
+            loginTitle: "VNSTAT-DASHBOARD",
+            languageTip: "切换成中文",
+            username: "Username",
+            password: "Password",
+            login: "Sign In",
+            loginIn: "Logging In...",
+            loginError: "Login Failure",
+            total: "TOTAL",
+            thisMonth: "THIS MONTH",
+            today: "TODAY",
+            yesterday: "YESTERDAY",
+            topStatistics: "Top Traffic Days",
+            byHour: "Hour",
+            byDay: "Day",
+            byMonth: "Month",
+            byYear: "Year",
+            themeSettings: "Theme Settings",
+            createTime: "Stats Since",
+            updateTime: "Last Updated",
+            traffic: "traffic",
+            hour: "HOUR",
+            date: "DATE",
+            month: "MONTH",
+            timeDate: "TIME/DATE",
+            time: "TIME",
+            accent: "Accent Color",
+            main: "Main Color",
+            contrast: "Contrast Color",
+            upload: "UPLOAD",
+            download: "DOWNLOAD",
+            allUpload: "TOTAL UPLOAD",
+            allDownload: "TOTAL DOWNLOAD",
+            allTotal: "TOTAL",
+            todayUpload: "TODAY UPLOAD",
+            todayDownload: "TODAY DOWNLOAD",
+            todayTotal: "TODAY TOTAL",
+            restoreDefault: "Restore Default",
+            cancel: "Cancel",
+            save: "Save",
+            chartView: "Chart View",
+            tableview: "Table View",
+            apiSettings: "SETTINGS",
+            assistApi: "API",
+            assistApiPlaceholder: "Please input API address",
+            defaultInterface: "Default Interface",
+            interfaceName: "INTERFACE NAME",
+            StatsByInterface: "Stats By Interface",
+            defaultInterfacePlaceholder:
+              "Please input default interface, e.g. eth0",
+            enableBackup: "Use Backup Data",
+            noAssistApi:
+              "Please set the API endpoint in the top-right settings first",
+            nightMode: "Good Evening",
+            refreshed: "Refreshed",
+            refresh: "refresh",
+            switchSuccess: "Toggle Successful",
+            langSwitched: "Language switched to English",
           },
         },
-        async mounted() {
-          if (this.isLateNight()) {
-            const nightModeOff = localStorage.getItem("nightModeOff");
-            if (!nightModeOff) {
-              this.toggleNightMode(1);
-              this.showMessage("nightMode");
+      },
+      computed: {
+        uploadGB() {
+          return (
+            this.formatBytes(this.currentStats.tx).value +
+            this.formatBytes(this.currentStats.tx).unit
+          );
+        },
+        downloadGB() {
+          return (
+            this.formatBytes(this.currentStats.rx).value +
+            this.formatBytes(this.currentStats.rx).unit
+          );
+        },
+        totalGB() {
+          return (
+            this.formatBytes(this.currentStats.total).value +
+            this.formatBytes(this.currentStats.total).unit
+          );
+        },
+        currentInterface() {
+          return (
+            this.latestSelectedInterfaceData || this.latestInterfacesData[0]
+          );
+        },
+        summaryData() {
+          const latestInterfacesData =
+            this.latestSelectedInterfaceData || this.latestInterfacesData[0];
+          const monthKey = this.language[this.currentLang]["thisMonth"];
+          const todayKey = this.language[this.currentLang]["today"];
+          const yesterdayKey = this.language[this.currentLang]["yesterday"];
+          const data = {};
+          data[monthKey] = this.getMonthData(latestInterfacesData);
+          data[todayKey] = this.getDayData(latestInterfacesData);
+          data[yesterdayKey] = this.getYesterdayData(latestInterfacesData);
+          return data;
+        },
+        sortedInterfaces() {
+          return [...this.latestInterfacesTableData].sort((a, b) => {
+            let modifier = -1;
+            if (this.sortOrder === "asc") modifier = 1;
+            if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+            if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+            return 0;
+          });
+        },
+        sortedTableData() {
+          return [...this.filteredData].sort((a, b) => {
+            let modifier = -1;
+            if (this.sortOrder === "asc") modifier = 1;
+            if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+            if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+            return 0;
+          });
+        },
+        sortedTopData() {
+          return [...this.latestTopData].sort((a, b) => {
+            let modifier = -1;
+            if (this.sortOrder === "asc") modifier = 1;
+            if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+            if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+            return 0;
+          });
+        },
+        dateRange() {
+          const d = new Date(this.currentRange);
+          const format = (date, withDay = true, withTime = false) => {
+            let result = `${date.getFullYear()}-${String(
+              date.getMonth() + 1
+            ).padStart(2, "0")}${withDay ? `-${String(date.getDate()).padStart(2, "0")}` : ""
+              }`;
+            if (withTime) {
+              result += ` ${String(date.getHours()).padStart(2, "0")}:00`;
             }
+            return result;
+          };
+          switch (this.timeRangeType) {
+            case "hour":
+              const hourStart = new Date(d);
+              hourStart.setMinutes(0, 0, 0);
+              const hourEnd = new Date(hourStart);
+              hourEnd.setHours(hourStart.getHours() + 1);
+              return `${format(hourStart, true, true)} - ${format(
+                hourEnd,
+                true,
+                true
+              )}`;
+            case "day":
+              const day = new Date(d);
+              return `${format(day)}`;
+            case "month":
+              const start = new Date(d.getFullYear(), d.getMonth(), 1);
+              const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+              return `${format(start)} - ${format(end)}`;
+            case "year":
+              return `${d.getFullYear()}`;
           }
-          this.loadThemeColors();
-          // 初始化时检查本地Token
-          const storedToken = localStorage.getItem("jwt_token");
-          // 初始化检查缓存api选项
-          const assistApi = localStorage.getItem("assist_api");
-          const defaultInterface = localStorage.getItem("default_interface");
-          const savedEnable = localStorage.getItem("enable_backup");
-          const currentLang = localStorage.getItem("current_lang");
-          this.currentLang =
-            currentLang != null && currentLang != "" ? currentLang : "zh";
-          this.enableBackupData =
-            savedEnable !== null ? savedEnable === "true" : true;
-          if (!this.enableBackupData) {
-            localStorage.removeItem("backup_data");
-          }
-          if (assistApi) {
-            this.assistApi = assistApi;
+        },
+      },
+      watch: {
+        timeRangeType() {
+          this.showNextButton = false;
+          (this.currentRange = new Date()), this.updateChart();
+        },
+        currentDate() {
+          this.updateChart();
+        },
+        latestSelectedInterfaceData() {
+          this.updateChart();
+          this.handleLatestTopData();
+        },
+        theme: {
+          deep: true,
+          handler(newTheme) {
+            this.saveThemeColors();
+            this.$nextTick(this.updatePreviewColors());
+          },
+        },
+      },
+      methods: {
+        // 登录逻辑
+        async handleLogin() {
+          if (!this.assistApi) {
+            alert("请先点击右上角设置统一API入口");
+            return;
+          } else {
             this.url = {
               login: this.assistApi + "/auth/login",
               verify: this.assistApi + "/auth/verify",
               loadJson: this.assistApi + "/json.cgi",
               backups: this.assistApi + "/backups/",
             };
-            this.defaultInterface = defaultInterface;
           }
-          if (!this.assistApi) {
-            this.showMessage("noAssistApi");
+          this.loggingIn = true;
+          this.loginError = "";
+          try {
+            const response = await fetch(this.url.login, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(this.loginForm),
+            });
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(
+                error.error || this.language[this.currentLang]["loginError"]
+              );
+            }
+            const { token } = await response.json();
+            this.handleAuthSuccess(token);
+          } catch (err) {
+            this.loginError =
+              err.message || this.language[this.currentLang]["loginError"];
+          } finally {
+            this.loggingIn = false;
+          }
+        },
+        // 认证成功处理
+        handleAuthSuccess(token) {
+          // 存储Token
+          localStorage.setItem("jwt_token", token);
+          this.authToken = token;
+          this.isAuthenticated = true;
+          // 加载数据
+          this.loadData();
+        },
+        // 注销处理
+        handleLogout() {
+          localStorage.removeItem("jwt_token");
+          this.isAuthenticated = false;
+          this.authToken = null;
+        },
+        async loadData(arg) {
+          const response = await this.fetchWithAuth(this.url.loadJson);
+          this.latestRawData = await response.json();
+          if (arg == 1 && this.latestRawData) {
+            this.showMessage("refreshed");
+          }
+          this.latestInterfacesData = this.latestRawData.interfaces;
+          if (this.latestInterfacesData.length > 0) {
+            const defaultInterface = this.latestInterfacesData.find(
+              (intf) => intf.name === this.defaultInterface
+            );
+            this.latestSelectedInterfaceData =
+              defaultInterface || this.latestInterfacesData[0];
+          }
+          await this.$nextTick();
+        },
+        async fetchWithAuth(url, options = {}) {
+          const response = await fetch(url, {
+            ...options,
+            headers: {
+              Authorization: `Bearer ${this.authToken}`,
+              ...options.headers,
+            },
+          });
+          if (response.status === 401) {
             this.handleLogout();
+          }
+          return response;
+        },
+        formatBytes(bytes) {
+          const units = ["B", "KB", "MB", "GB", "TB"];
+          let i = 0;
+          bytes = Number(bytes);
+          while (bytes >= 1024 && i < units.length - 1) {
+            bytes /= 1024;
+            i++;
+          }
+          return {
+            value: bytes.toFixed(2),
+            unit: units[i],
+          };
+        },
+        formatSum(data) {
+          const total = data.rx + data.tx;
+          return this.formatBytes(total);
+        },
+        getMonthData(interface) {
+          const year = new Date().getFullYear();
+          const month = new Date().getMonth() + 1;
+          return (
+            interface.traffic.month.find(
+              (d) => d.date.year === year && d.date.month === month
+            ) || { rx: 0, tx: 0 }
+          );
+        },
+        getDayData(interface) {
+          const year = new Date().getFullYear();
+          const month = new Date().getMonth() + 1;
+          const day = new Date().getDate();
+          return (
+            interface.traffic.day.find(
+              (d) =>
+                d.date.year === year &&
+                d.date.month === month &&
+                d.date.day === day
+            ) || { rx: 0, tx: 0 }
+          );
+        },
+        getYesterdayData(interface) {
+          const today = new Date();
+          const yesterday = new Date(today);
+          yesterday.setDate(today.getDate() - 1);
+          const year = yesterday.getFullYear();
+          const month = yesterday.getMonth() + 1;
+          const day = yesterday.getDate();
+          return (
+            interface.traffic.day.find(
+              (d) =>
+                d.date.year === year &&
+                d.date.month === month &&
+                d.date.day === day
+            ) || { rx: 0, tx: 0 }
+          );
+        },
+        adjustTime(offset) {
+          const d = new Date(this.currentRange);
+          const now = new Date();
+          let isLimitReached = false;
+          // 保存原始日期（用于闰年处理）
+          const originalDate = d.getDate();
+          const originalMonth = d.getMonth();
+          switch (this.timeRangeType) {
+            case "hour":
+              // 自动处理跨日/月/年
+              d.setTime(d.getTime() + offset * 60 * 60 * 1000);
+              // 精确比较到小时级别
+              isLimitReached =
+                d.getFullYear() === now.getFullYear() &&
+                d.getMonth() === now.getMonth() &&
+                d.getDate() === now.getDate() &&
+                d.getHours() === now.getHours();
+              break;
+            case "day":
+              d.setDate(d.getDate() + offset);
+              // 比较日期部分
+              isLimitReached = this.isSameDay(d, now);
+              break;
+            case "month":
+              // 先设置为当月第一天，避免跨月时的日期溢出问题
+              d.setDate(1);
+              d.setMonth(d.getMonth() + offset);
+              // 处理跨月调整后的日期有效性（如1月31日→2月28/29日）
+              const maxDays = new Date(
+                d.getFullYear(),
+                d.getMonth() + 1,
+                0
+              ).getDate();
+              d.setDate(Math.min(originalDate, maxDays));
+              isLimitReached =
+                d.getFullYear() === now.getFullYear() &&
+                d.getMonth() === now.getMonth();
+              break;
+            case "year":
+              const targetYear = d.getFullYear() + offset;
+              d.setFullYear(targetYear);
+              // 处理闰年2月29日的情况
+              if (originalMonth === 1 && originalDate === 29) {
+                const isLeapYear = (year) =>
+                  (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+                if (!isLeapYear(targetYear)) {
+                  d.setMonth(1); // February
+                  d.setDate(28);
+                }
+              }
+              isLimitReached = d.getFullYear() === now.getFullYear();
+              break;
+          }
+          this.showNextButton = !isLimitReached;
+          this.currentRange = d;
+          this.updateChart();
+        },
+        //比较两个日期是否是同一天
+        isSameDay(date1, date2) {
+          return (
+            date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate()
+          );
+        },
+        showApiSettings() {
+          this.apiSettingsVisible = !this.apiSettingsVisible;
+        },
+        normalizeUrl(url) {
+          if (url == null || url == "") return null;
+          const trimmedUrl = url.trim();
+          if (/^\/\//.test(trimmedUrl)) {
+            return `http:${trimmedUrl}`;
+          }
+          if (!/^https?:\/\//i.test(trimmedUrl)) {
+            return `http://${trimmedUrl}`;
+          }
+          return trimmedUrl;
+        },
+        saveApiSettings() {
+          this.apiSettingsVisible = false;
+          this.assistApi = this.normalizeUrl(this.assistApi);
+          if (!this.assistApi || this.assistApi == "") {
+            localStorage.removeItem("assist_api");
             return;
           }
-          if (storedToken) {
-            // 验证Token有效性
-            this.authToken = storedToken;
-            const response = await this.fetchWithAuth(this.url.verify);
-            const data = await response.json();
-            if (response.ok && data.valid) {
-              this.handleAuthSuccess(storedToken);
-            } else {
-              this.handleLogout();
+          localStorage.setItem("default_interface", this.defaultInterface);
+          localStorage.setItem("assist_api", this.assistApi);
+          localStorage.setItem("enable_backup", this.enableBackupData);
+          if (!this.enableBackupData) {
+            localStorage.removeItem("backup_data");
+          }
+
+          if (this.isAuthenticated) {
+            this.loadData();
+          }
+        },
+        cancelApiSettings() {
+          this.apiSettingsVisible = false;
+        },
+        showThemeSettings() {
+          this.themeSettingsVisible = !this.themeSettingsVisible;
+          this.$nextTick(() => {
+            this.initPreviewChart();
+          });
+        },
+        saveThemeSettings() {
+          // 检查是否是预设主题
+          const isPreset = this.presetThemes.some(
+            (preset) =>
+              preset.main === this.theme.main &&
+              preset.accent === this.theme.accent &&
+              preset.contrast === this.theme.contrast &&
+              preset.upload === this.theme.upload &&
+              preset.download === this.theme.download
+          );
+          if (!isPreset) {
+            this.theme.name = "自定义";
+            const customTheme = { ...this.theme };
+            const filteredThemes = this.presetThemes.filter(
+              (t) => t.name !== "自定义"
+            );
+            this.presetThemes = [...filteredThemes, customTheme];
+          }
+          this.saveThemeColors();
+          localStorage.setItem("themeColors", JSON.stringify(this.theme));
+          if (this.chart) {
+            this.updateChart();
+          }
+          this.cancelThemeSettings();
+        },
+        cancelThemeSettings() {
+          this.themeSettingsVisible = false;
+        },
+        //应用预设
+        applyPresetTheme(preset) {
+          this.theme = { ...preset };
+          this.saveThemeColors();
+          localStorage.setItem("themeColors", JSON.stringify(this.theme));
+        },
+        // 恢复默认
+        resetDefaultTheme() {
+          this.theme = { ...this.defaultTheme };
+          this.saveThemeColors();
+          localStorage.setItem("themeColors", JSON.stringify(this.theme));
+        },
+        getPresetStyle(theme) {
+          return {
+            "--main-color": theme.main,
+            "--accent-color": theme.accent,
+            background: `linear-gradient(135deg, ${theme.main} 50%, ${theme.accent} 50%)`,
+          };
+        },
+        toggleLanguage(arg) {
+          if (this.currentLang == "zh") {
+            this.currentLang = "en";
+          } else {
+            this.currentLang = "zh";
+          }
+          this.showMessage("langSwitched");
+          localStorage.setItem("current_lang", this.currentLang);
+          this.updateChart(1);
+        },
+        toggleNightMode(arg) {
+          if (arg == 1) {
+            this.isNightMode = true;
+          } else {
+            localStorage.setItem("nightModeOff", true);
+            this.isNightMode = !this.isNightMode;
+          }
+          const htmlEl = document.documentElement;
+          if (this.isNightMode) {
+            localStorage.removeItem("nightModeOff");
+            htmlEl.classList.add("night-mode");
+          } else {
+            htmlEl.classList.remove("night-mode");
+          }
+          this.showMessage("switchSuccess");
+        },
+        handleShowInterfaceData() {
+          if (this.interfacesDataMode) {
+            this.interfacesDataMode = false;
+            this.updateChart();
+          } else {
+            this.interfacesDataMode = true;
+            this.topDataMode = false;
+            this.handleLatestInterfacesData();
+          }
+        },
+        handleShowTopData() {
+          if (this.topDataMode) {
+            this.topDataMode = false;
+            this.updateChart();
+          } else {
+            this.topDataMode = true;
+            this.interfacesDataMode = false;
+            this.handleLatestTopData();
+          }
+        },
+        sortTable(key) {
+          if (this.sortKey === key) {
+            this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
+          } else {
+            this.sortKey = key;
+            this.sortOrder = "desc";
+          }
+        },
+        sortIcon(key) {
+          if (this.sortKey !== key) return "fa-sort";
+          return this.sortOrder === "asc" ? "fa-sort-up" : "fa-sort-down";
+        },
+        handleLatestInterfacesData() {
+          this.latestInterfacesTableData = this.latestInterfacesData.map(
+            (item) => {
+              const todayData = this.getDayData(item);
+              return {
+                name: item.name,
+                todayRx: todayData.rx,
+                todayTx: todayData.tx,
+                todayTotal: todayData.rx + todayData.tx,
+                totalRx: item.traffic.total.rx,
+                totalTx: item.traffic.total.tx,
+                totalTotal: item.traffic.total.rx + item.traffic.total.tx,
+              };
             }
+          );
+        },
+        handleLatestTopData() {
+          const currentInterfaceTopData =
+            this.latestSelectedInterfaceData || this.latestInterfacesData[0];
+          this.latestTopData = currentInterfaceTopData.traffic.top.map(
+            (item) => {
+              return {
+                timestamp: item.timestamp,
+                date: item.date,
+                rx: item.rx,
+                tx: item.tx,
+                total: item.rx + item.tx,
+              };
+            }
+          );
+        },
+        async getMergedSeriesData() {
+          const dataType = {
+            hour: "fiveminute",
+            day: "hour",
+            month: "day",
+            year: "month",
+          }[this.timeRangeType];
+          const currentDate = new Date(this.currentRange);
+          const isPastDate = this.isPastDate(currentDate);
+          // 判断是否需要使用备份数据
+          let useBackup =
+            this.enableBackupData &&
+            isPastDate &&
+            (this.timeRangeType === "hour" || this.timeRangeType === "day");
+          if (useBackup) {
+            const dateStr = this.getDateString(currentDate);
+            const backupData = await this.getBackupData(dateStr);
+            if (backupData) {
+              return this.processBackupData(
+                currentDate,
+                backupData,
+                dataType
+              );
+            }
+          }
+          //原有处理逻辑
+          const latestRawData =
+            this.latestSelectedInterfaceData.traffic[dataType];
+          return this.processData(currentDate, latestRawData, dataType);
+        },
+        //判断是否是过去日期，保险起见昨天之前的数据都从备份中获取
+        isPastDate(date) {
+          const now = new Date();
+          const compareDate = new Date(date);
+          compareDate.setHours(23, 59, 59, 999);
+          return compareDate < now;
+        },
+        //获取日期字符串
+        getDateString(date) {
+          return [
+            date.getFullYear(),
+            String(date.getMonth() + 1).padStart(2, "0"),
+            String(date.getDate()).padStart(2, "0"),
+          ].join("");
+        },
+        processData(currentDate, rawData, dataType) {
+          let totalRx = 0,
+            totalTx = 0;
+          const rangeYear = currentDate.getFullYear();
+          const rangeMonth = currentDate.getMonth() + 1;
+          const rangeDay = currentDate.getDate();
+          const rangeHour = currentDate.getHours();
+          this.filteredData = rawData.filter((item) => {
+            let match = false;
+            switch (this.timeRangeType) {
+              case "hour":
+                var itemYear = item.date.year;
+                var itemMonth = item.date.month;
+                var itemDay = item.date.day;
+                var itemHour = item.time ? item.time.hour : 0;
+                match =
+                  itemYear === rangeYear &&
+                  itemMonth === rangeMonth &&
+                  itemDay === rangeDay &&
+                  itemHour === rangeHour;
+                break;
+              case "day":
+                var itemYear = item.date.year;
+                var itemMonth = item.date.month;
+                var itemDay = item.date.day;
+                match =
+                  itemYear === rangeYear &&
+                  itemMonth === rangeMonth &&
+                  itemDay === rangeDay;
+                break;
+              case "month":
+                var itemYear = item.date.year;
+                var itemMonth = item.date.month;
+                var itemDay = item.date.day;
+                match = itemYear === rangeYear && itemMonth === rangeMonth;
+                break;
+              case "year":
+                var itemYear = item.date.year;
+                match = itemYear === rangeYear;
+                break;
+            }
+            if (match) {
+              totalRx += item.rx || 0;
+              totalTx += item.tx || 0;
+            }
+            return match;
+          });
+          this.currentStats = {
+            rx: totalRx,
+            tx: totalTx,
+            total: totalRx + totalTx,
+          };
+          const getXValue = (date, time) =>
+            this.getXValue(date, time, dataType);
+          return [
+            this.generateSeries(
+              this.language[this.currentLang]["upload"],
+              "tx",
+              this.theme.upload,
+              getXValue
+            ),
+            this.generateSeries(
+              this.language[this.currentLang]["download"],
+              "rx",
+              this.theme.download,
+              getXValue
+            ),
+          ];
+        },
+        //获取备份数据（带缓存）
+        async getBackupData(dateStr) {
+          // 初始化 backupCache 为 Map（若尚未初始化）
+          if (!(this.backupCache instanceof Map)) {
+            this.backupCache = new Map();
+          }
+          if (!this.backupCache || typeof this.backupCache !== 'object') {
+            this.backupCache = {};
+            this.cacheKeys = [];
+          }
+          //先检查内存缓存
+          if (this.backupCache[dateStr]) {
+            return this.backupCache[dateStr];
+          }
+          //再检查localStorage
+          const cachedData = localStorage.getItem('backup_data');
+          if (cachedData) {
+            try {
+              const parsedData = JSON.parse(cachedData);
+              this.backupCache = parsedData.cache || {};
+              this.cacheKeys = parsedData.keys || [];
+              const now = new Date();
+              const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 10)).getTime();
+              this.cacheKeys = this.cacheKeys.filter(key => {
+                const keyDate = new Date(
+                  key.slice(0, 4),
+                  parseInt(key.slice(4, 6)) - 1,
+                  key.slice(6, 8)
+                ).getTime();
+
+                if (keyDate < thirtyDaysAgo) {
+                  delete this.backupCache[key];
+                  return false;
+                }
+                return true;
+              });
+
+              if (this.backupCache[dateStr]) {
+                return this.backupCache[dateStr];
+              }
+            } catch (e) {
+              console.error("解析备份缓存失败:", e);
+              this.backupCache = {};
+              this.cacheKeys = [];
+            }
+          }
+          try {
+            const url = `${this.url.backups}${dateStr}`;
+            const response = await this.fetchWithAuth(url);
+            const data = await response.json();
+            if (data && !data.error) {
+              // 插入新数据
+              this.backupCache[dateStr] = data;
+              this.cacheKeys.push(dateStr);
+              this.cacheKeys.sort((a, b) => a.localeCompare(b));
+              const MAX_CACHE_SIZE = 10;
+              while (this.cacheKeys.length > MAX_CACHE_SIZE) {
+                const oldestKey = this.cacheKeys.shift();
+                delete this.backupCache[oldestKey];
+              }
+              localStorage.setItem(
+                `backup_data`,
+                JSON.stringify({
+                  cache: this.backupCache,
+                  keys: this.cacheKeys
+                })
+              );
+              return data;
+            }
+            return null;
+          } catch (e) {
+            console.error("备份数据获取失败:", e);
+            return null;
+          }
+        },
+        //处理备份数据
+        processBackupData(currentDate, backupData, dataType) {
+          const selectedInterfaceData = backupData.interfaces.find(
+            (item) => item.name === this.latestSelectedInterfaceData.name
+          );
+          // 筛选逻辑（示例处理小时粒度）
+          const rawData = selectedInterfaceData.traffic[dataType] || [];
+          return this.processData(currentDate, rawData, dataType);
+        },
+        generateSeries(name, field, color, getX) {
+          return {
+            name,
+            data: this.filteredData.map((d) => ({
+              x: getX(d.date, d.time),
+              y: d[field] / (1024 * 1024), // 统一单位转换
+            })),
+            color,
+          };
+        },
+        getXValue(date, time, dataKey) {
+          const itemYear = date.year;
+          const itemMonth = String(date.month).padStart(2, "0");
+          const itemDay = String(date.day).padStart(2, "0");
+          var itemHour = "";
+          var itemMinute = "";
+          if (time) {
+            itemHour = String(time.hour).padStart(2, "0");
+            itemMinute = String(time.minute).padStart(2, "0");
+          }
+          switch (dataKey) {
+            case "fiveminute":
+              return `${itemHour}:${itemMinute}`;
+            case "hour":
+              return `${itemHour}` + ":00";
+            case "day":
+              return `${itemMonth}-${itemDay}`;
+            case "month":
+              return `${itemYear}-${itemMonth}`;
+          }
+        },
+        async updateChart() {
+          const seriesData = await this.getMergedSeriesData();
+          const options = {
+            chart: { type: "area", height: 400 },
+            series: seriesData,
+            fill: {
+              type: "solid",
+            },
+            dataLabels: {
+              enabled: false,
+            },
+            stroke: {
+              curve: "smooth",
+              width: 2,
+            },
+            markers: {
+              size: 3,
+              hover: { size: 5 },
+            },
+            xaxis: {
+              type: "category",
+              title: { text: this.getXAxisTitle() },
+            },
+            yaxis: {
+              title: {
+                text: this.language[this.currentLang]["traffic"] + " (MB)",
+              },
+              labels: {
+                formatter: function (value) {
+                  return value % 1 === 0
+                    ? value.toFixed(0) // 整数显示
+                    : value.toFixed(2); // 小数保留两位
+                },
+              },
+            },
+            tooltip: {
+              y: {
+                formatter: (value) => {
+                  const formatResult = this.formatFromMB(value);
+                  return formatResult.value + formatResult.unit;
+                },
+              },
+            },
+          };
+          if (this.chart) {
+            this.chart.updateOptions(options);
+          } else {
+            this.chart = new ApexCharts(
+              document.querySelector("#trafficChart"),
+              options
+            );
+            this.chart.render();
+          }
+        },
+        formatFromMB(mb) {
+          const units = ["MB", "GB", "TB"];
+          let value = Number(mb);
+          let i = 0;
+          while (value >= 1024 && i < units.length - 1) {
+            value /= 1024;
+            i++;
+          }
+          return {
+            value: value.toFixed(2),
+            unit: units[i],
+          };
+        },
+        getformatTableTime(date, time) {
+          const dataType = {
+            hour: "fiveminute",
+            day: "hour",
+            month: "day",
+            year: "month",
+          }[this.timeRangeType];
+          return this.getXValue(date, time, dataType);
+        },
+        getXAxisTitle() {
+          return {
+            day: this.language[this.currentLang]["hour"],
+            month: this.language[this.currentLang]["date"],
+            year: this.language[this.currentLang]["month"],
+          }[this.timeRangeType];
+        },
+        formatTime(timeObj) {
+          if (!timeObj?.timestamp) return "N/A";
+          const date = this.getBeijingTime(timeObj.timestamp);
+          return `${date.getUTCFullYear()}-${this.pad(
+            date.getUTCMonth() + 1
+          )}-${this.pad(date.getUTCDate())}
+                ${this.pad(date.getUTCHours())}:${this.pad(
+            date.getUTCMinutes()
+          )}`;
+        },
+        // 补零函数
+        pad(num) {
+          return num.toString().padStart(2, "0");
+        },
+        getBeijingTime(timestamp) {
+          const date = new Date(timestamp * 1000);
+          date.setMinutes(date.getMinutes() + date.getTimezoneOffset() + 480); // UTC+8
+          return date;
+        },
+        saveThemeColors() {
+          document.documentElement.style.setProperty(
+            "--accent-color",
+            this.theme.accent
+          );
+          document.documentElement.style.setProperty(
+            "--main-color",
+            this.theme.main
+          );
+          document.documentElement.style.setProperty(
+            "--contrast-color",
+            this.theme.contrast
+          );
+        },
+        initPreviewChart() {
+          this.previewChart = new ApexCharts(
+            document.querySelector("#themePreviewChart"),
+            {
+              chart: {
+                type: "area",
+                height: 160,
+                toolbar: { show: false },
+                parentHeightOffset: 0,
+              },
+              series: [
+                {
+                  name: this.language[this.currentLang]["upload"],
+                  data: this.sampleUpData,
+                  color: this.theme.upload,
+                },
+                {
+                  name: this.language[this.currentLang]["download"],
+                  data: this.sampleDownData,
+                  color: this.theme.download,
+                },
+              ],
+              stroke: { curve: "smooth", width: 2 },
+              markers: { size: 3 },
+              dataLabels: { enabled: false },
+              xaxis: { type: "category" },
+              yaxis: { labels: { formatter: (val) => `${val} MB` } },
+              grid: { borderColor: "rgba(125,125,125,0.1)" },
+            }
+          );
+          this.previewChart.render();
+        },
+        updatePreviewColors() {
+          if (this.previewChart) {
+            this.previewChart.updateOptions({
+              series: [
+                {
+                  name: this.language[this.currentLang]["upload"],
+                  data: this.sampleUpData,
+                  color: this.theme.upload,
+                },
+                {
+                  name: this.language[this.currentLang]["download"],
+                  data: this.sampleDownData,
+                  color: this.theme.download,
+                },
+              ],
+            });
+          }
+        },
+        loadThemeColors() {
+          const savedColors = localStorage.getItem("themeColors");
+          if (savedColors) {
+            const theme = JSON.parse(savedColors);
+            if (theme.name == "自定义") {
+              this.presetThemes.push(theme);
+            }
+            this.theme = theme;
+            this.saveThemeColors();
+            localStorage.setItem("themeColors", JSON.stringify(this.theme));
+          }
+          localStorage.setItem("themeColors", JSON.stringify(this.theme));
+        },
+        isLateNight() {
+          const currentHour = new Date().getHours();
+          return currentHour >= 23 || currentHour < 6;
+        },
+        showMessage(msgKey) {
+          const msg = this.language[this.currentLang][msgKey];
+          const container =
+            document.querySelector(".msg-container") ||
+            this.createContainer();
+          const msgEl = document.createElement("div");
+          msgEl.className = "message";
+          msgEl.textContent = msg;
+          container.appendChild(msgEl);
+          setTimeout(() => msgEl.classList.add("show"), 10);
+          setTimeout(() => {
+            msgEl.classList.remove("show");
+            setTimeout(() => msgEl.remove(), 300);
+          }, 3000);
+        },
+        createContainer() {
+          const container = document.createElement("div");
+          container.className = "msg-container";
+          document.body.appendChild(container);
+          return container;
+        },
+      },
+      async mounted() {
+        if (this.isLateNight()) {
+          const nightModeOff = localStorage.getItem("nightModeOff");
+          if (!nightModeOff) {
+            this.toggleNightMode(1);
+            this.showMessage("nightMode");
+          }
+        }
+        this.loadThemeColors();
+        // 初始化时检查本地Token
+        const storedToken = localStorage.getItem("jwt_token");
+        // 初始化检查缓存api选项
+        const assistApi = localStorage.getItem("assist_api");
+        const defaultInterface = localStorage.getItem("default_interface");
+        const savedEnable = localStorage.getItem("enable_backup");
+        const currentLang = localStorage.getItem("current_lang");
+        this.currentLang =
+          currentLang != null && currentLang != "" ? currentLang : "zh";
+        this.enableBackupData =
+          savedEnable !== null ? savedEnable === "true" : true;
+        if (!this.enableBackupData) {
+          this.backupCache = {};
+          this.cacheKeys = [];
+          localStorage.removeItem("backup_data");
+        } else {
+          const cachedData = localStorage.getItem("backup_data");
+          if (cachedData) {
+            try {
+              const parsedData = JSON.parse(cachedData);
+              this.backupCache = parsedData.cache || {};
+              this.cacheKeys = parsedData.keys || [];
+            } catch (e) {
+              console.error("解析备份缓存失败:", e);
+              this.backupCache = {};
+              this.cacheKeys = [];
+            }
+          }
+        }
+        if (assistApi) {
+          this.assistApi = assistApi;
+          this.url = {
+            login: this.assistApi + "/auth/login",
+            verify: this.assistApi + "/auth/verify",
+            loadJson: this.assistApi + "/json.cgi",
+            backups: this.assistApi + "/backups/",
+          };
+          this.defaultInterface = defaultInterface;
+        }
+        if (!this.assistApi) {
+          this.showMessage("noAssistApi");
+          this.handleLogout();
+          return;
+        }
+        if (storedToken) {
+          // 验证Token有效性
+          this.authToken = storedToken;
+          const response = await this.fetchWithAuth(this.url.verify);
+          const data = await response.json();
+          if (response.ok && data.valid) {
+            this.handleAuthSuccess(storedToken);
           } else {
             this.handleLogout();
           }
-        },
-      });
-    </script>
-  </body>
+        } else {
+          this.handleLogout();
+        }
+      },
+    });
+  </script>
+</body>
+
 </html>
