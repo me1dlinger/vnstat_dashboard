@@ -1752,8 +1752,6 @@
           }
         }
         this.loadThemeColors();
-        // 初始化时检查本地Token
-        const storedToken = localStorage.getItem("jwt_token");
         // 初始化检查缓存api选项
         const assistApi = localStorage.getItem("assist_api");
         const defaultInterface = localStorage.getItem("default_interface");
@@ -1796,6 +1794,19 @@
           this.handleLogout();
           return;
         }
+        const verifyResponse = await fetch(this.url.verify);
+        const verifyData = await verifyResponse.json();
+        if (verifyData.auth_disabled) {
+          const loginResponse = await fetch(this.url.login, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}) // 空body即可
+          });
+          const { token } = await loginResponse.json();
+          this.handleAuthSuccess(token);
+          return;
+        }
+        const storedToken = localStorage.getItem("jwt_token");
         if (storedToken) {
           // 验证Token有效性
           this.authToken = storedToken;

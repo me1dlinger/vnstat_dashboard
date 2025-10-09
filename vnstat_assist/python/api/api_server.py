@@ -6,7 +6,7 @@ import os
 import time
 import urllib.request
 from hashlib import sha256
-
+import ssl
 from flask import Flask, jsonify, make_response, render_template, request
 
 # 设置日志
@@ -20,8 +20,8 @@ DEFAULT_CONFIG = {
     "secret_key": "secret_key",
     "auth_enable": 1,
     "expire_seconds": 3600,
-    "user": {"username": "username", "password": "password"},
-    "vnstat_api": "http://vnstat.102419.xyz:19327/json.cgi",
+    "user": {"username": "username", "password": "username"},
+    "vnstat_api": "vnstat_api",
 }
 
 
@@ -153,9 +153,8 @@ def login():
         return set_cors_headers(response)
 
     if not AUTH_ENABLED:
-        # 直接生成Token无需验证用户
         token = JWTManager.generate_token(VALID_USER["username"])
-        response = jsonify({"token": token, "expires_in": EXPIRE_SECONDS})
+        response = jsonify({"token": token, "expires_in": EXPIRE_SECONDS, "auth_disabled": True})
         return set_cors_headers(response)
 
     try:
@@ -184,7 +183,7 @@ def verify():
 
     if not AUTH_ENABLED:
         # 直接返回验证通过
-        response = jsonify({"valid": True, "user": "anonymous"})
+        response = jsonify({"valid": True, "user": "anonymous", "auth_disabled": True})
         return set_cors_headers(response)
 
     auth_header = request.headers.get("Authorization", "")
@@ -216,10 +215,13 @@ def proxy_vnstat_json():
         verification = JWTManager.verify_token(token)
         if not verification["valid"]:
             return jsonify({"error": verification["error"]}), 401
+    
+    ssl_context = ssl._create_unverified_context()
+    
     # 发起代理请求
     try:
         req = urllib.request.Request(VNSTAT_PROXY_URL)
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, context=ssl_context) as response:
             data = response.read().decode("utf-8")
             json_data = json.loads(data)
             response = jsonify(json_data)
