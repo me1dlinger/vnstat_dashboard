@@ -7,7 +7,7 @@ import shutil
 from datetime import datetime, timedelta
 from typing import Dict, Any
 import requests
-from dateutil import tz  # 需要安装python3-dateutil
+from dateutil import tz
 
 # 配置日志
 def setup_logging(log_dir: str) -> str:
