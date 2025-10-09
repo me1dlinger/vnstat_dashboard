@@ -3,10 +3,11 @@ import hmac
 import json
 import logging
 import os
+import ssl
 import time
 import urllib.request
 from hashlib import sha256
-import ssl
+
 from flask import Flask, jsonify, make_response, render_template, request
 
 # 设置日志
@@ -154,7 +155,9 @@ def login():
 
     if not AUTH_ENABLED:
         token = JWTManager.generate_token(VALID_USER["username"])
-        response = jsonify({"token": token, "expires_in": EXPIRE_SECONDS, "auth_disabled": True})
+        response = jsonify(
+            {"token": token, "expires_in": EXPIRE_SECONDS, "auth_disabled": True}
+        )
         return set_cors_headers(response)
 
     try:
@@ -215,9 +218,9 @@ def proxy_vnstat_json():
         verification = JWTManager.verify_token(token)
         if not verification["valid"]:
             return jsonify({"error": verification["error"]}), 401
-    
+
     ssl_context = ssl._create_unverified_context()
-    
+
     # 发起代理请求
     try:
         req = urllib.request.Request(VNSTAT_PROXY_URL)

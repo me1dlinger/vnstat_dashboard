@@ -117,10 +117,6 @@
       <div class="settings-content">
         <h3>[[language[currentLang]['apiSettings'] ]]</h3>
         <div class="form-group">
-          <label> [[language[currentLang]['assistApi'] ]]:</label>
-          <input type="text" v-model="assistApi" :placeholder="language[currentLang]['assistApi']" />
-        </div>
-        <div class="form-group">
           <label> [[language[currentLang]['defaultInterface'] ]]:</label>
           <input type="text" v-model="defaultInterface"
             :placeholder="language[currentLang]['defaultInterfacePlaceholder']" />
@@ -672,14 +668,11 @@
             chartView: "图表视图",
             tableview: "表格视图",
             apiSettings: "页面配置",
-            assistApi: "API接口",
-            assistApiPlaceholder: "请输入API地址",
             defaultInterface: "默认网卡",
             interfaceName: "网卡名称",
             StatsByInterface: "按网卡统计",
             defaultInterfacePlaceholder: "请输入默认网卡，比如：enp3s0",
             enableBackup: "使用备份数据",
-            noAssistApi: "请先点击右上角设置统一API入口",
             nightMode: "夜深了，已切换成夜间模式",
             refreshed: "刷新成功",
             refresh: "刷新",
@@ -738,16 +731,12 @@
             chartView: "Chart View",
             tableview: "Table View",
             apiSettings: "SETTINGS",
-            assistApi: "API",
-            assistApiPlaceholder: "Please input API address",
             defaultInterface: "Default Interface",
             interfaceName: "INTERFACE NAME",
             StatsByInterface: "Stats By Interface",
             defaultInterfacePlaceholder:
               "Please input default interface, e.g. eth0",
             enableBackup: "Use Backup Data",
-            noAssistApi:
-              "Please set the API endpoint in the top-right settings first",
             nightMode: "Good Evening",
             refreshed: "Refreshed",
             refresh: "refresh",
@@ -885,17 +874,13 @@
       methods: {
         // 登录逻辑
         async handleLogin() {
-          if (!this.assistApi) {
-            alert("请先点击右上角设置统一API入口");
-            return;
-          } else {
-            this.url = {
-              login: this.assistApi + "/auth/login",
-              verify: this.assistApi + "/auth/verify",
-              loadJson: this.assistApi + "/json.cgi",
-              backups: this.assistApi + "/backups/",
-            };
-          }
+          this.assistApi = window.location.href;
+          this.url = {
+            login: this.assistApi + "/auth/login",
+            verify: this.assistApi + "/auth/verify",
+            loadJson: this.assistApi + "/json.cgi",
+            backups: this.assistApi + "/backups/",
+          };
           this.loggingIn = true;
           this.loginError = "";
           try {
@@ -1138,13 +1123,7 @@
         },
         saveApiSettings() {
           this.apiSettingsVisible = false;
-          this.assistApi = this.normalizeUrl(this.assistApi);
-          if (!this.assistApi || this.assistApi == "") {
-            localStorage.removeItem("assist_api");
-            return;
-          }
           localStorage.setItem("default_interface", this.defaultInterface);
-          localStorage.setItem("assist_api", this.assistApi);
           localStorage.setItem("enable_backup", this.enableBackupData);
           if (!this.enableBackupData) {
             localStorage.removeItem("backup_data");
@@ -1753,7 +1732,7 @@
         }
         this.loadThemeColors();
         // 初始化检查缓存api选项
-        const assistApi = localStorage.getItem("assist_api");
+        const assistApi = window.location.href;
         const defaultInterface = localStorage.getItem("default_interface");
         const savedEnable = localStorage.getItem("enable_backup");
         const currentLang = localStorage.getItem("current_lang");

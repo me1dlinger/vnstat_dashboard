@@ -77,23 +77,6 @@ vnstat-assist
 ```
 docker pull meidlinger1024/vnstat-dashboard:latest
 ```
-### docker run配置
-
-```
-
-docker run -d \
-  --name vnstat-dashboard \
-  -p 19328:19328 \
-  -v ${path-on-host}/log/python:/app/log/python \
-  -v ${path-on-host}/backups:/app/backups \
-  -e VNA_AUTH_ENABLE=1 \
-  -e VNSTAT_API_URL=http://${host}:${port}/json.cgi \
-  -e VNA_SECRET_KEY=${secret_key} \
-  -e VNA_EXPIRE_SECONDS=3600 \
-  -e VNA_USERNAME=${username} \
-  -e VNA_PASSWORD=${password} \
-  meidlinger1024/vnstat-dashboard:latest
-```
 
 ### docker-compose配置
 ```
@@ -112,7 +95,7 @@ services:
     environment:
       #启用校验
       - VNA_AUTH_ENABLE=1 
-      #vnstat的json数据api 
+      #vnstat的json数据api,一般是http://${host}:8685/json.cgi
       - VNSTAT_API_URL=http://${host}:${port}/json.cgi
       #后端校验秘钥
       - VNA_SECRET_KEY=${secret_key}
@@ -122,6 +105,23 @@ services:
       - VNA_USERNAME=${username}
       #后端校验密码
       - VNA_PASSWORD=${password}
+```
+
+### docker run配置
+
+```
+docker run -d \
+  --name vnstat-dashboard \
+  -p 19328:19328 \
+  -v ${path-on-host}/log/python:/app/log/python \
+  -v ${path-on-host}/backups:/app/backups \
+  -e VNA_AUTH_ENABLE=1 \
+  -e VNSTAT_API_URL=http://${host}:${port}/json.cgi \
+  -e VNA_SECRET_KEY=${secret_key} \
+  -e VNA_EXPIRE_SECONDS=3600 \
+  -e VNA_USERNAME=${username} \
+  -e VNA_PASSWORD=${password} \
+  meidlinger1024/vnstat-dashboard:latest
 ```
 
 ## 🧩 界面截图
