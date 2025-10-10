@@ -44,29 +44,29 @@
         </div>
         <div class="form-group">
           <div class="color-input-container">
-            <input type="color" v-model="theme.accent" />
-            <div class="color-preview" :style="{'--selected-color': theme.accent}"></div>
+            <input type="color" v-model="tempTheme.accent" />
+            <div class="color-preview" :style="{'--selected-color': tempTheme.accent}"></div>
             <div class="color-value">
-              [[language[currentLang]['accent'] ]]: [[ theme.accent ]]
+              [[language[currentLang]['accent'] ]]: [[ tempTheme.accent ]]
             </div>
           </div>
         </div>
         <div class="form-group">
           <div class="color-input-container">
-            <input type="color" v-model="theme.main" />
-            <div class="color-preview" :style="{'--selected-color': theme.main}"></div>
+            <input type="color" v-model="tempTheme.main" />
+            <div class="color-preview" :style="{'--selected-color': tempTheme.main}"></div>
             <div class="color-value">
-              [[language[currentLang]['main'] ]]: [[ theme.main ]]
+              [[language[currentLang]['main'] ]]: [[ tempTheme.main ]]
             </div>
           </div>
         </div>
 
         <div class="form-group">
           <div class="color-input-container">
-            <input type="color" v-model="theme.contrast" />
-            <div class="color-preview" :style="{'--selected-color': theme.contrast}"></div>
+            <input type="color" v-model="tempTheme.contrast" />
+            <div class="color-preview" :style="{'--selected-color': tempTheme.contrast}"></div>
             <div class="color-value">
-              [[language[currentLang]['contrast'] ]]: [[ theme.contrast ]]
+              [[language[currentLang]['contrast'] ]]: [[ tempTheme.contrast ]]
             </div>
           </div>
         </div>
@@ -76,19 +76,19 @@
           <div class="color-settings-column">
             <div class="form-group compact">
               <div class="color-input-container">
-                <input type="color" v-model="theme.upload" />
-                <div class="color-preview" :style="{'--selected-color': theme.upload}"></div>
+                <input type="color" v-model="tempTheme.upload" />
+                <div class="color-preview" :style="{'--selected-color': tempTheme.upload}"></div>
                 <div class="color-value">
-                  [[language[currentLang]['upload'] ]]: [[ theme.upload ]]
+                  [[language[currentLang]['upload'] ]]: [[ tempTheme.upload ]]
                 </div>
               </div>
             </div>
             <div class="form-group compact">
               <div class="color-input-container">
-                <input type="color" v-model="theme.download" />
-                <div class="color-preview" :style="{'--selected-color': theme.download}"></div>
+                <input type="color" v-model="tempTheme.download" />
+                <div class="color-preview" :style="{'--selected-color': tempTheme.download}"></div>
                 <div class="color-value">
-                  [[language[currentLang]['download'] ]]: [[ theme.download ]]
+                  [[language[currentLang]['download'] ]]: [[ tempTheme.download ]]
                 </div>
               </div>
             </div>
@@ -623,6 +623,7 @@
           upload: "#93c5fd",
           download: "#60a5fa",
         },
+        tempTheme: {},
         currentLang: "zh",
         language: {
           zh: {
@@ -869,6 +870,12 @@
             this.saveThemeColors();
             this.$nextTick(this.updatePreviewColors());
           },
+        },
+        tempTheme: {
+          deep: true,
+          handler() {
+            this.$nextTick(this.updatePreviewColors);
+          }
         },
       },
       methods: {
@@ -1138,11 +1145,13 @@
         },
         showThemeSettings() {
           this.themeSettingsVisible = !this.themeSettingsVisible;
+          this.tempTheme = { ...this.theme };
           this.$nextTick(() => {
             this.initPreviewChart();
           });
         },
         saveThemeSettings() {
+          this.theme = { ...this.tempTheme };
           // 检查是否是预设主题
           const isPreset = this.presetThemes.some(
             (preset) =>
@@ -1172,9 +1181,7 @@
         },
         //应用预设
         applyPresetTheme(preset) {
-          this.theme = { ...preset };
-          this.saveThemeColors();
-          localStorage.setItem("themeColors", JSON.stringify(this.theme));
+          this.tempTheme = { ...preset };
         },
         // 恢复默认
         resetDefaultTheme() {
@@ -1647,12 +1654,12 @@
                 {
                   name: this.language[this.currentLang]["upload"],
                   data: this.sampleUpData,
-                  color: this.theme.upload,
+                  color: this.tempTheme.upload,
                 },
                 {
                   name: this.language[this.currentLang]["download"],
                   data: this.sampleDownData,
-                  color: this.theme.download,
+                  color: this.tempTheme.download,
                 },
               ],
               stroke: { curve: "smooth", width: 2 },
@@ -1672,12 +1679,12 @@
                 {
                   name: this.language[this.currentLang]["upload"],
                   data: this.sampleUpData,
-                  color: this.theme.upload,
+                  color: this.tempTheme.upload,
                 },
                 {
                   name: this.language[this.currentLang]["download"],
                   data: this.sampleDownData,
-                  color: this.theme.download,
+                  color: this.tempTheme.download,
                 },
               ],
             });
