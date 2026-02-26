@@ -10,10 +10,10 @@
   <link rel="shortcut icon"
     href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD//////////////////////////3I2JLdyNyTnczYjUAAAAAD///////////////////////////////////////////////////////////////9yNiPJdTgl/3g6Jv9yNyTKbzcnIAAAAACcpgBQnKYAiZ2lAJmepQBm////////////////AAAAAAAAAAAAAAAAcjcjdHY5Jf9yNiT/ci4m/3I1JPAAAAAAnqUARAAAAAAAAAAAnqcArZmqAA///////////wAAAAAAAAAAAAAAAHI3Ikp2NyX/dDwj/56nAP93RiH2AAAAAAAAAAAAAAAAAAAAAJ2mAG2dpgBT//////////8AAAAAAAAAAIFAKkNyNiP/bykm/5iaCf98VR//cDIk/gAAAAAAAAAAAAAAAAAAAACcpgCGoKYAK6BSO7agVDrMnlI5eZ5SOFGmVz3/hzwx/4uCEP97UR//cDEl/3Y5Jf8AAAAAAAAAAAAAAAAAAAAAnaYAnv////+hUzvppVY9/6ZXPf+nVz3/olE8/6J3Lf+PdB7/bS0k/3I3JP9zNyT/cjck72YzGQoAAAAAAAAAAJ6mAKD/////n1Q7UqlYPv+hVDv/oVM7/6FYOf+ekhj/pE4//4dELv9vNSL/cjck/3Q4Jf9yNiT3AAAAAJ6nAJ2bogAh/////wAAAACgVDrMpVY8/6JOPf+fjxv/oVI7/6FUO/+kVj3/h0Qu/281Iv9yNyT/dDgl/3I4JOmktgCVAAAAAP//////////nlI0IqFSPPOhaDL4oX8o/6dUP/+iVTv/oVQ7/6RWPf+GRC7/bzUi/3I3JP91OCX/bislpP////////////////////8AAAAAnK0ArQAAAAAAAAAAoVM78aNVPP+hVDv/pFY9/4ZDLv9zNiT/dTgl/3Y5Jf//////////////////////AAAAAJ2mAK4AAAAAAAAAAJZLLRGhVDr4o1U8/6FUO/+oWj3/pM4AYmwqIoR4Oib/cTYkh////////////////56oAGmepwBxAAAAAAAAAAAAAAAAmUwzFKFRO+ylVT3/pVY9/6RPPoeHQy7Fczck/3E2I7v///////////////+cpQCQnKgAQwAAAAAAAAAAAAAAAAAAAACdrQCPn2oxzahWPv+qWD7/qVg+/4lFL/9vNSHU////////////////nKYAap2lAIAAAAAAAAAAAKGoACacpgC/nqgAZgAAAACUUjEfoVQ6laFUO8OhVDv/oVQ7//////////////////////+dpgCvnqYApZ2nAKSdpgCa////////////////////////////////////////////////AYAAAAByAAA8PQAAPD8AADg9AAAwPAAAABwAAIAKAACAAgAAQAAAACwAAAAuEAAAPwAAAB8AAAAu4AAAAAAAAA=="
     type="image/x-icon" />
-  <script src="{{ url_for('static', filename='js/apexcharts.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/vue.js') }}"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <script src="{{ url_for('static', filename='js/apexcharts.js') }}?v=3"></script>
+  <script src="{{ url_for('static', filename='js/vue.js') }}?v=3"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}?v=3" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=3" />
 </head>
 
 <body>
@@ -118,8 +118,11 @@
         <h3>[[language[currentLang]['apiSettings'] ]]</h3>
         <div class="form-group">
           <label> [[language[currentLang]['defaultInterface'] ]]:</label>
-          <input type="text" v-model="defaultInterface"
-            :placeholder="language[currentLang]['defaultInterfacePlaceholder']" />
+          <select v-model="defaultInterface">
+            <option v-for="iface in latestInterfacesData" :value="iface.name">
+              [[ iface.name ]]
+            </option>
+          </select>
         </div>
         <!-- 新增备份数据开关 -->
         <div class="form-group switch-group">
@@ -344,6 +347,10 @@
               :title="language[currentLang]['chartView']">
               <i class="fas fa-chart-line"></i>
             </button>
+            <button @click="currentView = 'bar'" class="view-switch" :class="{active: currentView === 'bar'} "
+              :title="language[currentLang]['barView'] || '柱状图视图'">
+              <i class="fas fa-chart-bar"></i>
+            </button>
             <button @click="currentView = 'table'" class="view-switch" :class="{active: currentView === 'table'}"
               :title="language[currentLang]['tableView']">
               <i class="fas fa-table"></i>
@@ -352,7 +359,7 @@
         </div>
         <!-- 图表容器 -->
         <div class="chart-container">
-          <div v-show="currentView === 'chart'" id="trafficChart"></div>
+          <div v-show="currentView === 'chart' || currentView === 'bar'" id="trafficChart"></div>
           <div v-show="currentView === 'table'" class="data-table">
             <table>
               <thead>
@@ -666,7 +673,8 @@
             restoreDefault: "恢复默认",
             cancel: "取消",
             save: "保存",
-            chartView: "图表视图",
+            chartView: "折线/面积图",
+            barView: "柱状图",
             tableview: "表格视图",
             apiSettings: "页面配置",
             defaultInterface: "默认网卡",
@@ -688,6 +696,7 @@
             startDate: "开始日期",
             endDate: "结束日期",
             apply: "应用",
+            loadError: "加载数据失败，请检查后端或配置",
           },
           en: {
             loginTitle: "VNSTAT-DASHBOARD",
@@ -729,7 +738,8 @@
             restoreDefault: "Restore Default",
             cancel: "Cancel",
             save: "Save",
-            chartView: "Chart View",
+            chartView: "Area Chart",
+            barView: "Bar Chart",
             tableview: "Table View",
             apiSettings: "SETTINGS",
             defaultInterface: "Default Interface",
@@ -751,6 +761,7 @@
             startDate: "Start Date",
             endDate: "End Date",
             apply: "Apply",
+            loadError: "Failed to load data, please check backend or config",
           },
         },
       },
@@ -860,6 +871,13 @@
         currentDate() {
           this.updateChart();
         },
+        currentView(newVal) {
+          if (newVal === 'chart' || newVal === 'bar') {
+             this.$nextTick(() => {
+                this.updateChart();
+             });
+          }
+        },
         latestSelectedInterfaceData() {
           this.updateChart();
           this.handleLatestTopData();
@@ -927,12 +945,25 @@
           this.authToken = null;
         },
         async loadData(arg) {
-          const response = await this.fetchWithAuth(this.url.loadJson);
-          this.latestRawData = await response.json();
+          try {
+            const response = await this.fetchWithAuth(this.url.loadJson);
+            this.latestRawData = await response.json();
+          } catch (e) {
+            this.showMessage("loadError");
+            return;
+          }
+
+          if (this.latestRawData && this.latestRawData.error) {
+            console.error(this.latestRawData.error);
+            this.showMessage("loadError");
+            this.latestInterfacesData = [];
+            return;
+          }
+
           if (arg == 1 && this.latestRawData) {
             this.showMessage("refreshed");
           }
-          this.latestInterfacesData = this.latestRawData.interfaces;
+          this.latestInterfacesData = this.latestRawData.interfaces || [];
           if (this.latestInterfacesData.length > 0) {
             const defaultInterface = this.latestInterfacesData.find(
               (intf) => intf.name === this.defaultInterface
@@ -1393,15 +1424,15 @@
             this.getXValue(date, time, dataType);
           return [
             this.generateSeries(
-              this.language[this.currentLang]["upload"],
-              "tx",
-              this.theme.upload,
-              getXValue
-            ),
-            this.generateSeries(
               this.language[this.currentLang]["download"],
               "rx",
               this.theme.download,
+              getXValue
+            ),
+            this.generateSeries(
+              this.language[this.currentLang]["upload"],
+              "tx",
+              this.theme.upload,
               getXValue
             ),
           ];
@@ -1523,12 +1554,14 @@
         },
         async updateChart() {
           const seriesData = await this.getMergedSeriesData();
+          const targetChartType = this.currentView === 'bar' ? 'bar' : 'area';
 
           const options = {
-            chart: { type: "area", height: 400 },
+            chart: { type: targetChartType, height: 400 },
             series: seriesData,
             fill: {
               type: "solid",
+              opacity: targetChartType === 'area' ? 0.75 : 1
             },
             dataLabels: {
               enabled: false,
@@ -1652,16 +1685,17 @@
               },
               series: [
                 {
-                  name: this.language[this.currentLang]["upload"],
-                  data: this.sampleUpData,
-                  color: this.tempTheme.upload,
-                },
-                {
                   name: this.language[this.currentLang]["download"],
                   data: this.sampleDownData,
                   color: this.tempTheme.download,
                 },
+                {
+                  name: this.language[this.currentLang]["upload"],
+                  data: this.sampleUpData,
+                  color: this.tempTheme.upload,
+                },
               ],
+              fill: { type: "solid", opacity: 0.75 },
               stroke: { curve: "smooth", width: 2 },
               markers: { size: 3 },
               dataLabels: { enabled: false },
@@ -1677,14 +1711,14 @@
             this.previewChart.updateOptions({
               series: [
                 {
-                  name: this.language[this.currentLang]["upload"],
-                  data: this.sampleUpData,
-                  color: this.tempTheme.upload,
-                },
-                {
                   name: this.language[this.currentLang]["download"],
                   data: this.sampleDownData,
                   color: this.tempTheme.download,
+                },
+                {
+                  name: this.language[this.currentLang]["upload"],
+                  data: this.sampleUpData,
+                  color: this.tempTheme.upload,
                 },
               ],
             });

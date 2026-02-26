@@ -524,7 +524,11 @@ tr:nth-child(even) {
   border-radius: 8px;
   padding: 20px;
   width: 600px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 }
 
 .settings-content h3 {
