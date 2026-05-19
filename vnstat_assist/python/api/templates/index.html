@@ -364,9 +364,9 @@
                     <!-- Preset swatches -->
                     <div class="theme-presets">
                         <div v-for="(t, i) in presetThemes" :key="i" class="theme-preset"
-                            :class="{selected: tempTheme.name === t.name}" :style="{background: t.main}"
+                            :class="{selected: tempTheme.name === t.name}" :style="{background: t.accent}"
                             @click="applyPresetTheme(t)">
-                            <div :style="{position:'absolute',top:0,right:0,bottom:0,left:'50%',background:t.accent}">
+                            <div :style="{position:'absolute',top:0,right:0,bottom:0,left:'50%',background:t.main}">
                             </div>
                             <div class="theme-preset-name">[[ t.name ]]</div>
                         </div>
@@ -376,7 +376,6 @@
                         <div class="color-field">
                             <label>[[t('accent')]]</label>
                             <div class="color-swatch" :style="{background: tempTheme.accent}">
-                                <input type="color" v-model="tempTheme.accent" />
                                 <div class="color-swatch-preview"><span class="color-hex">[[ tempTheme.accent ]]</span>
                                 </div>
                             </div>
@@ -384,7 +383,6 @@
                         <div class="color-field">
                             <label>[[t('main')]]</label>
                             <div class="color-swatch" :style="{background: tempTheme.main}">
-                                <input type="color" v-model="tempTheme.main" />
                                 <div class="color-swatch-preview"><span class="color-hex">[[ tempTheme.main ]]</span>
                                 </div>
                             </div>
@@ -392,7 +390,6 @@
                         <div class="color-field">
                             <label>[[t('download')]]</label>
                             <div class="color-swatch" :style="{background: tempTheme.download}">
-                                <input type="color" v-model="tempTheme.download" />
                                 <div class="color-swatch-preview"><span class="color-hex">[[ tempTheme.download
                                         ]]</span></div>
                             </div>
@@ -400,7 +397,6 @@
                         <div class="color-field">
                             <label>[[t('upload')]]</label>
                             <div class="color-swatch" :style="{background: tempTheme.upload}">
-                                <input type="color" v-model="tempTheme.upload" />
                                 <div class="color-swatch-preview"><span class="color-hex">[[ tempTheme.upload ]]</span>
                                 </div>
                             </div>
