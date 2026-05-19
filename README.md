@@ -41,7 +41,7 @@
 ### 文件结构
 
 ```
-vnstat-assist
+vnstat_assist
 ├── python
 │   ├── api
 │   │   ├── api_server.py               ➔ API服务
@@ -54,16 +54,17 @@ vnstat-assist
 │   │       ├── js
 │   │       │   ├── apexcharts.js
 │   │       │   └── vue.js
-│   │       └── webfonts
-│   │           └── fa-solid-900.woff2  ➔ font-awesome字体文件
-│   └── backup
-│       ├── task_scheduler.py           ➔ 定时执行器，调用备份服务
-│       └── vnstat_backup.py            ➔ vnstat数据备份具体业务
+│   │       ├── webfonts
+│   │       │   └── fa-solid-900.woff2  ➔ font-awesome字体文件
+│   │       └── favicon.png             ➔ 网站图标
+│   ├── backup
+│   │   ├── task_scheduler.py           ➔ 定时执行器，调用备份服务
+│   │   └── vnstat_backup.py            ➔ vnstat数据备份具体业务
+│   └── requirements.txt                ➔ Python依赖文件
 ├── conf
 │   └── supervisord.conf                ➔ supervisord进程配置
 ├── Dockerfile                          ➔ 打包配置
 └── docker-compose.yml                  ➔ docker构建配置，宿主机要先创建对应目录
-  
 ```
 
 ## 🔧 部署说明
@@ -130,8 +131,12 @@ docker run -d \
 
 ![2](screenshots/2.png)
 
-![2](screenshots/3.png)
+![3](screenshots/3.png)
 
-![2](screenshots/4.png)
+![4](screenshots/4.png)
 
-![2](screenshots/5.png)
+![5](screenshots/5.png)
+
+![6](screenshots/6.png)
+
+![7](screenshots/7.png)

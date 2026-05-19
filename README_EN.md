@@ -43,7 +43,7 @@ Enable authentication for public network access
 ### File Structure
 
 ```
-vnstat-assist
+vnstat_assist
 ├── python
 │   ├── api
 │   │   ├── api_server.py               ➔ API service
@@ -56,11 +56,13 @@ vnstat-assist
 │   │       ├── js
 │   │       │   ├── apexcharts.js
 │   │       │   └── vue.js
-│   │       └── webfonts
-│   │           └── fa-solid-900.woff2  ➔ Font-awesome webfont
-│   └── backup
-│       ├── task_scheduler.py           ➔ Timed backup executor
-│       └── vnstat_backup.py            ➔ vnstat data backup implementation
+│   │       ├── webfonts
+│   │       │   └── fa-solid-900.woff2  ➔ Font-awesome webfont
+│   │       └── favicon.png             ➔ Website favicon
+│   ├── backup
+│   │   ├── task_scheduler.py           ➔ Timed backup executor
+│   │   └── vnstat_backup.py            ➔ vnstat data backup implementation
+│   └── requirements.txt                ➔ Python dependencies
 ├── conf
 │   └── supervisord.conf                ➔ Process management configuration
 ├── Dockerfile                          ➔ Docker build configuration
@@ -131,8 +133,12 @@ services:
 
 ![2](screenshots/2.png)
 
-![2](screenshots/3.png)
+![3](screenshots/3.png)
 
-![2](screenshots/4.png)
+![4](screenshots/4.png)
 
-![2](screenshots/5.png)
+![5](screenshots/5.png)
+
+![6](screenshots/6.png)
+
+![7](screenshots/7.png)
