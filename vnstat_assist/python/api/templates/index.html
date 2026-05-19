@@ -5,9 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VNSTAT · DASHBOARD</title>
-    <link rel="icon"
-        href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD//////////////////////////3I2JLdyNyTnczYjUAAAAAD///////////////////////////////////////////////////////////////9yNiPJdTgl/3g6Jv9yNyTKbzcnIAAAAACcpgBQnKYAiZ2lAJmepQBm////////////////AAAAAAAAAAAAAAAAcjcjdHY5Jf9yNiT/ci4m/3I1JPAAAAAAnqUARAAAAAAAAAAAnqcArZmqAA///////////wAAAAAAAAAAAAAAAHI3Ikp2NyX/dDwj/56nAP93RiH2AAAAAAAAAAAAAAAAAAAAAJ2mAG2dpgBT//////////8AAAAAAAAAAIFAKkNyNiP/bykm/5iaCf98VR//cDIk/gAAAAAAAAAAAAAAAAAAAACcpgCGoKYAK6BSO7agVDrMnlI5eZ5SOFGmVz3/hzwx/4uCEP97UR//cDEl/3Y5Jf8AAAAAAAAAAAAAAAAAAAAAnaYAnv////+hUzvppVY9/6ZXPf+nVz3/olE8/6J3Lf+PdB7/bS0k/3I3JP9zNyT/cjck72YzGQoAAAAAAAAAAJ6mAKD/////n1Q7UqlYPv+hVDv/oVM7/6FYOf+ekhj/pE4//4dELv9vNSL/cjck/3Q4Jf9yNiT3AAAAAJ6nAJ2bogAh/////wAAAACgVDrMpVY8/6JOPf+fjxv/oVI7/6FUO/+kVj3/h0Qu/281Iv9yNyT/dDgl/3I4JOmktgCVAAAAAP//////////nlI0IqFSPPOhaDL4oX8o/6dUP/+iVTv/oVQ7/6RWPf+GRC7/bzUi/3I3JP91OCX/bislpP////////////////////8AAAAAnK0ArQAAAAAAAAAAoVM78aNVPP+hVDv/pFY9/4ZDLv9zNiT/dTgl/3Y5Jf//////////////////////AAAAAJ2mAK4AAAAAAAAAAJZLLRGhVDr4o1U8/6FUO/+oWj3/pM4AYmwqIoR4Oib/cTYkh////////////////56oAGmepwBxAAAAAAAAAAAAAAAAmUwzFKFRO+ylVT3/pVY9/6RPPoeHQy7Fczck/3E2I7v///////////////+cpQCQnKgAQwAAAAAAAAAAAAAAAAAAAACdrQCPn2oxzahWPv+qWD7/qVg+/4lFL/9vNSHU////////////////nKYAap2lAIAAAAAAAAAAAKGoACacpgC/nqgAZgAAAACUUjEfoVQ6laFUO8OhVDv/oVQ7//////////////////////+dpgCvnqYApZ2nAKSdpgCa"
-        type="image/x-icon" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <script src="{{ url_for('static', filename='js/apexcharts.js') }}?v=4"></script>
     <script src="{{ url_for('static', filename='js/vue.js') }}?v=4"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}?v=4" />
@@ -2345,20 +2343,6 @@
                 // Base URL
                 this.assistApi = window.location.href.replace(/\/$/, '');
                 this.buildUrls();
-
-                // Auth check
-                const verifyRes = await fetch(this.url.verify);
-                const verifyData = await verifyRes.json();
-
-                if (verifyData.auth_disabled) {
-                    const loginRes = await fetch(this.url.login, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
-                    });
-                    const { token } = await loginRes.json();
-                    this.handleAuthSuccess(token);
-                    return;
-                }
-
                 const storedToken = localStorage.getItem('jwt_token');
                 if (storedToken) {
                     this.authToken = storedToken;
