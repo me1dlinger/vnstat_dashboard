@@ -358,16 +358,27 @@
         <div class="modal-overlay" v-if="themeSettingsVisible" @click.self="cancelThemeSettings">
             <div class="modal-box">
                 <div class="modal-header">
-                    <span class="modal-title">[[t('themeSettings')]]</span>
+                    <div class="modal-title-wrapper">
+                        <span class="modal-title">[[t('themeSettings')]]</span>
+                        <div class="current-theme-indicator">
+                            <i class="fas fa-check-circle"></i>
+                            <span>[[ t('currentTheme') ]]: </span>
+                            <span class="current-theme-name">[[ theme.name ]]</span>
+                        </div>
+                    </div>
                     <button class="modal-close" @click="cancelThemeSettings"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body">
                     <!-- Preset swatches -->
                     <div class="theme-presets">
                         <div v-for="(t, i) in presetThemes" :key="i" class="theme-preset"
-                            :class="{selected: tempTheme.name === t.name}" :style="{background: t.accent}"
+                            :class="{selected: tempTheme.name === t.name, 'custom-preset': t.isCustom}"
+                            :style="!t.isCustom ? {background: t.accent} : getCustomPresetStyle()"
                             @click="applyPresetTheme(t)">
-                            <div :style="{position:'absolute',top:0,right:0,bottom:0,left:'50%',background:t.main}">
+                            <div v-if="!t.isCustom"
+                                :style="{position:'absolute',top:0,right:0,bottom:0,left:'50%',background:t.main}">
+                            </div>
+                            <div v-if="t.isCustom" :style="getCustomMainColor()">
                             </div>
                             <div class="theme-preset-name">[[ t.name ]]</div>
                         </div>
@@ -376,30 +387,46 @@
                     <div class="color-fields">
                         <div class="color-field">
                             <label>[[t('accent')]]</label>
-                            <div class="color-swatch" :style="{background: tempTheme.accent}">
-                                <div class="color-swatch-preview"><span class="color-hex">[[ tempTheme.accent ]]</span>
+                            <div class="color-swatch-wrapper">
+                                <div class="color-swatch" :style="{background: tempTheme.accent}">
+                                    <input v-if="tempTheme.isCustom" type="color" v-model="tempTheme.accent"
+                                        class="color-picker">
+                                    <div v-else class="color-swatch-preview"></div>
                                 </div>
+                                <div class="color-hex-display">[[ tempTheme.accent ]]</div>
                             </div>
                         </div>
                         <div class="color-field">
                             <label>[[t('main')]]</label>
-                            <div class="color-swatch" :style="{background: tempTheme.main}">
-                                <div class="color-swatch-preview"><span class="color-hex">[[ tempTheme.main ]]</span>
+                            <div class="color-swatch-wrapper">
+                                <div class="color-swatch" :style="{background: tempTheme.main}">
+                                    <input v-if="tempTheme.isCustom" type="color" v-model="tempTheme.main"
+                                        class="color-picker">
+                                    <div v-else class="color-swatch-preview"></div>
                                 </div>
+                                <div class="color-hex-display">[[ tempTheme.main ]]</div>
                             </div>
                         </div>
                         <div class="color-field">
                             <label>[[t('download')]]</label>
-                            <div class="color-swatch" :style="{background: tempTheme.download}">
-                                <div class="color-swatch-preview"><span class="color-hex">[[ tempTheme.download
-                                        ]]</span></div>
+                            <div class="color-swatch-wrapper">
+                                <div class="color-swatch" :style="{background: tempTheme.download}">
+                                    <input v-if="tempTheme.isCustom" type="color" v-model="tempTheme.download"
+                                        class="color-picker">
+                                    <div v-else class="color-swatch-preview"></div>
+                                </div>
+                                <div class="color-hex-display">[[ tempTheme.download ]]</div>
                             </div>
                         </div>
                         <div class="color-field">
                             <label>[[t('upload')]]</label>
-                            <div class="color-swatch" :style="{background: tempTheme.upload}">
-                                <div class="color-swatch-preview"><span class="color-hex">[[ tempTheme.upload ]]</span>
+                            <div class="color-swatch-wrapper">
+                                <div class="color-swatch" :style="{background: tempTheme.upload}">
+                                    <input v-if="tempTheme.isCustom" type="color" v-model="tempTheme.upload"
+                                        class="color-picker">
+                                    <div v-else class="color-swatch-preview"></div>
                                 </div>
+                                <div class="color-hex-display">[[ tempTheme.upload ]]</div>
                             </div>
                         </div>
                     </div>
@@ -408,13 +435,18 @@
                         <div class="section-title-small">[[t('gradientConfig')]]</div>
                         <div class="gradient-slider">
                             <label>[[t('shadeIntensity')]]: [[ tempTheme.gradientConfig.shadeIntensity ]]</label>
-                            <input type="range" min="0" max="1" step="0.1" v-model.number="tempTheme.gradientConfig.shadeIntensity" @input="updatePreviewColors" />
+                            <input type="range" min="0" max="1" step="0.1"
+                                v-model.number="tempTheme.gradientConfig.shadeIntensity" @input="updatePreviewColors" />
                         </div>
                         <div class="gradient-slider opacity-range">
-                            <label>[[t('opacityRange')]]: [[ tempTheme.gradientConfig.opacityFrom ]] - [[ tempTheme.gradientConfig.opacityTo ]]</label>
+                            <label>[[t('opacityRange')]]: [[ tempTheme.gradientConfig.opacityFrom ]] - [[
+                                tempTheme.gradientConfig.opacityTo ]]</label>
                             <div class="range-inputs">
-                                <input type="range" min="0" max="1" step="0.05" v-model.number="tempTheme.gradientConfig.opacityFrom" @input="updatePreviewColors" />
-                                <input type="range" min="0" max="1" step="0.05" v-model.number="tempTheme.gradientConfig.opacityTo" @input="updatePreviewColors" />
+                                <input type="range" min="0" max="1" step="0.05"
+                                    v-model.number="tempTheme.gradientConfig.opacityFrom"
+                                    @input="updatePreviewColors" />
+                                <input type="range" min="0" max="1" step="0.05"
+                                    v-model.number="tempTheme.gradientConfig.opacityTo" @input="updatePreviewColors" />
                             </div>
                         </div>
                     </div>
@@ -422,14 +454,15 @@
                     <div class="layer-order-section">
                         <div class="section-title-small">[[t('chartLayerOrder')]]</div>
                         <div class="layer-order-controls">
-                            <div class="layer-order-item" :class="{active: tempTheme.chartLayerOrder[0] === 'download'}" @click="setLayerOrder('download')">
+                            <div class="layer-order-item" :class="{active: tempTheme.chartLayerOrder[0] === 'download'}"
+                                @click="setLayerOrder('download')">
                                 <i class="fas fa-arrow-down"></i> [[t('download')]]
                             </div>
-                            <div class="layer-order-item" :class="{active: tempTheme.chartLayerOrder[0] === 'upload'}" @click="setLayerOrder('upload')">
+                            <div class="layer-order-item" :class="{active: tempTheme.chartLayerOrder[0] === 'upload'}"
+                                @click="setLayerOrder('upload')">
                                 <i class="fas fa-arrow-up"></i> [[t('upload')]]
                             </div>
                         </div>
-                        <div class="layer-order-tip">[[t('layerOrderTip')]]</div>
                     </div>
                     <!-- Preview chart -->
                     <div id="themePreviewChart" style="margin-top:12px;"></div>
@@ -584,6 +617,7 @@
                     { name: "清新绿", main: "#1c1917", accent: "#10b981", contrast: "#ecfdf5", upload: "#6ee7b7", download: "#34d399", gradientConfig: { shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35 }, chartLayerOrder: ['download', 'upload'] },
                     { name: "幻影紫", main: "#1a1b26", accent: "#9d7cde", contrast: "#f8f5ff", upload: "#b9a4e6", download: "#7f5fd3", gradientConfig: { shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35 }, chartLayerOrder: ['download', 'upload'] },
                     { name: "玫瑰粉", main: "#2d2d2d", accent: "#ff6b6b", contrast: "#fff0f0", upload: "#ff9d9d", download: "#ff5252", gradientConfig: { shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35 }, chartLayerOrder: ['download', 'upload'] },
+                    { name: "自定义", main: "#0f172a", accent: "#3b82f6", contrast: "#f8fafc", upload: "#93c5fd", download: "#60a5fa", gradientConfig: { shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35 }, chartLayerOrder: ['download', 'upload'], isCustom: true },
                 ],
                 defaultTheme: {
                     name: "科技蓝", main: "#0f172a", accent: "#3b82f6", contrast: "#f8fafc", upload: "#93c5fd", download: "#60a5fa",
@@ -593,6 +627,16 @@
                         opacityTo: 0.35,
                     },
                     chartLayerOrder: ['download', 'upload'],
+                },
+                customTheme: {
+                    name: "自定义", main: "#0f172a", accent: "#3b82f6", contrast: "#f8fafc", upload: "#93c5fd", download: "#60a5fa",
+                    gradientConfig: {
+                        shadeIntensity: 0.5,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.35,
+                    },
+                    chartLayerOrder: ['download', 'upload'],
+                    isCustom: true,
                 },
                 tempTheme: {},
                 currentLang: "zh",
@@ -606,14 +650,15 @@
                         topStatistics: "流量 TOP 统计",
                         byHour: "按时", byDay: "按日", byMonth: "按月", byYear: "按年",
                         hour: "小时", date: "日期", month: "月份", timeDate: "时间/日期", time: "时间",
-                        themeSettings: "主题配置",
+                        themeSettings: "主题",
+                        currentTheme: "当前主题",
                         createTime: "统计开始", updateTime: "最后更新",
                         traffic: "流量",
                         accent: "强调色", main: "主体色", contrast: "对比色",
                         upload: "上行", download: "下行",
                         gradientConfig: "渐变配置",
                         shadeIntensity: "渐变强度", opacityFrom: "顶部透明度", opacityTo: "底部透明度", opacityRange: "透明度范围",
-                        chartLayerOrder: "曲线图层顺序", layerOrderTip: "点击设置哪个曲线在上层（覆盖另一个）",
+                        chartLayerOrder: "曲线图层顺序",
                         allUpload: "历史上行", allDownload: "历史下行", allTotal: "历史总计",
                         todayUpload: "今日上行", todayDownload: "今日下行", todayTotal: "今日总计",
                         restoreDefault: "恢复默认", cancel: "取消", save: "保存",
@@ -640,13 +685,14 @@
                         byHour: "Hour", byDay: "Day", byMonth: "Month", byYear: "Year",
                         hour: "HOUR", date: "DATE", month: "MONTH", timeDate: "TIME / DATE", time: "TIME",
                         themeSettings: "Theme Settings",
+                        currentTheme: "Current",
                         createTime: "Stats Since", updateTime: "Last Updated",
                         traffic: "Traffic",
                         accent: "Accent", main: "Background", contrast: "Contrast",
                         upload: "UPLOAD", download: "DOWNLOAD",
                         gradientConfig: "Gradient Config",
                         shadeIntensity: "Shade Intensity", opacityFrom: "Top Opacity", opacityTo: "Bottom Opacity", opacityRange: "Opacity Range",
-                        chartLayerOrder: "Chart Layer Order", layerOrderTip: "Click to set which curve is on top (covers the other)",
+                        chartLayerOrder: "Chart Layer Order",
                         allUpload: "TOTAL UPLOAD", allDownload: "TOTAL DOWNLOAD", allTotal: "TOTAL",
                         todayUpload: "TODAY UP", todayDownload: "TODAY DOWN", todayTotal: "TODAY TOTAL",
                         restoreDefault: "Restore Default", cancel: "Cancel", save: "Save",
@@ -938,14 +984,24 @@
                 },
                 cancelThemeSettings() { this.themeSettingsVisible = false; },
                 saveThemeSettings() {
-                    this.theme = { ...this.tempTheme };
-                    const isPreset = this.presetThemes.some(p =>
-                        p.main === this.theme.main && p.accent === this.theme.accent && p.upload === this.theme.upload && p.download === this.theme.download
+                    const isPreset = this.presetThemes.slice(0, 5).some(p =>
+                        p.main === this.tempTheme.main && p.accent === this.tempTheme.accent && p.upload === this.tempTheme.upload && p.download === this.tempTheme.download
                     );
-                    if (!isPreset) {
-                        this.theme.name = '自定义';
-                        this.presetThemes = [...this.presetThemes.filter(t => t.name !== '自定义'), { ...this.theme }];
+
+                    if (isPreset) {
+                        const matchedPreset = this.presetThemes.slice(0, 5).find(p =>
+                            p.main === this.tempTheme.main && p.accent === this.tempTheme.accent && p.upload === this.tempTheme.upload && p.download === this.tempTheme.download
+                        );
+                        this.theme = { ...matchedPreset };
+                    } else {
+                        this.theme = {
+                            ...this.tempTheme,
+                            name: '自定义',
+                            isCustom: true
+                        };
+                        localStorage.setItem('customTheme', JSON.stringify(this.theme));
                     }
+
                     this.applyThemeToCss();
                     localStorage.setItem('themeColors', JSON.stringify(this.theme));
                     if (this.chart) this.updateChart();
@@ -955,11 +1011,59 @@
                     this.theme = { ...this.defaultTheme };
                     this.tempTheme = { ...this.defaultTheme };
                     this.applyThemeToCss();
+                    localStorage.removeItem('customTheme');
                     localStorage.setItem('themeColors', JSON.stringify(this.theme));
                     if (this.chart) this.updateChart();
                     if (this.previewChart) this.updatePreviewColors();
                 },
-                applyPresetTheme(preset) { this.tempTheme = { ...preset }; },
+                applyPresetTheme(preset) {
+                    if (preset.isCustom) {
+                        const savedCustom = localStorage.getItem('customTheme');
+                        if (savedCustom) {
+                            try {
+                                const custom = JSON.parse(savedCustom);
+                                this.tempTheme = { ...custom };
+                            } catch (e) {
+                                this.tempTheme = { ...this.customTheme };
+                            }
+                        } else {
+                            this.tempTheme = { ...this.customTheme };
+                        }
+                    } else {
+                        this.tempTheme = { ...preset };
+                    }
+                    this.$nextTick(() => this.updatePreviewColors());
+                },
+                getCustomPresetStyle() {
+                    const savedCustom = localStorage.getItem('customTheme');
+                    if (savedCustom) {
+                        try {
+                            const custom = JSON.parse(savedCustom);
+                            return { background: custom.accent };
+                        } catch (e) {
+                            return { background: this.customTheme.accent };
+                        }
+                    }
+                    return { background: this.customTheme.accent };
+                },
+                getCustomMainColor() {
+                    const savedCustom = localStorage.getItem('customTheme');
+                    let mainColor = this.customTheme.main;
+                    if (savedCustom) {
+                        try {
+                            const custom = JSON.parse(savedCustom);
+                            mainColor = custom.main;
+                        } catch (e) { }
+                    }
+                    return {
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        left: '50%',
+                        background: mainColor
+                    };
+                },
                 setLayerOrder(layer) {
                     const other = layer === 'download' ? 'upload' : 'download';
                     this.tempTheme.chartLayerOrder = [layer, other];
@@ -973,16 +1077,41 @@
                 },
                 loadThemeColors() {
                     const saved = localStorage.getItem('themeColors');
-                    if (saved) {
+                    const savedCustom = localStorage.getItem('customTheme');
+
+                    if (savedCustom) {
+                        try {
+                            const custom = JSON.parse(savedCustom);
+                            this.customTheme = custom;
+                            this.theme = { ...custom };
+                            this.tempTheme = { ...custom };
+                        } catch (e) {
+                            this.theme = { ...this.defaultTheme };
+                            this.tempTheme = { ...this.defaultTheme };
+                        }
+                    } else if (saved) {
                         try {
                             const t = JSON.parse(saved);
-                            this.theme = { ...this.defaultTheme, ...t };
-                            if (!this.presetThemes.some(p => p.name === this.theme.name)) {
-                                this.presetThemes = [...this.presetThemes.filter(t => t.name !== '自定义'), { ...this.theme }];
+                            const isPreset = this.presetThemes.slice(0, 5).some(p =>
+                                p.main === t.main && p.accent === t.accent && p.upload === t.upload && p.download === t.download
+                            );
+                            if (isPreset) {
+                                const matchedPreset = this.presetThemes.slice(0, 5).find(p =>
+                                    p.main === t.main && p.accent === t.accent && p.upload === t.upload && p.download === t.download
+                                );
+                                this.theme = { ...matchedPreset };
+                                this.tempTheme = { ...matchedPreset };
+                            } else {
+                                this.theme = { ...this.defaultTheme, ...t };
+                                this.tempTheme = { ...this.defaultTheme, ...t };
                             }
-                        } catch (e) { 
+                        } catch (e) {
                             this.theme = { ...this.defaultTheme };
+                            this.tempTheme = { ...this.defaultTheme };
                         }
+                    } else {
+                        this.theme = { ...this.defaultTheme };
+                        this.tempTheme = { ...this.defaultTheme };
                     }
                     this.applyThemeToCss();
                 },
@@ -1168,7 +1297,7 @@
                     const textColor = isDark ? '#64748b' : '#94a3b8';
                     const gridColor = isDark ? '#1e2030' : '#f1f5f9';
                     const chartType = this.currentView === 'bar' ? 'bar' : 'area';
-                    
+
                     const layerOrder = this.theme.chartLayerOrder || ['download', 'upload'];
                     const lang = this.language[this.currentLang];
                     const orderedSeries = layerOrder.map(layer => {
@@ -1181,7 +1310,7 @@
 
                     const options = {
                         chart: {
-                            type: chartType, height: 550,
+                            type: chartType, height: 520,
                             toolbar: { show: false },
                             background: 'transparent',
                             fontFamily: "'IBM Plex Mono', monospace",
@@ -1245,7 +1374,7 @@
                     ];
                     // Reorder series based on layerOrder (first item is on top)
                     const orderedSeries = layerOrder.map(layer => series.find(s => s.name === this.language[this.currentLang][layer]));
-                    
+
                     this.previewChart = new ApexCharts(el, {
                         chart: { type: 'area', height: 120, toolbar: { show: false }, background: 'transparent', fontFamily: 'IBM Plex Mono', animations: { enabled: false } },
                         series: orderedSeries,
@@ -1277,7 +1406,7 @@
                         { name: this.language[this.currentLang]['upload'], data: this.sampleUpData, color: this.tempTheme.upload },
                     ];
                     const orderedSeries = layerOrder.map(layer => series.find(s => s.name === this.language[this.currentLang][layer]));
-                    
+
                     this.previewChart.updateOptions({
                         series: orderedSeries,
                         fill: {
