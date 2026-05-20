@@ -403,6 +403,34 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Gradient configuration -->
+                    <div class="gradient-config-section">
+                        <div class="section-title-small">[[t('gradientConfig')]]</div>
+                        <div class="gradient-slider">
+                            <label>[[t('shadeIntensity')]]: [[ tempTheme.gradientConfig.shadeIntensity ]]</label>
+                            <input type="range" min="0" max="1" step="0.1" v-model.number="tempTheme.gradientConfig.shadeIntensity" @input="updatePreviewColors" />
+                        </div>
+                        <div class="gradient-slider opacity-range">
+                            <label>[[t('opacityRange')]]: [[ tempTheme.gradientConfig.opacityFrom ]] - [[ tempTheme.gradientConfig.opacityTo ]]</label>
+                            <div class="range-inputs">
+                                <input type="range" min="0" max="1" step="0.05" v-model.number="tempTheme.gradientConfig.opacityFrom" @input="updatePreviewColors" />
+                                <input type="range" min="0" max="1" step="0.05" v-model.number="tempTheme.gradientConfig.opacityTo" @input="updatePreviewColors" />
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chart layer order -->
+                    <div class="layer-order-section">
+                        <div class="section-title-small">[[t('chartLayerOrder')]]</div>
+                        <div class="layer-order-controls">
+                            <div class="layer-order-item" :class="{active: tempTheme.chartLayerOrder[0] === 'download'}" @click="setLayerOrder('download')">
+                                <i class="fas fa-arrow-down"></i> [[t('download')]]
+                            </div>
+                            <div class="layer-order-item" :class="{active: tempTheme.chartLayerOrder[0] === 'upload'}" @click="setLayerOrder('upload')">
+                                <i class="fas fa-arrow-up"></i> [[t('upload')]]
+                            </div>
+                        </div>
+                        <div class="layer-order-tip">[[t('layerOrderTip')]]</div>
+                    </div>
                     <!-- Preview chart -->
                     <div id="themePreviewChart" style="margin-top:12px;"></div>
                 </div>
@@ -543,16 +571,28 @@
                     contrast: "#f8fafc",
                     upload: "#93c5fd",
                     download: "#60a5fa",
+                    gradientConfig: {
+                        shadeIntensity: 0.5,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.35,
+                    },
+                    chartLayerOrder: ['download', 'upload'],
                 },
                 presetThemes: [
-                    { name: "科技蓝", main: "#0f172a", accent: "#3b82f6", contrast: "#f8fafc", upload: "#93c5fd", download: "#60a5fa" },
-                    { name: "活力橙", main: "#1e293b", accent: "#f59e0b", contrast: "#fff7ed", upload: "#fcd34d", download: "#fb923c" },
-                    { name: "清新绿", main: "#1c1917", accent: "#10b981", contrast: "#ecfdf5", upload: "#6ee7b7", download: "#34d399" },
-                    { name: "幻影紫", main: "#1a1b26", accent: "#9d7cde", contrast: "#f8f5ff", upload: "#b9a4e6", download: "#7f5fd3" },
-                    { name: "玫瑰粉", main: "#2d2d2d", accent: "#ff6b6b", contrast: "#fff0f0", upload: "#ff9d9d", download: "#ff5252" },
+                    { name: "科技蓝", main: "#0f172a", accent: "#3b82f6", contrast: "#f8fafc", upload: "#93c5fd", download: "#60a5fa", gradientConfig: { shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35 }, chartLayerOrder: ['download', 'upload'] },
+                    { name: "活力橙", main: "#1e293b", accent: "#f59e0b", contrast: "#fff7ed", upload: "#fcd34d", download: "#fb923c", gradientConfig: { shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35 }, chartLayerOrder: ['download', 'upload'] },
+                    { name: "清新绿", main: "#1c1917", accent: "#10b981", contrast: "#ecfdf5", upload: "#6ee7b7", download: "#34d399", gradientConfig: { shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35 }, chartLayerOrder: ['download', 'upload'] },
+                    { name: "幻影紫", main: "#1a1b26", accent: "#9d7cde", contrast: "#f8f5ff", upload: "#b9a4e6", download: "#7f5fd3", gradientConfig: { shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35 }, chartLayerOrder: ['download', 'upload'] },
+                    { name: "玫瑰粉", main: "#2d2d2d", accent: "#ff6b6b", contrast: "#fff0f0", upload: "#ff9d9d", download: "#ff5252", gradientConfig: { shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35 }, chartLayerOrder: ['download', 'upload'] },
                 ],
                 defaultTheme: {
                     name: "科技蓝", main: "#0f172a", accent: "#3b82f6", contrast: "#f8fafc", upload: "#93c5fd", download: "#60a5fa",
+                    gradientConfig: {
+                        shadeIntensity: 0.5,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.35,
+                    },
+                    chartLayerOrder: ['download', 'upload'],
                 },
                 tempTheme: {},
                 currentLang: "zh",
@@ -571,6 +611,9 @@
                         traffic: "流量",
                         accent: "强调色", main: "主体色", contrast: "对比色",
                         upload: "上行", download: "下行",
+                        gradientConfig: "渐变配置",
+                        shadeIntensity: "渐变强度", opacityFrom: "顶部透明度", opacityTo: "底部透明度", opacityRange: "透明度范围",
+                        chartLayerOrder: "曲线图层顺序", layerOrderTip: "点击设置哪个曲线在上层（覆盖另一个）",
                         allUpload: "历史上行", allDownload: "历史下行", allTotal: "历史总计",
                         todayUpload: "今日上行", todayDownload: "今日下行", todayTotal: "今日总计",
                         restoreDefault: "恢复默认", cancel: "取消", save: "保存",
@@ -601,6 +644,9 @@
                         traffic: "Traffic",
                         accent: "Accent", main: "Background", contrast: "Contrast",
                         upload: "UPLOAD", download: "DOWNLOAD",
+                        gradientConfig: "Gradient Config",
+                        shadeIntensity: "Shade Intensity", opacityFrom: "Top Opacity", opacityTo: "Bottom Opacity", opacityRange: "Opacity Range",
+                        chartLayerOrder: "Chart Layer Order", layerOrderTip: "Click to set which curve is on top (covers the other)",
                         allUpload: "TOTAL UPLOAD", allDownload: "TOTAL DOWNLOAD", allTotal: "TOTAL",
                         todayUpload: "TODAY UP", todayDownload: "TODAY DOWN", todayTotal: "TODAY TOTAL",
                         restoreDefault: "Restore Default", cancel: "Cancel", save: "Save",
@@ -910,8 +956,15 @@
                     this.tempTheme = { ...this.defaultTheme };
                     this.applyThemeToCss();
                     localStorage.setItem('themeColors', JSON.stringify(this.theme));
+                    if (this.chart) this.updateChart();
+                    if (this.previewChart) this.updatePreviewColors();
                 },
                 applyPresetTheme(preset) { this.tempTheme = { ...preset }; },
+                setLayerOrder(layer) {
+                    const other = layer === 'download' ? 'upload' : 'download';
+                    this.tempTheme.chartLayerOrder = [layer, other];
+                    this.$nextTick(() => this.updatePreviewColors());
+                },
                 applyThemeToCss() {
                     const r = document.documentElement.style;
                     r.setProperty('--accent', this.theme.accent);
@@ -923,9 +976,13 @@
                     if (saved) {
                         try {
                             const t = JSON.parse(saved);
-                            this.theme = t;
-                            if (t.name === '自定义') this.presetThemes.push(t);
-                        } catch (e) { }
+                            this.theme = { ...this.defaultTheme, ...t };
+                            if (!this.presetThemes.some(p => p.name === this.theme.name)) {
+                                this.presetThemes = [...this.presetThemes.filter(t => t.name !== '自定义'), { ...this.theme }];
+                            }
+                        } catch (e) { 
+                            this.theme = { ...this.defaultTheme };
+                        }
                     }
                     this.applyThemeToCss();
                 },
@@ -1111,6 +1168,16 @@
                     const textColor = isDark ? '#64748b' : '#94a3b8';
                     const gridColor = isDark ? '#1e2030' : '#f1f5f9';
                     const chartType = this.currentView === 'bar' ? 'bar' : 'area';
+                    
+                    const layerOrder = this.theme.chartLayerOrder || ['download', 'upload'];
+                    const lang = this.language[this.currentLang];
+                    const orderedSeries = layerOrder.map(layer => {
+                        if (layer === 'download') {
+                            return seriesData.find(s => s.name === lang['download']);
+                        } else if (layer === 'upload') {
+                            return seriesData.find(s => s.name === lang['upload']);
+                        }
+                    }).filter(s => s);
 
                     const options = {
                         chart: {
@@ -1120,11 +1187,13 @@
                             fontFamily: "'IBM Plex Mono', monospace",
                             animations: { enabled: true, easing: 'easeinout', speed: 300 },
                         },
-                        series: seriesData,
+                        series: orderedSeries,
                         fill: {
                             type: chartType === 'area' ? 'gradient' : 'solid',
                             gradient: {
-                                shadeIntensity: 0.5, opacityFrom: 0.7, opacityTo: 0.35,
+                                shadeIntensity: this.theme.gradientConfig.shadeIntensity,
+                                opacityFrom: this.theme.gradientConfig.opacityFrom,
+                                opacityTo: this.theme.gradientConfig.opacityTo,
                                 stops: [0, 100],
                             },
                             opacity: chartType === 'bar' ? 0.9 : 1,
@@ -1169,13 +1238,26 @@
                     if (this.previewChart) { try { this.previewChart.destroy(); } catch (e) { } this.previewChart = null; }
                     const el = document.querySelector('#themePreviewChart');
                     if (!el) return;
+                    const layerOrder = this.tempTheme.chartLayerOrder || ['download', 'upload'];
+                    const series = [
+                        { name: this.language[this.currentLang]['download'], data: this.sampleDownData, color: this.tempTheme.download },
+                        { name: this.language[this.currentLang]['upload'], data: this.sampleUpData, color: this.tempTheme.upload },
+                    ];
+                    // Reorder series based on layerOrder (first item is on top)
+                    const orderedSeries = layerOrder.map(layer => series.find(s => s.name === this.language[this.currentLang][layer]));
+                    
                     this.previewChart = new ApexCharts(el, {
                         chart: { type: 'area', height: 120, toolbar: { show: false }, background: 'transparent', fontFamily: 'IBM Plex Mono', animations: { enabled: false } },
-                        series: [
-                            { name: this.language[this.currentLang]['download'], data: this.sampleDownData, color: this.tempTheme.download },
-                            { name: this.language[this.currentLang]['upload'], data: this.sampleUpData, color: this.tempTheme.upload },
-                        ],
-                        fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0.15 } },
+                        series: orderedSeries,
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shadeIntensity: this.tempTheme.gradientConfig.shadeIntensity,
+                                opacityFrom: this.tempTheme.gradientConfig.opacityFrom,
+                                opacityTo: this.tempTheme.gradientConfig.opacityTo,
+                                stops: [0, 100],
+                            },
+                        },
                         stroke: { curve: 'smooth', width: 2 },
                         markers: { size: 0 },
                         dataLabels: { enabled: false },
@@ -1189,11 +1271,22 @@
                 },
                 updatePreviewColors() {
                     if (!this.previewChart) return;
+                    const layerOrder = this.tempTheme.chartLayerOrder || ['download', 'upload'];
+                    const series = [
+                        { name: this.language[this.currentLang]['download'], data: this.sampleDownData, color: this.tempTheme.download },
+                        { name: this.language[this.currentLang]['upload'], data: this.sampleUpData, color: this.tempTheme.upload },
+                    ];
+                    const orderedSeries = layerOrder.map(layer => series.find(s => s.name === this.language[this.currentLang][layer]));
+                    
                     this.previewChart.updateOptions({
-                        series: [
-                            { name: this.language[this.currentLang]['download'], data: this.sampleDownData, color: this.tempTheme.download },
-                            { name: this.language[this.currentLang]['upload'], data: this.sampleUpData, color: this.tempTheme.upload },
-                        ],
+                        series: orderedSeries,
+                        fill: {
+                            gradient: {
+                                shadeIntensity: this.tempTheme.gradientConfig.shadeIntensity,
+                                opacityFrom: this.tempTheme.gradientConfig.opacityFrom,
+                                opacityTo: this.tempTheme.gradientConfig.opacityTo,
+                            },
+                        },
                     });
                 },
 
