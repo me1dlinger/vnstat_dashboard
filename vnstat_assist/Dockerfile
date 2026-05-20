@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.13.13-slim
 
 # 安装依赖
 RUN apt-get update && apt-get install -y \
