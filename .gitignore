@@ -1,2 +1,4 @@
-/.idea/
-/myenv/
+/.idea
+/myenv
+.trae
+.gitignore

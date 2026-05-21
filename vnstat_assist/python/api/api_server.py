@@ -21,7 +21,7 @@ DEFAULT_CONFIG = {
     "secret_key": "secret_key",
     "auth_enable": 1,
     "expire_seconds": 3600,
-    "user": {"username": "username", "password": "username"},
+    "user": {"username": "username", "password": "password"},
     "vnstat_api": "vnstat_api",
 }
 
