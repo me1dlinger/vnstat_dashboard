@@ -12,7 +12,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
 # 创建目录结构
 RUN mkdir -p /app/python
 RUN mkdir -p /app/backups
-RUN mkdir -p /app/log/python
+RUN mkdir -p /app/log
 
 # 复制脚本和API文件
 COPY /python /app/python

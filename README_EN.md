@@ -87,7 +87,7 @@ docker pull meidlinger1024/vnstat-dashboard:latest
 docker run -d \
   --name vnstat-dashboard \
   -p 19328:19328 \
-  -v ${path-on-host}/log/python:/app/log/python \
+  -v ${path-on-host}/log:/app/log \
   -v ${path-on-host}/backups:/app/backups \
   -e VNA_AUTH_ENABLE=1 \
   -e VNSTAT_API_URL=http://${host}:${port}/json.cgi \
@@ -110,7 +110,7 @@ services:
       - "19328:19328"
     volumes:
         # Specify host machine paths (create them first if needed)
-      - ${path-on-host}/log/python:/app/log/python
+      - ${path-on-host}/log:/app/log
       - ${path-on-host}/backups:/app/backups
     environment:
       # Enable authentication

@@ -833,6 +833,7 @@
                         verify: base + "/auth/verify",
                         loadJson: base + "/json.cgi",
                         backups: base + "/backups/",
+                        monthBackups: base + "/backups/month/",
                     };
                 },
                 handleAuthSuccess(token) {
@@ -1215,6 +1216,42 @@
                     } catch (e) { return null; }
                     finally { this.pendingBackups.delete(dateStr); }
                 },
+                getMonthString(date) {
+                    return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0')].join('');
+                },
+                isPastMonth(date) {
+                    const d = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                    d.setHours(23, 59, 59, 999);
+                    return d < new Date();
+                },
+                async getMonthBackupData(monthStr) {
+                    const cacheKey = 'month_' + monthStr;
+                    const cachedRaw = localStorage.getItem('backup_data');
+                    if (cachedRaw) {
+                        try {
+                            const parsed = JSON.parse(cachedRaw);
+                            this.backupCache = parsed.cache || {};
+                            this.cacheKeys = parsed.keys || [];
+                            if (this.backupCache[cacheKey]) return this.backupCache[cacheKey];
+                        } catch (e) { this.backupCache = {}; this.cacheKeys = []; }
+                    }
+                    if (this.pendingBackups.has(cacheKey)) return null;
+                    this.pendingBackups.add(cacheKey);
+                    try {
+                        const res = await this.fetchWithAuth(`${this.url.monthBackups}${monthStr}`);
+                        const data = await res.json();
+                        if (data && !data.error) {
+                            this.backupCache[cacheKey] = data;
+                            this.cacheKeys = [...new Set([...this.cacheKeys, cacheKey])].sort();
+                            const MAX = 10;
+                            while (this.cacheKeys.length > MAX) { delete this.backupCache[this.cacheKeys.shift()]; }
+                            localStorage.setItem('backup_data', JSON.stringify({ cache: this.backupCache, keys: this.cacheKeys }));
+                            return data;
+                        }
+                        return null;
+                    } catch (e) { return null; }
+                    finally { this.pendingBackups.delete(cacheKey); }
+                },
                 processBackupData(currentDate, backupData, dataType) {
                     const iface = backupData.interfaces.find(i => i.name === this.latestSelectedInterfaceData.name);
                     const raw = (iface?.traffic?.[dataType]) || [];
@@ -1225,13 +1262,17 @@
                 async getMergedSeriesData() {
                     const dataType = { hour: 'fiveminute', day: 'hour', month: 'day', year: 'month' }[this.timeRangeType];
                     const currentDate = new Date(this.currentRange);
-                    const useBackup = this.enableBackupData && this.isPastDate(currentDate)
-                        && (this.timeRangeType === 'hour' || this.timeRangeType === 'day');
 
-                    if (useBackup) {
-                        const bd = await this.getBackupData(this.getDateString(currentDate));
-                        if (bd) return this.processBackupData(currentDate, bd, dataType);
+                    if (this.enableBackupData) {
+                        if ((this.timeRangeType === 'hour' || this.timeRangeType === 'day') && this.isPastDate(currentDate)) {
+                            const bd = await this.getBackupData(this.getDateString(currentDate));
+                            if (bd) return this.processBackupData(currentDate, bd, dataType);
+                        } else if (this.timeRangeType === 'month' && this.isPastMonth(currentDate)) {
+                            const bd = await this.getMonthBackupData(this.getMonthString(currentDate));
+                            if (bd) return this.processBackupData(currentDate, bd, dataType);
+                        }
                     }
+
                     if (this.latestSelectedInterfaceData?.traffic) {
                         return this.processData(currentDate, this.latestSelectedInterfaceData.traffic[dataType], dataType);
                     }

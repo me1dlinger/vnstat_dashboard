@@ -90,7 +90,7 @@ services:
       - "19328:19328"
     volumes:
         #填写自己宿主机的路径，可以提前创建
-      - ${path-on-host}/log/python:/app/log/python
+      - ${path-on-host}/log:/app/log
       - ${path-on-host}/backups:/app/backups
     environment:
       #启用校验
@@ -113,7 +113,7 @@ services:
 docker run -d \
   --name vnstat-dashboard \
   -p 19328:19328 \
-  -v ${path-on-host}/log/python:/app/log/python \
+  -v ${path-on-host}/log:/app/log \
   -v ${path-on-host}/backups:/app/backups \
   -e VNA_AUTH_ENABLE=1 \
   -e VNSTAT_API_URL=http://${host}:${port}/json.cgi \

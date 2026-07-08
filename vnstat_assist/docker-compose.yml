@@ -7,13 +7,13 @@ services:
     ports:
       - "19328:19328"
     volumes:
-        #填写自己宿主机的路径，可以提前创建
-      - :path/log/python:/app/log/python
+      #填写自己宿主机的路径，可以提前创建
+      - :path/log:/app/log
       - :path/backups:/app/backups
     environment:
       - TZ=Asia/Shanghai
       #启用校验
-      - VNA_AUTH_ENABLE=1 
+      - VNA_AUTH_ENABLE=1
       #vnstat的json数据api 
       - VNSTAT_API_URL=http://127.0.0.1:9695/json.cgi
       #后端校验秘钥

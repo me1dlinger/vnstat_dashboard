@@ -1,4 +1,5 @@
 import base64
+import calendar
 import hmac
 import json
 import logging
@@ -6,15 +7,37 @@ import os
 import ssl
 import time
 import urllib.request
+from datetime import datetime
 from hashlib import sha256
 
 from flask import Flask, jsonify, make_response, render_template, request
 
-# 设置日志
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from backup.vnstat_backup import organize_backup_files, get_month_dir, ensure_month_dir
+
+LOG_DIR = "/app/log"
+
+
+def _setup_api_logger():
+    _logger = logging.getLogger("api_server")
+    _logger.setLevel(logging.INFO)
+    if not _logger.handlers:
+        os.makedirs(LOG_DIR, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        log_file = os.path.join(LOG_DIR, f"api_{timestamp}.log")
+        fmt = logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s")
+        fh = logging.FileHandler(log_file)
+        fh.setFormatter(fmt)
+        sh = logging.StreamHandler()
+        sh.setFormatter(fmt)
+        _logger.addHandler(fh)
+        _logger.addHandler(sh)
+    return _logger
+
+
+logger = _setup_api_logger()
 
 # 默认配置
 DEFAULT_CONFIG = {
@@ -220,7 +243,6 @@ def proxy_vnstat_json():
             return jsonify({"error": verification["error"]}), 401
 
     ssl_context = ssl._create_unverified_context()
-
     # 发起代理请求
     try:
         req = urllib.request.Request(VNSTAT_PROXY_URL)
@@ -245,7 +267,6 @@ def proxy_vnstat_json():
 def get_backup(day):
     """获取备份文件"""
     if AUTH_ENABLED:
-        # 验证Token
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
             return jsonify({"error": "Missing authorization token"}), 401
@@ -255,9 +276,14 @@ def get_backup(day):
         if not verification["valid"]:
             return jsonify({"error": verification["error"]}), 401
 
-    # 处理文件请求
     try:
-        file_path = os.path.join(JSON_DIR, f"vnstat_{day}.json")
+        if len(day) != 8 or not day.isdigit():
+            return jsonify({"error": "Invalid day format, expected YYYYMMDD"}), 400
+
+        target_year = int(day[:4])
+        target_month = int(day[4:6])
+        month_dir = get_month_dir(JSON_DIR, target_year, target_month)
+        file_path = os.path.join(month_dir, f"vnstat_{day}.json")
 
         if os.path.isfile(file_path):
             with open(file_path, "r") as f:
@@ -271,13 +297,155 @@ def get_backup(day):
         return jsonify({"error": str(e)}), 500
 
 
+def _merge_day_backups_to_month(target_year, target_month):
+    days_in_month = calendar.monthrange(target_year, target_month)[1]
+    day_files_data = []
+    month_dir = get_month_dir(JSON_DIR, target_year, target_month)
+
+    for day in range(1, days_in_month + 1):
+        day_str = f"{target_year}{target_month:02d}{day:02d}"
+        day_file = os.path.join(month_dir, f"vnstat_{day_str}.json")
+
+        if os.path.isfile(day_file):
+            try:
+                with open(day_file, "r") as f:
+                    day_data = json.load(f)
+                day_files_data.append(day_data)
+            except (json.JSONDecodeError, Exception):
+                pass
+
+    if not day_files_data:
+        return None
+
+    merged = {"interfaces": []}
+    interface_map = {}
+
+    for day_data in day_files_data:
+        for interface in day_data.get("interfaces", []):
+            iface_name = interface.get("name", "unknown")
+            if iface_name not in interface_map:
+                interface_map[iface_name] = {
+                    "name": iface_name,
+                    "alias": interface.get("alias", ""),
+                    "created": interface.get("created"),
+                    "updated": interface.get("updated"),
+                    "traffic": {
+                        "day": [],
+                        "month": [],
+                    },
+                }
+
+            iface = interface_map[iface_name]
+            traffic = interface.get("traffic", {})
+
+            for entry in traffic.get("day", []):
+                iface["traffic"]["day"].append(entry)
+
+            for entry in traffic.get("month", []):
+                existing = iface["traffic"]["month"]
+                entry_date = entry.get("date", {})
+                is_dup = False
+                for ex in existing:
+                    ex_date = ex.get("date", {})
+                    if ex_date.get("year") == entry_date.get("year") and ex_date.get(
+                        "month"
+                    ) == entry_date.get("month"):
+                        is_dup = True
+                        break
+                if not is_dup:
+                    iface["traffic"]["month"].append(entry)
+
+    for iface_name, iface_data in interface_map.items():
+        iface_data["traffic"]["day"].sort(key=lambda x: x.get("timestamp", 0))
+
+        if not iface_data["traffic"]["month"]:
+            total_rx = sum(d.get("rx", 0) for d in iface_data["traffic"]["day"])
+            total_tx = sum(d.get("tx", 0) for d in iface_data["traffic"]["day"])
+            first_day_ts = None
+            for d in iface_data["traffic"]["day"]:
+                d_date = d.get("date", {})
+                if (
+                    d_date.get("year") == target_year
+                    and d_date.get("month") == target_month
+                    and d_date.get("day") == 1
+                ):
+                    first_day_ts = d.get("timestamp")
+                    break
+            if first_day_ts is None and iface_data["traffic"]["day"]:
+                first_day_ts = iface_data["traffic"]["day"][0].get("timestamp")
+
+            iface_data["traffic"]["month"] = [
+                {
+                    "id": 0,
+                    "date": {"year": target_year, "month": target_month},
+                    "timestamp": first_day_ts or 0,
+                    "rx": total_rx,
+                    "tx": total_tx,
+                }
+            ]
+
+        merged["interfaces"].append(iface_data)
+
+    return merged
+
+
+@app.route("/backups/month/<month>", methods=["GET"])
+def get_month_backup(month):
+    """获取月备份数据，优先读取月备份文件，不存在则合并天备份文件"""
+    if AUTH_ENABLED:
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Missing authorization token"}), 401
+
+        token = auth_header.split(" ")[1]
+        verification = JWTManager.verify_token(token)
+        if not verification["valid"]:
+            return jsonify({"error": verification["error"]}), 401
+
+    try:
+        if len(month) != 6 or not month.isdigit():
+            return jsonify({"error": "Invalid month format, expected YYYYMM"}), 400
+
+        target_year = int(month[:4])
+        target_month = int(month[4:6])
+
+        if target_month < 1 or target_month > 12:
+            return jsonify({"error": "Invalid month value"}), 400
+
+        month_dir = get_month_dir(JSON_DIR, target_year, target_month)
+        month_file = os.path.join(month_dir, f"vnstat_month_{month}.json")
+
+        if os.path.isfile(month_file):
+            with open(month_file, "r") as f:
+                content = json.load(f)
+            return jsonify(content), 200
+
+        merged = _merge_day_backups_to_month(target_year, target_month)
+
+        if merged is None:
+            return jsonify({"error": "No backup data found for this month"}), 404
+
+        try:
+            ensure_month_dir(JSON_DIR, target_year, target_month)
+            with open(month_file, "w") as f:
+                json.dump(merged, f, indent=2)
+            logger.info(f"合并天备份生成月备份文件: {month_file}")
+        except Exception as e:
+            logger.warning(f"保存合并月备份文件失败: {str(e)}")
+
+        return jsonify(merged), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
 if __name__ == "__main__":
-    # 从环境变量获取端口号，默认为19328
+    organize_backup_files(JSON_DIR)
     port = int(os.environ.get("PORT", 19328))
     logger.info(f"服务器启动于 0.0.0.0:{port}")
     app.run(host="0.0.0.0", port=port)
