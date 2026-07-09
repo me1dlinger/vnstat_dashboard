@@ -129,16 +129,16 @@ services:
 
 ## 🧩 Screenshots
 
-![1](screenshots/1.png)
+![1](https://files.seeusercontent.com/2026/07/09/gQs3/1.png)
 
-![2](screenshots/2.png)
+![2](https://files.seeusercontent.com/2026/07/09/rZj7/2.png)
 
-![3](screenshots/3.png)
+![3](https://files.seeusercontent.com/2026/07/09/fW5w/3.png)
 
-![4](screenshots/4.png)
+![4](https://files.seeusercontent.com/2026/07/09/n6Ko/4.png)
 
-![5](screenshots/5.png)
+![5](https://files.seeusercontent.com/2026/07/09/xrD8/5.png)
 
-![6](screenshots/6.png)
+![6](https://files.seeusercontent.com/2026/07/09/jDg0/6.png)
 
-![7](screenshots/7.png)
+![7](https://files.seeusercontent.com/2026/07/09/A8rq/7.png)
