@@ -1,0 +1,10 @@
+# 构建上下文为 vnstat_assist/（见 .github/workflows/docker-publish.yml）
+# Dockerfile 只 COPY /python 与 conf/supervisord.conf，这里排除无关产物
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.log
+log/
+backups/
+.env
