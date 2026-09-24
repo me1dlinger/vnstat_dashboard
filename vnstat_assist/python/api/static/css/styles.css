@@ -1019,7 +1019,20 @@ tbody td:first-child {
   font-size: 10px;
 }
 
-/* ─── LOGIN ─── */
+/* ─── BOOT / LOGIN ─── */
+.boot-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 100vh;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+}
+
 .login-screen {
   flex: 1;
   display: flex;

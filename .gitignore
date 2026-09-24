@@ -2,3 +2,4 @@
 /myenv
 .trae
 .gitignore
+**/__pycache__/**

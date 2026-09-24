@@ -19,8 +19,14 @@
 <body>
     <div id="app">
 
+        <!-- ═══ BOOT ═══ -->
+        <div v-if="booting" class="boot-screen">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <span>[[t('loading')]]</span>
+        </div>
+
         <!-- ═══ LOGIN ═══ -->
-        <div v-if="!isAuthenticated" class="login-screen">
+        <div v-else-if="!isAuthenticated" class="login-screen">
             <div class="login-box">
                 <div class="login-header">
                     <div class="login-title">
@@ -549,6 +555,7 @@
             el: "#app",
             data: {
                 isAuthenticated: true,
+                booting: true,
                 loginForm: { username: "", password: "" },
                 loggingIn: false,
                 loginError: "",
@@ -675,6 +682,7 @@
                         apply: "应用",
                         loadError: "数据加载失败，请检查后端配置",
                         noData: "暂无数据",
+                        loading: "加载中...",
                     },
                     en: {
                         languageTip: "切换成中文",
@@ -709,6 +717,7 @@
                         apply: "Apply",
                         loadError: "Failed to load data, check backend or config",
                         noData: "No data",
+                        loading: "Loading...",
                     },
                 },
             },
@@ -790,9 +799,10 @@
             },
 
             watch: {
-                timeRangeType() { this.showNextButton = false; this.updateChart(); },
-                currentView(v) { if (v === 'chart' || v === 'bar') this.$nextTick(() => this.updateChart()); },
-                latestSelectedInterfaceData() { this.updateChart(); this.handleLatestTopData(); },
+                timeRangeType() { this.showNextButton = false; this.scheduleUpdateChart(); },
+                currentRange() { this.scheduleUpdateChart(); },
+                currentView(v) { if (v === 'chart' || v === 'bar') this.scheduleUpdateChart(); },
+                latestSelectedInterfaceData() { this.scheduleUpdateChart(); this.handleLatestTopData(); },
                 theme: { deep: true, handler() { this.applyThemeToCss(); this.$nextTick(() => this.updatePreviewColors()); } },
                 tempTheme: { deep: true, handler() { this.$nextTick(() => this.updatePreviewColors()); } },
             },
@@ -846,6 +856,11 @@
                     this.isAuthenticated = false;
                     this.authToken = null;
                     localStorage.removeItem("jwt_token");
+                    // Drop the chart instance so a later login rebuilds it on a
+                    // fresh DOM node instead of updating a detached one.
+                    if (this.chart) { try { this.chart.destroy(); } catch (e) { } this.chart = null; }
+                    this._chartSig = null;
+                    this._chartLabels = null;
                 },
                 async fetchWithAuth(url) {
                     const res = await fetch(url, {
@@ -857,8 +872,11 @@
 
                 // ── Data Loading ──
                 async loadData(showMsg) {
+                    if (this._loadingData) return;
+                    this._loadingData = true;
                     try {
                         const res = await this.fetchWithAuth(this.url.loadJson);
+                        if (!res.ok) throw new Error('load failed');
                         const data = await res.json();
                         this.latestRawData = data;
                         this.latestInterfacesData = data.interfaces || [];
@@ -870,12 +888,14 @@
                         } else {
                             this.latestSelectedInterfaceData = this.latestInterfacesData[0];
                         }
+                        // Table is rebuilt here; chart + top list react to the
+                        // latestSelectedInterfaceData watcher (single coalesced update).
                         this.handleLatestInterfacesData();
-                        this.handleLatestTopData();
-                        this.updateChart();
                         if (showMsg) this.showMessage('refreshed');
                     } catch (e) {
                         this.showMessage('loadError');
+                    } finally {
+                        this._loadingData = false;
                     }
                 },
 
@@ -939,7 +959,6 @@
                             break;
                     }
                     this.currentRange = d;
-                    this.updateChart();
                 },
                 isSameDay(a, b) {
                     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -962,7 +981,6 @@
                         case 'month': this.timeRangeType = 'month'; this.currentRange = new Date(this.customSelectedMonth + '-01'); break;
                         case 'year': this.timeRangeType = 'year'; this.currentRange = new Date(parseInt(this.customSelectedYear), 0, 1); break;
                     }
-                    this.updateChart();
                 },
 
                 // ── Settings ──
@@ -1005,7 +1023,7 @@
 
                     this.applyThemeToCss();
                     localStorage.setItem('themeColors', JSON.stringify(this.theme));
-                    if (this.chart) this.updateChart();
+                    if (this.chart) this.scheduleUpdateChart();
                     this.cancelThemeSettings();
                 },
                 resetDefaultTheme() {
@@ -1014,7 +1032,7 @@
                     this.applyThemeToCss();
                     localStorage.removeItem('customTheme');
                     localStorage.setItem('themeColors', JSON.stringify(this.theme));
-                    if (this.chart) this.updateChart();
+                    if (this.chart) this.scheduleUpdateChart();
                     if (this.previewChart) this.updatePreviewColors();
                 },
                 applyPresetTheme(preset) {
@@ -1122,7 +1140,7 @@
                     this.currentLang = this.currentLang === 'zh' ? 'en' : 'zh';
                     localStorage.setItem('current_lang', this.currentLang);
                     this.showMessage('langSwitched');
-                    this.updateChart();
+                    this.scheduleUpdateChart();
                 },
 
                 // ── Night Mode ──
@@ -1131,16 +1149,17 @@
                     else { this.isNightMode = !this.isNightMode; localStorage.setItem('nightModeOff', !this.isNightMode); }
                     document.documentElement.classList.toggle('night-mode', this.isNightMode);
                     this.showMessage('switchSuccess');
+                    if (this.chart) this.scheduleUpdateChart();
                 },
                 isLateNight() { const h = new Date().getHours(); return h >= 23 || h < 6; },
 
                 // ── Interface / Top modes ──
                 handleShowInterfaceData() {
-                    if (this.interfacesDataMode) { this.interfacesDataMode = false; this.updateChart(); }
+                    if (this.interfacesDataMode) { this.interfacesDataMode = false; this.scheduleUpdateChart(); }
                     else { this.interfacesDataMode = true; this.topDataMode = false; this.handleLatestInterfacesData(); }
                 },
                 handleShowTopData() {
-                    if (this.topDataMode) { this.topDataMode = false; this.updateChart(); }
+                    if (this.topDataMode) { this.topDataMode = false; this.scheduleUpdateChart(); }
                     else { this.topDataMode = true; this.interfacesDataMode = false; this.handleLatestTopData(); }
                 },
                 handleLatestInterfacesData() {
@@ -1182,39 +1201,70 @@
                 isPastDate(date) {
                     const c = new Date(date); c.setHours(23, 59, 59, 999); return c < new Date();
                 },
-                async getBackupData(dateStr) {
-                    const cachedRaw = localStorage.getItem('backup_data');
-                    if (cachedRaw) {
-                        try {
-                            const parsed = JSON.parse(cachedRaw);
+                // Backup cache lives in memory; localStorage is read once and
+                // written back debounced, to avoid main-thread jank on every nav.
+                _loadBackupCache() {
+                    if (this._backupCacheLoaded) return;
+                    this._backupCacheLoaded = true;
+                    if (!this.enableBackupData) return;
+                    try {
+                        const raw = localStorage.getItem('backup_data');
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
                             this.backupCache = parsed.cache || {};
                             this.cacheKeys = parsed.keys || [];
-                            // Prune stale keys (>30 days)
-                            const cutoff = Date.now() - 30 * 86400000;
-                            this.cacheKeys = this.cacheKeys.filter(k => {
-                                const d = new Date(k.slice(0, 4), parseInt(k.slice(4, 6)) - 1, k.slice(6, 8)).getTime();
-                                if (d < cutoff) { delete this.backupCache[k]; return false; }
-                                return true;
-                            });
-                            if (this.backupCache[dateStr]) return this.backupCache[dateStr];
-                        } catch (e) { this.backupCache = {}; this.cacheKeys = []; }
-                    }
-                    if (this.pendingBackups.has(dateStr)) return null;
-                    this.pendingBackups.add(dateStr);
+                        }
+                    } catch (e) { this.backupCache = {}; this.cacheKeys = []; }
+                    this._pruneBackupCache();
+                },
+                _pruneBackupCache() {
+                    const cutoff = Date.now() - 30 * 86400000;
+                    this.cacheKeys = this.cacheKeys.filter(k => {
+                        const digits = k.replace(/\D/g, '');
+                        if (digits.length < 6) { delete this.backupCache[k]; return false; }
+                        const y = +digits.slice(0, 4), m = +digits.slice(4, 6) - 1;
+                        const day = digits.length >= 8 ? +digits.slice(6, 8) : 1;
+                        if (new Date(y, m, day).getTime() < cutoff) { delete this.backupCache[k]; return false; }
+                        return true;
+                    });
+                },
+                _schedulePersistBackupCache() {
+                    if (this._persistTimer) clearTimeout(this._persistTimer);
+                    this._persistTimer = setTimeout(() => {
+                        this._persistTimer = null;
+                        const store = () => localStorage.setItem('backup_data', JSON.stringify({ cache: this.backupCache, keys: this.cacheKeys }));
+                        try { store(); } catch (e) {
+                            // localStorage full: drop oldest entries until it fits
+                            while (this.cacheKeys.length > 1) {
+                                delete this.backupCache[this.cacheKeys.shift()];
+                                try { store(); return; } catch (_) { }
+                            }
+                            try { localStorage.removeItem('backup_data'); } catch (_) { }
+                        }
+                    }, 400);
+                },
+                async _fetchBackup(cacheKey, url) {
+                    this._loadBackupCache();
+                    if (this.backupCache[cacheKey]) return this.backupCache[cacheKey];
+                    if (this.pendingBackups.has(cacheKey)) return null;
+                    this.pendingBackups.add(cacheKey);
                     try {
-                        const res = await this.fetchWithAuth(`${this.url.backups}${dateStr}`);
+                        const res = await this.fetchWithAuth(url);
                         const data = await res.json();
                         if (data && !data.error) {
-                            this.backupCache[dateStr] = data;
-                            this.cacheKeys = [...new Set([...this.cacheKeys, dateStr])].sort();
+                            this.backupCache[cacheKey] = data;
+                            this.cacheKeys = [...new Set([...this.cacheKeys, cacheKey])].sort();
                             const MAX = 10;
                             while (this.cacheKeys.length > MAX) { delete this.backupCache[this.cacheKeys.shift()]; }
-                            localStorage.setItem('backup_data', JSON.stringify({ cache: this.backupCache, keys: this.cacheKeys }));
+                            this._schedulePersistBackupCache();
                             return data;
                         }
                         return null;
                     } catch (e) { return null; }
-                    finally { this.pendingBackups.delete(dateStr); }
+                    finally { this.pendingBackups.delete(cacheKey); }
+                },
+                getBackupData(dateStr) {
+                    return this._fetchBackup(dateStr, `${this.url.backups}${dateStr}`);
                 },
                 getMonthString(date) {
                     return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0')].join('');
@@ -1224,51 +1274,29 @@
                     d.setHours(23, 59, 59, 999);
                     return d < new Date();
                 },
-                async getMonthBackupData(monthStr) {
-                    const cacheKey = 'month_' + monthStr;
-                    const cachedRaw = localStorage.getItem('backup_data');
-                    if (cachedRaw) {
-                        try {
-                            const parsed = JSON.parse(cachedRaw);
-                            this.backupCache = parsed.cache || {};
-                            this.cacheKeys = parsed.keys || [];
-                            if (this.backupCache[cacheKey]) return this.backupCache[cacheKey];
-                        } catch (e) { this.backupCache = {}; this.cacheKeys = []; }
-                    }
-                    if (this.pendingBackups.has(cacheKey)) return null;
-                    this.pendingBackups.add(cacheKey);
-                    try {
-                        const res = await this.fetchWithAuth(`${this.url.monthBackups}${monthStr}`);
-                        const data = await res.json();
-                        if (data && !data.error) {
-                            this.backupCache[cacheKey] = data;
-                            this.cacheKeys = [...new Set([...this.cacheKeys, cacheKey])].sort();
-                            const MAX = 10;
-                            while (this.cacheKeys.length > MAX) { delete this.backupCache[this.cacheKeys.shift()]; }
-                            localStorage.setItem('backup_data', JSON.stringify({ cache: this.backupCache, keys: this.cacheKeys }));
-                            return data;
-                        }
-                        return null;
-                    } catch (e) { return null; }
-                    finally { this.pendingBackups.delete(cacheKey); }
+                getMonthBackupData(monthStr) {
+                    return this._fetchBackup('month_' + monthStr, `${this.url.monthBackups}${monthStr}`);
                 },
                 processBackupData(currentDate, backupData, dataType) {
-                    const iface = backupData.interfaces.find(i => i.name === this.latestSelectedInterfaceData.name);
+                    const iface = (backupData.interfaces || []).find(i => i.name === this.latestSelectedInterfaceData?.name);
                     const raw = (iface?.traffic?.[dataType]) || [];
                     return this.processData(currentDate, raw, dataType);
                 },
 
                 // ── Series Data ──
-                async getMergedSeriesData() {
+                async getMergedSeriesData(reqId) {
                     const dataType = { hour: 'fiveminute', day: 'hour', month: 'day', year: 'month' }[this.timeRangeType];
                     const currentDate = new Date(this.currentRange);
+                    const isStale = () => reqId !== undefined && reqId !== this._chartReqId;
 
                     if (this.enableBackupData) {
                         if ((this.timeRangeType === 'hour' || this.timeRangeType === 'day') && this.isPastDate(currentDate)) {
                             const bd = await this.getBackupData(this.getDateString(currentDate));
+                            if (isStale()) return [];
                             if (bd) return this.processBackupData(currentDate, bd, dataType);
                         } else if (this.timeRangeType === 'month' && this.isPastMonth(currentDate)) {
                             const bd = await this.getMonthBackupData(this.getMonthString(currentDate));
+                            if (isStale()) return [];
                             if (bd) return this.processBackupData(currentDate, bd, dataType);
                         }
                     }
@@ -1279,7 +1307,17 @@
                     return [];
                 },
                 processData(currentDate, rawData, dataType) {
-                    if (!rawData) { this.filteredData = []; this.currentStats = { rx: 0, tx: 0, total: 0 }; return []; }
+                    const gx = (date, time) => this.getXValue(date, time, dataType);
+                    if (!rawData) {
+                        this.filteredData = [];
+                        this.currentStats = { rx: 0, tx: 0, total: 0 };
+                        // Always return two (possibly empty) series so the
+                        // chart can switch via updateSeries() without a rebuild.
+                        return [
+                            this.generateSeries(this.language[this.currentLang]['download'], 'rx', this.theme.download, gx),
+                            this.generateSeries(this.language[this.currentLang]['upload'], 'tx', this.theme.upload, gx),
+                        ];
+                    }
                     const ry = currentDate.getFullYear(), rm = currentDate.getMonth() + 1,
                         rd = currentDate.getDate(), rh = currentDate.getHours();
                     let totalRx = 0, totalTx = 0;
@@ -1299,7 +1337,6 @@
                     });
                     this.currentStats = { rx: totalRx, tx: totalTx, total: totalRx + totalTx };
 
-                    const gx = (date, time) => this.getXValue(date, time, dataType);
                     return [
                         this.generateSeries(this.language[this.currentLang]['download'], 'rx', this.theme.download, gx),
                         this.generateSeries(this.language[this.currentLang]['upload'], 'tx', this.theme.upload, gx),
@@ -1332,24 +1369,37 @@
                 },
 
                 // ── Chart ──
-                async updateChart() {
-                    const seriesData = await this.getMergedSeriesData();
+                // Coalesce every chart update that happens in the same tick so
+                // rapid interactions (date nav, interface switch, language, ...)
+                // trigger a single render instead of several redundant ones.
+                scheduleUpdateChart() {
+                    if (this._chartScheduled) return;
+                    this._chartScheduled = true;
+                    this.$nextTick(() => {
+                        this._chartScheduled = false;
+                        this.updateChart();
+                    });
+                },
+                // Only structural chart changes (view type, theme, language,
+                // night mode, range type) need a full updateOptions() rebuild.
+                // Pure data changes use the much cheaper updateSeries().
+                chartSignature() {
+                    const g = this.theme.gradientConfig || {};
+                    const order = (this.theme.chartLayerOrder || ['download', 'upload']).join(',');
+                    return [
+                        this.currentView, this.timeRangeType, this.currentLang,
+                        this.isNightMode ? 'night' : 'day',
+                        this.theme.download, this.theme.upload, this.theme.accent,
+                        g.shadeIntensity, g.opacityFrom, g.opacityTo, order,
+                    ].join('|');
+                },
+                buildChartOptions(orderedSeries) {
                     const isDark = this.isNightMode;
                     const textColor = isDark ? '#64748b' : '#94a3b8';
                     const gridColor = isDark ? '#1e2030' : '#f1f5f9';
                     const chartType = this.currentView === 'bar' ? 'bar' : 'area';
-
-                    const layerOrder = this.theme.chartLayerOrder || ['download', 'upload'];
-                    const lang = this.language[this.currentLang];
-                    const orderedSeries = layerOrder.map(layer => {
-                        if (layer === 'download') {
-                            return seriesData.find(s => s.name === lang['download']);
-                        } else if (layer === 'upload') {
-                            return seriesData.find(s => s.name === lang['upload']);
-                        }
-                    }).filter(s => s);
-
-                    const options = {
+                    const g = this.theme.gradientConfig || {};
+                    return {
                         chart: {
                             type: chartType, height: 520,
                             toolbar: { show: false },
@@ -1361,9 +1411,9 @@
                         fill: {
                             type: chartType === 'area' ? 'gradient' : 'solid',
                             gradient: {
-                                shadeIntensity: this.theme.gradientConfig.shadeIntensity,
-                                opacityFrom: this.theme.gradientConfig.opacityFrom,
-                                opacityTo: this.theme.gradientConfig.opacityTo,
+                                shadeIntensity: g.shadeIntensity,
+                                opacityFrom: g.opacityFrom,
+                                opacityTo: g.opacityTo,
                                 stops: [0, 100],
                             },
                             opacity: chartType === 'bar' ? 0.9 : 1,
@@ -1394,13 +1444,43 @@
                         legend: { labels: { colors: textColor } },
                         theme: { mode: isDark ? 'dark' : 'light' },
                     };
+                },
+                async updateChart() {
+                    // Token guards against out-of-order async responses: when the
+                    // user navigates quickly only the latest request is applied.
+                    const reqId = ++this._chartReqId;
+                    const seriesData = await this.getMergedSeriesData(reqId);
+                    if (reqId !== this._chartReqId) return;
 
+                    const lang = this.language[this.currentLang];
+                    const layerOrder = this.theme.chartLayerOrder || ['download', 'upload'];
+                    const orderedSeries = layerOrder.map(layer => seriesData.find(s => s.name === lang[layer]))
+                        .filter(s => s);
+
+                    const sig = this.chartSignature();
+                    const labels = (orderedSeries[0]?.data || []).map(d => d.x);
+                    const sameLabels = this._chartLabels
+                        && labels.length === this._chartLabels.length
+                        && labels.every((v, i) => v === this._chartLabels[i]);
+
+                    if (this.chart && this._chartSig === sig && orderedSeries.length && sameLabels) {
+                        // Same structure and same X categories: only the values
+                        // changed, so the cheap updateSeries() path is enough.
+                        this.chart.updateSeries(orderedSeries, true);
+                        return;
+                    }
+
+                    const options = this.buildChartOptions(orderedSeries);
                     if (this.chart) {
                         this.chart.updateOptions(options);
                     } else {
-                        this.chart = new ApexCharts(document.querySelector('#trafficChart'), options);
+                        const el = document.querySelector('#trafficChart');
+                        if (!el) return; // DOM not mounted yet; retry on next trigger
+                        this.chart = new ApexCharts(el, options);
                         this.chart.render();
                     }
+                    this._chartSig = sig;
+                    this._chartLabels = labels;
                 },
 
                 // ── Preview chart for theme panel ──
@@ -1478,6 +1558,18 @@
                 },
             },
 
+            created() {
+                // Non-reactive bookkeeping fields (keep them out of data() so
+                // they never trigger re-renders on their own).
+                this._chartReqId = 0;
+                this._chartScheduled = false;
+                this._chartSig = null;
+                this._chartLabels = null;
+                this._loadingData = false;
+                this._backupCacheLoaded = false;
+                this._persistTimer = null;
+            },
+
             async mounted() {
                 // Night mode
                 if (this.isLateNight() && !localStorage.getItem('nightModeOff')) {
@@ -1510,26 +1602,29 @@
 
                 if (!this.enableBackupData) {
                     this.backupCache = {}; this.cacheKeys = [];
+                    this._backupCacheLoaded = true;
                     localStorage.removeItem('backup_data');
-                } else {
-                    try {
-                        const raw = localStorage.getItem('backup_data');
-                        if (raw) { const p = JSON.parse(raw); this.backupCache = p.cache || {}; this.cacheKeys = p.keys || []; }
-                    } catch (e) { }
                 }
+                // Otherwise the backup cache is loaded lazily on first use.
 
                 // Base URL
                 this.assistApi = window.location.href.replace(/\/$/, '');
                 this.buildUrls();
                 const storedToken = localStorage.getItem('jwt_token');
-                if (storedToken) {
-                    this.authToken = storedToken;
-                    const checkRes = await this.fetchWithAuth(this.url.verify);
-                    const check = await checkRes.json();
-                    if (checkRes.ok && check.valid) { this.handleAuthSuccess(storedToken); }
-                    else { this.handleLogout(); }
-                } else {
+                try {
+                    if (storedToken) {
+                        this.authToken = storedToken;
+                        const checkRes = await this.fetchWithAuth(this.url.verify);
+                        const check = await checkRes.json();
+                        if (checkRes.ok && check.valid) { this.handleAuthSuccess(storedToken); }
+                        else { this.handleLogout(); }
+                    } else {
+                        this.handleLogout();
+                    }
+                } catch (e) {
                     this.handleLogout();
+                } finally {
+                    this.booting = false;
                 }
             },
         });

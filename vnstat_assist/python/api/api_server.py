@@ -104,6 +104,25 @@ except Exception as e:
 # 创建Flask应用
 app = Flask(__name__)
 
+# 保持 JSON 键顺序，避免对大体积备份数据做无谓的排序序列化
+try:
+    app.json.sort_keys = False
+except Exception:
+    app.config["JSON_SORT_KEYS"] = False
+
+# 复用未校验的 SSL 上下文，避免每次代理请求都重新创建
+SSL_CONTEXT = ssl._create_unverified_context()
+UPSTREAM_TIMEOUT = 10
+
+
+def _backup_cache_headers(response, is_current):
+    """历史备份不可变，可长期缓存；当天/当月数据不缓存。"""
+    if is_current:
+        response.headers["Cache-Control"] = "no-store"
+    else:
+        response.headers["Cache-Control"] = "private, max-age=2592000, immutable"
+    return response
+
 
 class JWTManager:
     @staticmethod
@@ -242,11 +261,10 @@ def proxy_vnstat_json():
         if not verification["valid"]:
             return jsonify({"error": verification["error"]}), 401
 
-    ssl_context = ssl._create_unverified_context()
     # 发起代理请求
     try:
         req = urllib.request.Request(VNSTAT_PROXY_URL)
-        with urllib.request.urlopen(req, context=ssl_context) as response:
+        with urllib.request.urlopen(req, context=SSL_CONTEXT, timeout=UPSTREAM_TIMEOUT) as response:
             data = response.read().decode("utf-8")
             json_data = json.loads(data)
             response = jsonify(json_data)
@@ -286,9 +304,12 @@ def get_backup(day):
         file_path = os.path.join(month_dir, f"vnstat_{day}.json")
 
         if os.path.isfile(file_path):
-            with open(file_path, "r") as f:
-                content = json.load(f)
-            return jsonify(content), 200
+            with open(file_path, "r", encoding="utf-8") as f:
+                text = f.read()
+            json.loads(text)  # 校验文件内容
+            response = app.response_class(text, mimetype="application/json")
+            is_current = day == datetime.now().strftime("%Y%m%d")
+            return _backup_cache_headers(response, is_current)
         else:
             return jsonify({"error": "File not found"}), 500
     except json.JSONDecodeError:
@@ -308,7 +329,7 @@ def _merge_day_backups_to_month(target_year, target_month):
 
         if os.path.isfile(day_file):
             try:
-                with open(day_file, "r") as f:
+                with open(day_file, "r", encoding="utf-8") as f:
                     day_data = json.load(f)
                 day_files_data.append(day_data)
             except (json.JSONDecodeError, Exception):
@@ -416,9 +437,12 @@ def get_month_backup(month):
         month_file = os.path.join(month_dir, f"vnstat_month_{month}.json")
 
         if os.path.isfile(month_file):
-            with open(month_file, "r") as f:
-                content = json.load(f)
-            return jsonify(content), 200
+            with open(month_file, "r", encoding="utf-8") as f:
+                text = f.read()
+            json.loads(text)  # 校验文件内容
+            response = app.response_class(text, mimetype="application/json")
+            is_current = month == datetime.now().strftime("%Y%m")
+            return _backup_cache_headers(response, is_current)
 
         merged = _merge_day_backups_to_month(target_year, target_month)
 
@@ -427,13 +451,14 @@ def get_month_backup(month):
 
         try:
             ensure_month_dir(JSON_DIR, target_year, target_month)
-            with open(month_file, "w") as f:
+            with open(month_file, "w", encoding="utf-8") as f:
                 json.dump(merged, f, indent=2)
             logger.info(f"合并天备份生成月备份文件: {month_file}")
         except Exception as e:
             logger.warning(f"保存合并月备份文件失败: {str(e)}")
 
-        return jsonify(merged), 200
+        response = jsonify(merged)
+        return _backup_cache_headers(response, month == datetime.now().strftime("%Y%m"))
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -448,4 +473,4 @@ if __name__ == "__main__":
     organize_backup_files(JSON_DIR)
     port = int(os.environ.get("PORT", 19328))
     logger.info(f"服务器启动于 0.0.0.0:{port}")
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, threaded=True)
